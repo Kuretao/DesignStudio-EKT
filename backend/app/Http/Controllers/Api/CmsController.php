@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Mail\LeadCreated;
 use App\Http\Requests\StoreLeadRequest;
 use App\Http\Controllers\Controller;
 use App\Models\Award;
@@ -20,6 +21,9 @@ use App\Models\UiText;
 use App\Models\Vacancy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class CmsController extends Controller
 {
@@ -133,7 +137,28 @@ class CmsController extends Controller
             'payload' => $request->input('payload'),
         ]);
 
+        $this->sendLeadNotification($lead);
+
         return response()->json(['id' => $lead->id, 'status' => 'ok'], 201);
+    }
+
+    private function sendLeadNotification(Lead $lead): void
+    {
+        $recipient = config('mail.leads.to');
+
+        if (blank($recipient)) {
+            return;
+        }
+
+        try {
+            Mail::to($recipient)->send(new LeadCreated($lead));
+        } catch (Throwable $exception) {
+            Log::error('Lead notification email failed.', [
+                'lead_id' => $lead->id,
+                'recipient' => $recipient,
+                'exception' => $exception,
+            ]);
+        }
     }
 
     private function settings(?SiteSetting $settings): array

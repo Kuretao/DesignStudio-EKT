@@ -115,4 +115,8 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    'leads' => [
+        'to' => env('LEAD_NOTIFICATION_TO', env('ADMIN_EMAIL')),
+    ],
+
 ];

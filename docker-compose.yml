@@ -49,6 +49,15 @@ services:
       ADMIN_PASSWORD: password
       MOONSHINE_TITLE: "DesignStudio CMS"
       MOONSHINE_ROUTE_PREFIX: admin
+      MAIL_MAILER: ${MAIL_MAILER:-log}
+      MAIL_SCHEME: ${MAIL_SCHEME:-null}
+      MAIL_HOST: ${MAIL_HOST:-127.0.0.1}
+      MAIL_PORT: ${MAIL_PORT:-2525}
+      MAIL_USERNAME: ${MAIL_USERNAME:-null}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-null}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-hello@example.com}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-DesignStudio CMS}
+      LEAD_NOTIFICATION_TO: ${LEAD_NOTIFICATION_TO:-admin@example.com}
     volumes:
       - ./backend/app:/var/www/html/app
       - ./backend/routes:/var/www/html/routes
