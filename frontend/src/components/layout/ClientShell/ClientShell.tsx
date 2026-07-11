@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -66,6 +66,26 @@ export default function ClientShell({ children }: { children: React.ReactNode })
   const text = useCmsText();
   const pathname = usePathname();
   const isStandaloneExperience = isStandaloneExperiencePath(pathname);
+  const [isSiteLoading, setIsSiteLoading] = useState(true);
+
+  useEffect(() => {
+    let timeoutId = window.setTimeout(() => setIsSiteLoading(false), 1800);
+    const finishLoading = () => {
+      window.clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(() => setIsSiteLoading(false), 220);
+    };
+
+    if (document.readyState === "complete") {
+      finishLoading();
+    } else {
+      window.addEventListener("load", finishLoading, { once: true });
+    }
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener("load", finishLoading);
+    };
+  }, []);
 
   useEffect(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -358,6 +378,12 @@ export default function ClientShell({ children }: { children: React.ReactNode })
   return (
     <main ref={mainRef} className="min-h-screen bg-[#0c0b09] text-[#F5F2EC] antialiased">
       <GlobalStyle />
+      <div className={`site-loader ${isSiteLoading ? "" : "site-loader-hidden"}`} aria-hidden={!isSiteLoading}>
+        <div className="site-loader-mark">
+          <img src="/logo.png" alt="" className="site-loader-logo" />
+          <div className="site-loader-line" />
+        </div>
+      </div>
       <div className="motion-progress fixed left-0 top-0 z-[100] h-px w-full origin-left scale-x-0 bg-[#D69A66]" />
       <div className="motion-curtain pointer-events-none fixed inset-0 z-[98] origin-left scale-x-0" />
       <div className="motion-cursor pointer-events-none fixed left-0 top-0 z-[120] hidden h-4 w-4 md:block">

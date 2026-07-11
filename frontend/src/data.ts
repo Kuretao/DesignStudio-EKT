@@ -14,11 +14,11 @@ export const projects: Project[] = [
     description:
       "Авторский интерьер загородного дома: мягкая неоклассика, продуманная кухня-гостиная, приватные спальни и спокойная палитра натуральных материалов.",
     image:
-      "https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?auto=format&fit=crop&w=2200&q=90",
+      "/images/cms/country-house-interior.webp",
     beforeImage:
-      "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1600&q=85",
+      "/images/cms/warm-interior-before.webp",
     afterImage:
-      "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1600&q=85",
+      "/images/cms/warm-interior-after.webp",
   },
   {
     id: 2,
@@ -30,11 +30,11 @@ export const projects: Project[] = [
     description:
       "Квартира с открытой кухней-гостиной, скрытым хранением, световыми сценариями и визуализацией до начала ремонтных работ.",
     image:
-      "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=2200&q=90",
+      "/images/cms/river-park-interior.webp",
     beforeImage:
-      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=85",
+      "/images/cms/modern-living-room.webp",
     afterImage:
-      "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1600&q=85",
+      "/images/cms/natural-living-room.webp",
   },
   {
     id: 3,
@@ -46,7 +46,7 @@ export const projects: Project[] = [
     description:
       "Благоустройство участка с маршрутами, вечерней подсветкой, зонами отдыха и растениями, подобранными под климат и уход.",
     image:
-      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=2200&q=90",
+      "/images/cms/landscape-garden.webp",
   },
   {
     id: 4,
@@ -58,7 +58,7 @@ export const projects: Project[] = [
     description:
       "Коммерческий интерьер с понятной навигацией, рабочими зонами, переговорными и визуальным языком бренда.",
     image:
-      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=2200&q=90",
+      "/images/cms/office-space.webp",
   },
   {
     id: 5,
@@ -70,7 +70,7 @@ export const projects: Project[] = [
     description:
       "Архитектурная визуализация виллы: фасады, посадка на участок, вечерний свет, окружение и презентационные ракурсы.",
     image:
-      "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=2200&q=90",
+      "/images/cms/villa-exterior.webp",
   },
   {
     id: 6,
@@ -82,7 +82,7 @@ export const projects: Project[] = [
     description:
       "Концепция частного дома с выразительной геометрией, панорамным остеклением и подготовкой материалов для согласования.",
     image:
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2200&q=90",
+      "/images/cms/greenwood-house.webp",
   },
 ];
 
@@ -1151,42 +1151,42 @@ export const partners: TrustedPartner[] = [
   {
     name: "Capital Group",
     note: "Крупная российская девелоперская компания в Москве и МО",
-    logo: "https://3dsmartdesign.ru/thumb/2/UTjcjjirjkNIb7gi9Ntcqw/400r/d/capital_group_companies.jpg",
+    logo: "/images/partners/capital-group.webp",
   },
   {
     name: "ГК Новый ДОН",
     note: "Девелопер в Самарской области",
-    logo: "https://3dsmartdesign.ru/thumb/2/RlgeH9Y3csLYczkYsgNu2Q/400r/d/new_don.png",
+    logo: "/images/partners/new-don.webp",
   },
   {
     name: "Донстрой",
     note: "Ведущий девелопер Москвы",
-    logo: "https://3dsmartdesign.ru/thumb/2/g2LV_n-kEBXik20WYSCS1A/400r/d/donstroy.png",
+    logo: "/images/partners/donstroy.svg",
   },
   {
     name: "Новое время",
     note: "Девелоперские проекты",
-    logo: "https://3dsmartdesign.ru/thumb/2/y2JTTt1Emb3k-aLkhLOnPg/400r/d/new_time.png",
+    logo: "/images/partners/new-time.svg",
   },
   {
     name: "ГК СтройСтиль",
     note: "Строительная группа в Самарской области",
-    logo: "https://3dsmartdesign.ru/thumb/2/kLTN_w8WucjQyKHSlM_5XA/400r/d/stroy_stil.png",
+    logo: "/images/partners/fsk.svg",
   },
   {
     name: "СЗ Парковый",
     note: "Специализированный застройщик",
-    logo: "https://3dsmartdesign.ru/thumb/2/CArE8uFr4NxRaKGKgcHC1g/400r/d/parkoviy.jpg",
+    logo: "/images/partners/parkovy.webp",
   },
   {
     name: "СЗ Весна",
     note: "Специализированный застройщик",
-    logo: "https://3dsmartdesign.ru/thumb/2/vwriae_lbfxG4f5fGZ5EGA/400r/d/vesna.png",
+    logo: "/images/partners/vesna.webp",
   },
   {
     name: "Берег",
     note: "Девелоперские проекты",
-    logo: "https://3dsmartdesign.ru/thumb/2/jVJTB_JBkAeGhqSVfGu42g/400r/d/bereg.png",
+    logo: "/images/partners/grad.svg",
   },
 ];
 
@@ -1373,7 +1373,7 @@ export const newsArticles: NewsArticle[] = [
     preview:
       "Поздравляем клиентов и партнеров, подводим итоги сезона и готовим новые проектные направления.",
     image:
-      "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=2200&q=90",
+      "/images/cms/construction-plan.webp",
     readingTime: "2 мин",
     body: [
       {
@@ -1395,7 +1395,7 @@ export const newsArticles: NewsArticle[] = [
     preview:
       "Как интерактивный тур помогает продавать, согласовывать планировки и показывать объект удаленно.",
     image:
-      "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=2200&q=90",
+      "/images/cms/river-park-interior.webp",
     readingTime: "3 мин",
     body: [
       {
@@ -1425,7 +1425,7 @@ export const newsArticles: NewsArticle[] = [
     preview:
       "Неполная смета, экономия на материалах, ремонт без проекта и другие ошибки, которые дорого исправлять.",
     image:
-      "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=2200&q=90",
+      "/images/cms/construction-site.webp",
     readingTime: "4 мин",
     body: [
       { type: "heading", text: "1. Ремонт без проекта" },

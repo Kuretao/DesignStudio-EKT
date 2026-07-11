@@ -1,3 +1,8 @@
+"use client";
+
+import { useState } from "react";
+import { optimizeImageList } from "@/src/utils/images";
+
 type CinematicImageProps = {
   frames: Array<string | undefined>;
   alt: string;
@@ -20,16 +25,24 @@ export default function CinematicImage({
   mode = "preview",
 }: CinematicImageProps) {
   const frameKey = frames.filter(Boolean).join("|");
-  const cleanFrames = Array.from(new Set(frameKey.split("|").filter(Boolean)));
+  const cleanFrames = optimizeImageList(
+    Array.from(new Set(frameKey.split("|").filter(Boolean))),
+    1200,
+    74,
+  );
   const baseFrame = cleanFrames[0];
+  const [loaded, setLoaded] = useState(false);
+  const baseFrameClassName = fill
+    ? "absolute inset-0 h-full w-full"
+    : "relative block h-auto w-full";
 
   if (!baseFrame) return null;
 
   return (
     <div
-      className={`cinematic-image group/cinema overflow-hidden bg-cover bg-center ${
+      className={`cinematic-image media-frame group/cinema overflow-hidden bg-[#17130f] bg-cover bg-center ${
         fill ? "absolute inset-0" : "relative"
-      } ${mode === "frames" ? "cinematic-image-frames" : "cinematic-image-preview"} ${className}`}
+      } ${loaded ? "media-frame-loaded" : ""} ${mode === "frames" ? "cinematic-image-frames" : "cinematic-image-preview"} ${className}`}
       style={{ backgroundImage: `url(${baseFrame})` }}
     >
       <img
@@ -37,7 +50,8 @@ export default function CinematicImage({
         alt={alt}
         loading="eager"
         decoding="async"
-        className={`cinematic-frame cinematic-frame-base absolute inset-0 h-full w-full object-cover transition duration-500 ease-out ${imageClassName}`}
+        onLoad={() => setLoaded(true)}
+        className={`media-frame-image cinematic-frame cinematic-frame-base ${baseFrameClassName} object-cover transition duration-500 ease-out ${imageClassName}`}
       />
 
       {cleanFrames.slice(1).map((frame, frameIndex) => {

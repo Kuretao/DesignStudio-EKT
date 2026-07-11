@@ -1,6 +1,7 @@
 "use client";
 
 import { useCms, useCmsText } from "@/src/cms";
+import { resolvePartnerLogo } from "@/src/components/common/legacyPartnerLogos";
 
 export default function BrandStrip() {
   const { partners } = useCms();
@@ -24,21 +25,25 @@ export default function BrandStrip() {
           </p>
         </div>
         <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/10 sm:grid-cols-3 lg:grid-cols-4">
-          {partners.map((brand) => (
+          {partners.map((brand) => {
+            const logo = resolvePartnerLogo(brand.logo);
+
+            return (
             <div
               key={brand.name}
               className="group flex min-h-32 flex-col items-center justify-center bg-[#11100d]/88 px-5 py-6 text-center transition hover:bg-white/[0.055]"
             >
               <img
-                src={brand.logo}
+                src={logo ?? ""}
                 alt={brand.name}
                 loading="lazy"
-                className="max-h-12 max-w-[160px] object-contain opacity-70 grayscale transition duration-300 group-hover:opacity-95"
+                className="h-16 w-full max-w-[190px] object-contain opacity-75 grayscale transition duration-300 group-hover:opacity-100 group-hover:grayscale-0"
               />
               <p className="mt-4 text-sm font-medium tracking-[0.04em] text-white/68">{brand.name}</p>
               <p className="mt-1 text-xs leading-snug text-white/34">{brand.note}</p>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

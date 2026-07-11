@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { optimizeImageUrl } from "@/src/utils/images";
 import {
   awards,
   careerVacancies,
@@ -196,6 +197,7 @@ function normalizeImageList(value: unknown): string[] {
     new Set(
       rawItems
         .map((item) => normalizeAsset(typeof item === "string" ? item : ""))
+        .map((item) => optimizeImageUrl(item, 1400, 76))
         .filter((item): item is string => Boolean(item)),
     ),
   );
@@ -268,6 +270,9 @@ function localizeProject(project: any, locale: SiteLocale) {
   return {
     ...project,
     title: localizeString(project, "title", locale, project?.title ?? "") ?? "",
+    image: optimizeImageUrl(project?.image, 1600, 76),
+    beforeImage: optimizeImageUrl(project?.beforeImage, 1200, 74),
+    afterImage: optimizeImageUrl(project?.afterImage, 1200, 74),
     category:
       localizeString(project, "category", locale, project?.category ?? "") ??
       "",
@@ -291,6 +296,7 @@ function localizeService(service: any, locale: SiteLocale) {
     eyebrow:
       localizeString(service, "eyebrow", locale, service?.eyebrow ?? "") ?? "",
     text: localizeString(service, "text", locale, service?.text ?? "") ?? "",
+    image: optimizeImageUrl(service?.image, 1400, 76),
     price: localizeString(service, "price", locale, service?.price ?? "") ?? "",
     timeline:
       localizeString(service, "timeline", locale, service?.timeline ?? "") ??
@@ -326,6 +332,7 @@ function localizeNewsArticle(article: any, locale: SiteLocale) {
       "",
     preview:
       localizeString(article, "preview", locale, article?.preview ?? "") ?? "",
+    image: optimizeImageUrl(article?.image, 1400, 76),
     readingTime:
       localizeString(
         article,
@@ -350,6 +357,7 @@ function localizePromo(promo: any, locale: SiteLocale) {
     description:
       localizeString(promo, "description", locale, promo?.description ?? "") ??
       "",
+    image: optimizeImageUrl(promo?.image, 1400, 76),
     conditions: localizeArray<string>(
       promo,
       "conditions",
@@ -371,6 +379,7 @@ function localizeReview(review: any, locale: SiteLocale) {
     adminReply:
       localizeString(review, "adminReply", locale, review?.adminReply ?? "") ??
       "",
+    image: optimizeImageUrl(review?.image, 1200, 74),
   };
 }
 
@@ -436,6 +445,7 @@ function localizeAward(award: any, locale: SiteLocale) {
     description:
       localizeString(award, "description", locale, award?.description ?? "") ??
       "",
+    image: optimizeImageUrl(award?.image, 1200, 74),
   };
 }
 

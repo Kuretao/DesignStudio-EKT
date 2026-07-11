@@ -180,12 +180,12 @@ class DatabaseSeeder extends Seeder
         });
 
         $projects = collect([
-            ['kp-pavlovy-ozera', 'КП "Павловы Озера"', 'KP "Pavlovy Ozera"', 'Интерьеры', 'Interiors', 'Москва', 'Moscow', '2026', 'Авторский интерьер загородного дома: мягкая неоклассика, продуманная кухня-гостиная, приватные спальни и спокойная палитра натуральных материалов.', 'Author-designed country house interior: soft neoclassic, thoughtful kitchen-living room, private bedrooms, and a calm palette of natural materials.', 'https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?auto=format&fit=crop&w=2200&q=90'],
-            ['river-park', 'ЖК "River Park"', 'RC "River Park"', 'Интерьеры', 'Interiors', 'Самара', 'Samara', '2025', 'Квартира с открытой кухней-гостиной, скрытым хранением, световыми сценариями и визуализацией до начала ремонтных работ.', 'Apartment with open kitchen-living room, hidden storage, lighting scenarios, and visualization before renovation work begins.', 'https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=2200&q=90'],
-            ['landshaftnyj-projekt', 'Ландшафтный проект', 'Landscape Project', 'Ландшафт', 'Landscape', 'Висловка', 'Vislovka', '2025', 'Благоустройство участка с маршрутами, вечерней подсветкой, зонами отдыха и растениями, подобранными под климат и уход.', 'Landscaping with pathways, evening lighting, recreation areas, and plants selected for the local climate and maintenance needs.', 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=2200&q=90'],
-            ['ofisnoe-prostranstvo', 'Офисное пространство', 'Office Space', 'Интерьеры', 'Interiors', 'Белгородская область', 'Belgorod Region', '2026', 'Коммерческий интерьер с понятной навигацией, рабочими зонами, переговорными и визуальным языком бренда.', 'Commercial interior with clear navigation, work zones, meeting rooms, and a visual brand language.', 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=2200&q=90'],
-            ['villa-austria', 'Villa Austria', 'Villa Austria', 'Архитектура', 'Architecture', 'Вена', 'Vienna', '2024', 'Архитектурная визуализация виллы: фасады, посадка на участок, вечерний свет, окружение и презентационные ракурсы.', 'Architectural visualization of a villa: facades, site placement, evening lighting, surroundings, and presentation views.', 'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=2200&q=90'],
-            ['kp-greenwood-2', 'КП GreenWood-2', 'KP GreenWood-2', 'Архитектура', 'Architecture', 'Москва', 'Moscow', '2025', 'Концепция частного дома с выразительной геометрией, панорамным остеклением и подготовкой материалов для согласования.', 'Concept for a private house with expressive geometry, panoramic glazing, and presentation materials for approval.', 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2200&q=90'],
+            ['kp-pavlovy-ozera', 'КП "Павловы Озера"', 'KP "Pavlovy Ozera"', 'Интерьеры', 'Interiors', 'Москва', 'Moscow', '2026', 'Авторский интерьер загородного дома: мягкая неоклассика, продуманная кухня-гостиная, приватные спальни и спокойная палитра натуральных материалов.', 'Author-designed country house interior: soft neoclassic, thoughtful kitchen-living room, private bedrooms, and a calm palette of natural materials.', '/images/cms/country-house-interior.webp'],
+            ['river-park', 'ЖК "River Park"', 'RC "River Park"', 'Интерьеры', 'Interiors', 'Самара', 'Samara', '2025', 'Квартира с открытой кухней-гостиной, скрытым хранением, световыми сценариями и визуализацией до начала ремонтных работ.', 'Apartment with open kitchen-living room, hidden storage, lighting scenarios, and visualization before renovation work begins.', '/images/cms/river-park-interior.webp'],
+            ['landshaftnyj-projekt', 'Ландшафтный проект', 'Landscape Project', 'Ландшафт', 'Landscape', 'Висловка', 'Vislovka', '2025', 'Благоустройство участка с маршрутами, вечерней подсветкой, зонами отдыха и растениями, подобранными под климат и уход.', 'Landscaping with pathways, evening lighting, recreation areas, and plants selected for the local climate and maintenance needs.', '/images/cms/landscape-garden.webp'],
+            ['ofisnoe-prostranstvo', 'Офисное пространство', 'Office Space', 'Интерьеры', 'Interiors', 'Белгородская область', 'Belgorod Region', '2026', 'Коммерческий интерьер с понятной навигацией, рабочими зонами, переговорными и визуальным языком бренда.', 'Commercial interior with clear navigation, work zones, meeting rooms, and a visual brand language.', '/images/cms/office-space.webp'],
+            ['villa-austria', 'Villa Austria', 'Villa Austria', 'Архитектура', 'Architecture', 'Вена', 'Vienna', '2024', 'Архитектурная визуализация виллы: фасады, посадка на участок, вечерний свет, окружение и презентационные ракурсы.', 'Architectural visualization of a villa: facades, site placement, evening lighting, surroundings, and presentation views.', '/images/cms/villa-exterior.webp'],
+            ['kp-greenwood-2', 'КП GreenWood-2', 'KP GreenWood-2', 'Архитектура', 'Architecture', 'Москва', 'Moscow', '2025', 'Концепция частного дома с выразительной геометрией, панорамным остеклением и подготовкой материалов для согласования.', 'Concept for a private house with expressive geometry, panoramic glazing, and presentation materials for approval.', '/images/cms/greenwood-house.webp'],
         ]);
 
         $projects->each(fn (array $project, int $index) => Project::query()->updateOrCreate(
@@ -201,8 +201,8 @@ class DatabaseSeeder extends Seeder
                 'description' => $project[8],
                 'description_en' => $project[9],
                 'image' => $project[10],
-                'before_image' => $index < 2 ? 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1600&q=85' : null,
-                'after_image' => $index < 2 ? 'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1600&q=85' : null,
+                'before_image' => $index < 2 ? '/images/cms/warm-interior-before.webp' : null,
+                'after_image' => $index < 2 ? '/images/cms/warm-interior-after.webp' : null,
                 'position' => $index + 1,
                 'is_featured' => $index < 3,
                 'is_published' => true,
@@ -319,7 +319,7 @@ class DatabaseSeeder extends Seeder
                 'category_en' => $article[7],
                 'preview' => $article[8],
                 'preview_en' => $article[9],
-                'image' => 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=2200&q=90',
+                'image' => '/images/cms/construction-plan.webp',
                 'reading_time' => '3 мин',
                 'reading_time_en' => '3 min',
                 'body' => $article[10],
@@ -385,14 +385,14 @@ class DatabaseSeeder extends Seeder
         ));
 
         collect([
-            ['Capital Group', 'Capital Group', 'Крупная российская девелоперская компания в Москве и МО', 'Major Russian developer in Moscow and the Moscow Region', 'https://3dsmartdesign.ru/thumb/2/UTjcjjirjkNIb7gi9Ntcqw/400r/d/capital_group_companies.jpg'],
-            ['ГК Новый ДОН', 'Novy DON Group', 'Девелопер в Самарской области', 'Developer in the Samara Region', 'https://3dsmartdesign.ru/thumb/2/RlgeH9Y3csLYczkYsgNu2Q/400r/d/new_don.png'],
-            ['Донстрой', 'Donstroy', 'Ведущий девелопер Москвы', 'Leading Moscow developer', 'https://3dsmartdesign.ru/thumb/2/g2LV_n-kEBXik20WYSCS1A/400r/d/donstroy.png'],
-            ['Новое время', 'Novoye Vremya', 'Девелоперские проекты', 'Development projects', 'https://3dsmartdesign.ru/thumb/2/y2JTTt1Emb3k-aLkhLOnPg/400r/d/new_time.png'],
-            ['ГК СтройСтиль', 'StroyStil Group', 'Строительная группа в Самарской области', 'Construction group in the Samara Region', 'https://3dsmartdesign.ru/thumb/2/kLTN_w8WucjQyKHSlM_5XA/400r/d/stroy_stil.png'],
-            ['СЗ Парковый', 'SZ Parkovy', 'Специализированный застройщик', 'Specialized developer', 'https://3dsmartdesign.ru/thumb/2/CArE8uFr4NxRaKGKgcHC1g/400r/d/parkoviy.jpg'],
-            ['СЗ Весна', 'SZ Vesna', 'Специализированный застройщик', 'Specialized developer', 'https://3dsmartdesign.ru/thumb/2/vwriae_lbfxG4f5fGZ5EGA/400r/d/vesna.png'],
-            ['Берег', 'Bereg', 'Девелоперские проекты', 'Development projects', 'https://3dsmartdesign.ru/thumb/2/jVJTB_JBkAeGhqSVfGu42g/400r/d/bereg.png'],
+            ['Capital Group', 'Capital Group', 'Крупная российская девелоперская компания в Москве и МО', 'Major Russian developer in Moscow and the Moscow Region', '/images/partners/capital-group.webp'],
+            ['ГК Новый ДОН', 'Novy DON Group', 'Девелопер в Самарской области', 'Developer in the Samara Region', '/images/partners/new-don.webp'],
+            ['Донстрой', 'Donstroy', 'Ведущий девелопер Москвы', 'Leading Moscow developer', '/images/partners/donstroy.svg'],
+            ['Новое время', 'Novoye Vremya', 'Девелоперские проекты', 'Development projects', '/images/partners/new-time.svg'],
+            ['Группа компаний ФСК', 'FSK Group', 'Девелоперские проекты и строительство', 'Development and construction projects', '/images/partners/fsk.svg'],
+            ['СЗ Парковый', 'SZ Parkovy', 'Специализированный застройщик', 'Specialized developer', '/images/partners/parkovy.webp'],
+            ['ЖК Весна', 'RC Vesna', 'Жилой комплекс', 'Residential complex', '/images/partners/vesna.webp'],
+            ['Строительная компания «Град»', 'Grad Construction Company', 'Строительная компания', 'Construction company', '/images/partners/grad.svg'],
         ])->each(fn (array $partner, int $index) => Partner::query()->updateOrCreate(
             ['name' => $partner[0]],
             [

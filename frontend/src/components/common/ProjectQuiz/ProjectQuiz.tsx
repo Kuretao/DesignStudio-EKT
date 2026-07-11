@@ -610,7 +610,7 @@ export default function ProjectQuiz({
           <div className="grid min-h-[620px] lg:grid-cols-[0.42fr_0.58fr]">
             <div className="relative flex flex-col justify-between overflow-hidden border-b border-white/10 bg-[#0c0b09]/65 p-7 md:p-9 lg:border-b-0 lg:border-r">
               <img
-                src="https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1400&q=85"
+                src="/images/cms/quiz-interior.webp"
                 alt={text("quiz.imageAlt", "Интерьер с мягким светом и натуральными материалами")}
                 className="absolute inset-0 h-full w-full object-cover opacity-30"
               />

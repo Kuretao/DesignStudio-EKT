@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { optimizeImageUrl } from "@/src/utils/images";
 
 type HeroBackdropSlide = {
   image?: string;
@@ -26,12 +27,19 @@ export default function HeroBackdropSlider({
         new Map(
           slides
             .filter((slide) => slide.image)
-            .map((slide) => [slide.image, { image: slide.image as string, alt: slide.alt ?? "" }]),
+            .map((slide) => [
+              slide.image,
+              {
+                image: optimizeImageUrl(slide.image as string, 1600, 76),
+                alt: slide.alt ?? "",
+              },
+            ]),
         ).values(),
       ),
     [slides],
   );
   const [activeSlide, setActiveSlide] = useState(0);
+  const [loadedSlides, setLoadedSlides] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (cleanSlides.length < 2) return;
@@ -63,7 +71,9 @@ export default function HeroBackdropSlider({
         {cleanSlides.map((slide, index) => (
           <div
             key={slide.image}
-            className={`absolute inset-0 transition duration-[1100ms] ease-out ${
+            className={`media-frame absolute inset-0 transition duration-[1100ms] ease-out ${
+              loadedSlides[slide.image] ? "media-frame-loaded" : ""
+            } ${
               activeSlide === index ? "opacity-100" : "opacity-0"
             }`}
             aria-hidden={activeSlide !== index}
@@ -71,11 +81,15 @@ export default function HeroBackdropSlider({
             <img
               src={slide.image}
               alt={activeSlide === index ? slide.alt : ""}
-              className={`h-full w-full object-cover transition duration-[1400ms] ease-out ${
+              className={`media-frame-image h-full w-full object-cover transition duration-[1400ms] ease-out ${
                 activeSlide === index ? "scale-100 brightness-[0.82] saturate-[1.08]" : "scale-[1.06] brightness-[0.62] saturate-[0.9]"
               }`}
               loading={index === 0 ? "eager" : "lazy"}
               decoding="async"
+              fetchPriority={index === 0 ? "high" : "auto"}
+              onLoad={() =>
+                setLoadedSlides((current) => ({ ...current, [slide.image]: true }))
+              }
             />
           </div>
         ))}

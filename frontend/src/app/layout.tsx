@@ -19,6 +19,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://3dsmartdesign.ru",
   ),
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
   title:
     "Студия дизайна интерьера, архитектуры и ландшафта в Самаре | 3D Smart Design Studio",
   description:

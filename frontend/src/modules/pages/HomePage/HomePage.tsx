@@ -15,6 +15,7 @@ import { ContactSection } from "@/src/modules/pages/ContactPage";
 import { PortfolioGrid, ProjectShowcase } from "@/src/modules/pages/PortfolioPage";
 import { ServicePages, ServicesSummary, Workflow } from "@/src/modules/pages/ServicesPage";
 import ContactModal from "@/src/modals/ContactModal";
+import { optimizeImageUrl } from "@/src/utils/images";
 
 const assetPrefix = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
@@ -34,9 +35,11 @@ function FeatureProject({
   labels: { type: string; location: string; year: string };
   reverse?: boolean;
 }) {
+  const image = optimizeImageUrl(project.image, 1600, 76);
+
   return (
     <section className="snap-section feature-project-section relative flex min-h-screen items-end overflow-hidden px-5 py-16 md:px-10 lg:px-16">
-      <div className="project-bg absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${project.image})` }} />
+      <div className="project-bg absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${image})` }} />
       <div className="feature-project-light absolute inset-0" />
       <div className="absolute inset-0 bg-gradient-to-t from-[#080705] via-[#080705]/30 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-r from-[#080705]/72 via-[#324238]/12 to-[#E8DDCE]/18" />
