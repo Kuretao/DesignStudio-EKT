@@ -160,8 +160,26 @@ export default function Footer() {
     { href: "/partneram", label: text("footer.partners", "Партнёрам") },
   ];
   const socialItems = socials.map((social) =>
-    social.label === "VK" ? { ...social, href: messengerLinks.vk } : social,
-  );
+    social.label === "VK"
+      ? { ...social, href: siteSettings.socialLinks.vk ?? messengerLinks.vk }
+      : social.label === "Telegram"
+        ? { ...social, href: messengerLinks.telegram }
+        : social.label === "LinkedIn"
+          ? { ...social, href: siteSettings.socialLinks.linkedin ?? social.href }
+          : social.label === "Behance"
+            ? { ...social, href: siteSettings.socialLinks.behance ?? social.href }
+            : social.label === "Pinterest"
+              ? { ...social, href: siteSettings.socialLinks.pinterest ?? social.href }
+              : social,
+  ).filter((social) => Boolean(social.href));
+  const scheduleLines = contactInfo.schedule
+    .split(/\r?\n|,\s*/u)
+    .map((item) => item.trim())
+    .filter(Boolean);
+  const addressLines = contactInfo.address
+    .split(/\r?\n/u)
+    .map((item) => item.trim())
+    .filter(Boolean);
   const footerLinkCls =
     "group flex items-start gap-2 text-sm leading-snug text-white/45 transition-colors duration-200 hover:text-white";
 
@@ -326,8 +344,9 @@ export default function Footer() {
                 <p className="mb-1 text-[10px] uppercase tracking-[0.22em] text-white/25">
                   {text("footer.schedule", "График")}
                 </p>
-                <p className="text-sm text-white/55">{text("footer.weekdays", "Пн–Пт: 9:00 – 20:00")}</p>
-                <p className="text-sm text-white/55">{text("footer.weekend", "Сб–Вс: 10:00 – 19:00")}</p>
+                {scheduleLines.map((line) => (
+                  <p key={line} className="text-sm text-white/55">{line}</p>
+                ))}
               </div>
 
               {/* Location */}
@@ -335,8 +354,9 @@ export default function Footer() {
                 <p className="mb-1 text-[10px] uppercase tracking-[0.22em] text-white/25">
                   {text("footer.address", "Адрес")}
                 </p>
-                <p className="text-sm text-white/55">{text("footer.locationCity", "Самара, Россия")}</p>
-                <p className="text-xs text-white/30">{text("footer.remote", "Работаем удалённо по всему миру")}</p>
+                {addressLines.map((line, index) => (
+                  <p key={line} className={index === 0 ? "text-sm text-white/55" : "text-xs text-white/30"}>{line}</p>
+                ))}
               </div>
             </div>
           </div>

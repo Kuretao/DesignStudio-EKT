@@ -62,7 +62,7 @@ function MessengerIcon({ icon }: { icon: string }) {
 
 export default function ClientShell({ children }: { children: React.ReactNode }) {
   const mainRef = useRef<HTMLDivElement | null>(null);
-  const { animationControls, messengerLinks } = useCms();
+  const { animationControls, messengerLinks, siteSettings } = useCms();
   const text = useCmsText();
   const pathname = usePathname();
   const isStandaloneExperience = isStandaloneExperiencePath(pathname);
@@ -380,7 +380,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
       <GlobalStyle />
       <div className={`site-loader ${isSiteLoading ? "" : "site-loader-hidden"}`} aria-hidden={!isSiteLoading}>
         <div className="site-loader-mark">
-          <img src="/logo.png" alt="" className="site-loader-logo" />
+          <img src={siteSettings.logoSmall ?? siteSettings.logo ?? "/logo.png"} alt="" className="site-loader-logo" />
           <div className="site-loader-line" />
         </div>
       </div>

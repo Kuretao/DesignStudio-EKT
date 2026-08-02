@@ -31,6 +31,12 @@ type SiteSettings = {
   favicon: string | null;
   appleTouchIcon: string | null;
   socialPreviewImage: string | null;
+  socialLinks: {
+    vk: string | null;
+    linkedin: string | null;
+    behance: string | null;
+    pinterest: string | null;
+  };
   compareEyebrow: string;
   compareTitle: string;
   compareText: string;
@@ -107,6 +113,12 @@ const fallbackData: CmsData = {
     favicon: null,
     appleTouchIcon: null,
     socialPreviewImage: null,
+    socialLinks: {
+      vk: "https://vk.com/3dsmartdesign",
+      linkedin: "https://www.linkedin.com/in/3dsmartdesignstudio",
+      behance: "https://www.behance.net/3dsmartdesign",
+      pinterest: "https://ru.pinterest.com/3D_SMART_DESIGN_STUDIO/",
+    },
     compareEyebrow: "Render / Blueprint",
     compareTitle: "Сравнение до / после",
     compareText:
@@ -630,6 +642,18 @@ function normalizePayload(payload: any, locale: SiteLocale): CmsData {
       favicon: settings.favicon ?? null,
       appleTouchIcon: settings.appleTouchIcon ?? null,
       socialPreviewImage: settings.socialPreviewImage ?? null,
+      socialLinks: {
+        vk: settings.socials?.vk ?? fallbackData.siteSettings.socialLinks.vk,
+        linkedin:
+          settings.socials?.linkedin ??
+          fallbackData.siteSettings.socialLinks.linkedin,
+        behance:
+          settings.socials?.behance ??
+          fallbackData.siteSettings.socialLinks.behance,
+        pinterest:
+          settings.socials?.pinterest ??
+          fallbackData.siteSettings.socialLinks.pinterest,
+      },
       compareEyebrow:
         settings.compareEyebrow ?? fallbackData.siteSettings.compareEyebrow,
       compareTitle:

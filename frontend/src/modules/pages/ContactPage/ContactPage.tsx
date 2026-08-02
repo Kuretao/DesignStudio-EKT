@@ -192,14 +192,34 @@ type ContactSectionProps = {
 };
 
 export function ContactSection({ showIntro = true, compactTop = false }: ContactSectionProps) {
-  const { contactInfo, messengerLinks, servicePageItems } = useCms();
+  const { contactInfo, messengerLinks, servicePageItems, siteSettings } = useCms();
   const text = useCmsText();
+  const scheduleLines = contactInfo.schedule
+    .split(/\r?\n|,\s*/u)
+    .map((item) => item.trim())
+    .filter(Boolean);
+  const addressLines = contactInfo.address
+    .split(/\r?\n/u)
+    .map((item) => item.trim())
+    .filter(Boolean);
   const [name, setName] = useState("");
   const [contactVal, setContactVal] = useState("");
   const [service, setService] = useState("");
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
-  const socialItems = socials.map((social) => (social.label === "VK" ? { ...social, href: messengerLinks.vk } : social));
+  const socialItems = socials.map((social) =>
+    social.label === "VK"
+      ? { ...social, href: siteSettings.socialLinks.vk ?? messengerLinks.vk }
+      : social.label === "Telegram"
+        ? { ...social, href: messengerLinks.telegram }
+        : social.label === "LinkedIn"
+          ? { ...social, href: siteSettings.socialLinks.linkedin ?? social.href }
+          : social.label === "Behance"
+            ? { ...social, href: siteSettings.socialLinks.behance ?? social.href }
+            : social.label === "Pinterest"
+              ? { ...social, href: siteSettings.socialLinks.pinterest ?? social.href }
+              : social,
+  ).filter((social) => Boolean(social.href));
   const localizedStats = contactStats.map((stat, index) => ({
     ...stat,
     suffix: text(`contact.stats.${index + 1}.suffix`, stat.suffix),
@@ -302,8 +322,9 @@ export function ContactSection({ showIntro = true, compactTop = false }: Contact
               label: text("contact.scheduleLabel", "График"),
               content: (
                 <div className="space-y-1">
-                  <p className="text-sm text-white/75">{text("footer.weekdays", "Пн–Пт: 9:00 – 20:00")}</p>
-                  <p className="text-sm text-white/75">{text("footer.weekend", "Сб–Вс: 10:00 – 19:00")}</p>
+                  {scheduleLines.map((line) => (
+                    <p key={line} className="text-sm text-white/75">{line}</p>
+                  ))}
                 </div>
               ),
               accent: "#D69A66",
@@ -318,8 +339,9 @@ export function ContactSection({ showIntro = true, compactTop = false }: Contact
               label: text("contact.locationLabel", "Локация"),
               content: (
                 <div className="space-y-1">
-                  <p className="text-sm text-white/75">{text("contact.locationCity", "Самара, Россия")}</p>
-                  <p className="text-xs text-white/35">{text("contact.remoteText", "Работаем удалённо по всему миру")}</p>
+                  {addressLines.map((line, index) => (
+                    <p key={line} className={index === 0 ? "text-sm text-white/75" : "text-xs text-white/35"}>{line}</p>
+                  ))}
                 </div>
               ),
               accent: "#D69A66",

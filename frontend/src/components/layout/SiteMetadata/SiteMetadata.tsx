@@ -26,6 +26,14 @@ function upsertLink(rel: string, href: string) {
   element.href = href;
 }
 
+function absoluteUrl(value: string) {
+  if (/^(https?:)?\/\//i.test(value) || value.startsWith("data:")) {
+    return value;
+  }
+
+  return `${window.location.origin}${value.startsWith("/") ? value : `/${value}`}`;
+}
+
 export default function SiteMetadata() {
   const { siteSettings } = useCms();
 
@@ -42,12 +50,13 @@ export default function SiteMetadata() {
     if (siteSettings.socialPreviewImage) {
       upsertMeta('meta[property="og:image"]', {
         property: "og:image",
-        content: siteSettings.socialPreviewImage,
+        content: absoluteUrl(siteSettings.socialPreviewImage),
       });
     }
 
     if (siteSettings.favicon) {
       upsertLink("icon", siteSettings.favicon);
+      upsertLink("shortcut icon", siteSettings.favicon);
     }
 
     if (siteSettings.appleTouchIcon) {
