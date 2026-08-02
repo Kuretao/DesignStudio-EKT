@@ -306,12 +306,30 @@ function normalizeBlock(block: any, locale: SiteLocale) {
 }
 
 function localizeProject(project: any, locale: SiteLocale) {
+  const galleryImages = normalizeImageList(project?.galleryImages);
+
   return {
     ...project,
     title: localizeString(project, "title", locale, project?.title ?? "") ?? "",
     image: optimizeImageUrl(project?.image, 1600, 76),
     beforeImage: optimizeImageUrl(project?.beforeImage, 1200, 74),
     afterImage: optimizeImageUrl(project?.afterImage, 1200, 74),
+    galleryEyebrow:
+      localizeString(project, "galleryEyebrow", locale, project?.galleryEyebrow ?? "") ??
+      "",
+    galleryTitle:
+      localizeString(project, "galleryTitle", locale, project?.galleryTitle ?? "") ??
+      "",
+    galleryText:
+      localizeString(project, "galleryText", locale, project?.galleryText ?? "") ??
+      "",
+    galleryImages,
+    galleryLabels: localizeArray<string>(
+      project,
+      "galleryLabels",
+      locale,
+      project?.galleryLabels ?? [],
+    ),
     featuredLabel:
       localizeString(project, "featuredLabel", locale, project?.featuredLabel ?? "") ??
       "",
@@ -556,6 +574,7 @@ function mergeServiceItems(payloadServices: any[]) {
       image: service.image || fallback.image,
       price: service.price || fallback.price,
       timeline: service.timeline || fallback.timeline,
+      isHomeItem: Boolean(service.isHomeItem),
       eyebrow: service.eyebrow || fallback.eyebrow,
       text: service.text || fallback.text,
     };

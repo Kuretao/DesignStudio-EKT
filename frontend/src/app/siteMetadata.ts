@@ -19,6 +19,7 @@ type CmsSettings = {
   favicon?: string | null;
   appleTouchIcon?: string | null;
   socialPreviewImage?: string | null;
+  updatedAt?: number | string | null;
 };
 
 export function absoluteSiteUrl(value?: string | null) {
@@ -53,7 +54,7 @@ function cmsApiUrl() {
   return `${siteUrl}${apiBase.startsWith("/") ? apiBase : `/${apiBase}`}/all`;
 }
 
-async function loadSettings(): Promise<CmsSettings | null> {
+export async function loadSiteMetadataSettings(): Promise<CmsSettings | null> {
   try {
     const response = await fetch(cmsApiUrl(), {
       headers: { Accept: "application/json" },
@@ -69,14 +70,23 @@ async function loadSettings(): Promise<CmsSettings | null> {
   }
 }
 
+function socialPreviewUrl(settings?: CmsSettings | null) {
+  const source = settings?.socialPreviewImage || settings?.logo;
+
+  if (!source) {
+    return absoluteSiteUrl("/logo.png");
+  }
+
+  const version = encodeURIComponent(String(settings?.updatedAt || source));
+  return `${siteUrl}/social-preview-image?v=${version}`;
+}
+
 export async function getSiteMetadata(): Promise<Metadata> {
-  const settings = await loadSettings();
+  const settings = await loadSiteMetadataSettings();
   const title = settings?.seoTitle?.trim() || defaultTitle;
   const description = settings?.seoDescription?.trim() || defaultDescription;
   const siteName = settings?.siteName?.trim() || "3D Smart Design Studio";
-  const previewImage = absoluteSiteUrl(
-    settings?.socialPreviewImage || settings?.logo || "/logo.png",
-  );
+  const previewImage = socialPreviewUrl(settings);
   const favicon = absoluteSiteUrl(settings?.favicon) ?? "/favicon.ico";
   const appleIcon = absoluteSiteUrl(settings?.appleTouchIcon);
 
@@ -115,6 +125,7 @@ export async function getSiteMetadata(): Promise<Metadata> {
               url: previewImage,
               width: 1200,
               height: 630,
+              type: "image/png",
               alt: siteName,
             },
           ]
@@ -130,6 +141,6 @@ export async function getSiteMetadata(): Promise<Metadata> {
 }
 
 export async function getSocialPreviewImage() {
-  const settings = await loadSettings();
-  return absoluteSiteUrl(settings?.socialPreviewImage || settings?.logo || "/logo.png");
+  const settings = await loadSiteMetadataSettings();
+  return socialPreviewUrl(settings);
 }

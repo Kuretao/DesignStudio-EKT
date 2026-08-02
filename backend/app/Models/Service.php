@@ -55,6 +55,7 @@ class Service extends Model
     {
         return [
             'is_published' => 'boolean',
+            'is_home_item' => 'boolean',
         ];
     }
 

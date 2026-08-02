@@ -83,6 +83,19 @@ class ProjectFormPage extends FormPage
                         ]),
                     ])->icon('photo')->customAttributes(['class' => 'proj-form-section']),
                 ])->icon('photo'),
+                Tab::make('Галерея кейса', [
+                    Box::make('Ракурсы и детали проекта', [
+                        $this->sectionNote('Картинки и подписи карточек', 'Первая картинка показывается большой плашкой. Остальные идут маленькими карточками снизу. Подписи пишутся в том же порядке.'),
+                        Grid::make([
+                            Column::make(array_slice($fields, 28, 3))->columnSpan(6),
+                            Column::make(array_slice($fields, 31, 3))->columnSpan(6),
+                        ]),
+                        Grid::make([
+                            Column::make(array_slice($fields, 34, 1))->columnSpan(6),
+                            Column::make(array_slice($fields, 35, 2))->columnSpan(6),
+                        ]),
+                    ])->icon('rectangle-stack')->customAttributes(['class' => 'proj-form-section']),
+                ])->icon('rectangle-stack'),
                 Tab::make('Публикация', [
                     Box::make('Показ на сайте', [
                         Grid::make([
@@ -132,6 +145,15 @@ class ProjectFormPage extends FormPage
             'image' => ['nullable', 'string', 'max:2048'],
             'before_image' => ['nullable', 'string', 'max:2048'],
             'after_image' => ['nullable', 'string', 'max:2048'],
+            'gallery_eyebrow_ru' => ['nullable', 'string', 'max:255'],
+            'gallery_eyebrow_en' => ['nullable', 'string', 'max:255'],
+            'gallery_title_ru' => ['nullable', 'string', 'max:255'],
+            'gallery_title_en' => ['nullable', 'string', 'max:255'],
+            'gallery_text_ru' => ['nullable', 'string', 'max:10000'],
+            'gallery_text_en' => ['nullable', 'string', 'max:10000'],
+            'gallery_images' => ['nullable', 'string', 'max:20000'],
+            'gallery_labels_ru' => ['nullable', 'string', 'max:10000'],
+            'gallery_labels_en' => ['nullable', 'string', 'max:10000'],
             'featured_label_ru' => ['nullable', 'string', 'max:255'],
             'featured_label_en' => ['nullable', 'string', 'max:255'],
             'featured_title_ru' => ['nullable', 'string', 'max:255'],

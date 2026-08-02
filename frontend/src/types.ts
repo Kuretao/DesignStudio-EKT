@@ -12,6 +12,11 @@ export type Project = {
   image: string;
   beforeImage?: string;
   afterImage?: string;
+  galleryEyebrow?: string;
+  galleryTitle?: string;
+  galleryText?: string;
+  galleryImages?: string[];
+  galleryLabels?: string[];
   isFeatured?: boolean;
   featuredLabel?: string;
   featuredTitle?: string;

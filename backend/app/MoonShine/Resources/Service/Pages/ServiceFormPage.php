@@ -178,6 +178,7 @@ class ServiceFormPage extends FormPage
             'process_en' => ['nullable', 'string', 'max:10000'],
             'position' => ['required', 'integer', 'min:0', 'max:9999'],
             'is_published' => ['nullable', 'boolean'],
+            'is_home_item' => ['nullable', 'boolean'],
         ];
     }
 

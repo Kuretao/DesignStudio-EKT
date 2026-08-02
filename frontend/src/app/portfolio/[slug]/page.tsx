@@ -41,6 +41,33 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
+function normalizeAsset(path?: string | null) {
+  const value = path?.trim();
+  if (!value) return "";
+
+  if (/^(https?:)?\/\//i.test(value) || value.startsWith("data:") || value.startsWith("/")) {
+    return value;
+  }
+
+  return `/storage/${value.replace(/^\/+/, "")}`;
+}
+
+function normalizeStringList(value: unknown): string[] {
+  const items = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(/\r?\n/u)
+      : [];
+
+  return items
+    .map((item) => (typeof item === "string" ? item.trim() : ""))
+    .filter(Boolean);
+}
+
+function normalizeImageList(value: unknown): string[] {
+  return Array.from(new Set(normalizeStringList(value).map(normalizeAsset).filter(Boolean)));
+}
+
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const project = await resolveProject(slug);
@@ -83,6 +110,11 @@ async function loadCmsProject(slug: string): Promise<Project | null> {
       image: project.image || projects[0]?.image || "",
       beforeImage: project.beforeImage || undefined,
       afterImage: project.afterImage || undefined,
+      galleryEyebrow: project.galleryEyebrow || undefined,
+      galleryTitle: project.galleryTitle || undefined,
+      galleryText: project.galleryText || undefined,
+      galleryImages: normalizeImageList(project.galleryImages),
+      galleryLabels: normalizeStringList(project.galleryLabels),
     } as Project;
   } catch {
     return null;

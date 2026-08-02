@@ -751,6 +751,29 @@ final class CmsFieldSets
             Textarea::make('Избранный: или URL фона', 'featured_image')
                 ->customAttributes(['data-gallery-lines' => '1'])
                 ->hint('Можно выбрать картинку из галереи. Используется если файл выше не загружен.'),
+            Text::make('Галерея кейса: надзаголовок RU', 'gallery_eyebrow_ru')
+                ->placeholder('Галерея')
+                ->hint('Маленькая подпись над заголовком блока "Ракурсы и детали проекта".'),
+            Text::make('Галерея кейса: надзаголовок EN', 'gallery_eyebrow_en')
+                ->placeholder('Gallery'),
+            Text::make('Галерея кейса: заголовок RU', 'gallery_title_ru')
+                ->placeholder('Ракурсы и детали проекта')
+                ->hint('Большой заголовок блока на странице этого проекта.'),
+            Text::make('Галерея кейса: заголовок EN', 'gallery_title_en')
+                ->placeholder('Project angles and details'),
+            Textarea::make('Галерея кейса: описание RU', 'gallery_text_ru')
+                ->hint('Текст справа от заголовка блока. Можно оставить пустым - будет общий текст.'),
+            Textarea::make('Галерея кейса: описание EN', 'gallery_text_en')
+                ->hint('Английский текст справа от заголовка блока.'),
+            Textarea::make('Галерея кейса: изображения, по одному в строке', 'gallery_images')
+                ->customAttributes(['data-gallery-lines' => '1'])
+                ->hint('Блок "Ракурсы и детали проекта". Первая строка - большая карточка, следующие строки - маленькие карточки под ней. Можно выбрать изображения из галереи.'),
+            Textarea::make('Галерея кейса: подписи RU, по одной в строке', 'gallery_labels_ru')
+                ->placeholder("Главный ракурс\nФинальная подача\nИсходная сцена\nМатериалы")
+                ->hint('Подписи карточек 01, 02, 03 и дальше. Если строка пустая, сайт возьмет стандартную подпись.'),
+            Textarea::make('Галерея кейса: подписи EN, по одной в строке', 'gallery_labels_en')
+                ->placeholder("Main angle\nFinal presentation\nSource scene\nMaterials")
+                ->hint('Английские подписи карточек галереи. Если пусто, EN-версия возьмет русский текст.'),
         ];
     }
 
@@ -879,6 +902,9 @@ final class CmsFieldSets
                 Switcher::make('Опубликовано', 'is_published')
                     ->default(true)
                     ->hint('Выключите, чтобы скрыть услугу на сайте без удаления.'),
+                Switcher::make('Показывать в блоке "Услуги и цены" на главной', 'is_home_item')
+                    ->default(false)
+                    ->hint('Включите, если эта услуга должна появиться карточкой в блоке "Услуги и цены" на главной странице. Порядок берется из поля "Позиция".'),
             ],
             default => [],
         };

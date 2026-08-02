@@ -452,7 +452,7 @@ class PageContentBuilderPage extends Page
                 ],
             ],
             [
-                'title' => 'Услуги, направления и этапы',
+                'title' => 'Услуги и цены на главной',
                 'kind' => 'Постоянный блок',
                 'badge' => 'Услуги и цены',
                 'primary_group' => 'services-home',
@@ -460,10 +460,10 @@ class PageContentBuilderPage extends Page
                     ['label' => 'Услуги и цены', 'group' => 'services-home'],
                     ['label' => 'Детальная услуга', 'group' => 'service-detail'],
                 ],
-                'description' => 'Блок как на скриншоте: надзаголовок, заголовок, описание, карточки услуг, цены, сроки, направления и этапы.',
+                'description' => 'Блок как на главной: надзаголовок, заголовок, описание справа и 6 карточек услуг с названиями, ценами и текстами.',
                 'links' => [
-                    ['label' => 'Услуги', 'url' => $this->moonshineResourcePageUrl(ServiceResource::class, ServiceIndexPage::class)],
-                    ['label' => 'Редактировать заголовок блока', 'url' => $this->permanentGroupUrl('services-home')],
+                    ['label' => 'Карточки услуг: название, цена, описание', 'url' => $this->moonshineResourcePageUrl(ServiceResource::class, ServiceIndexPage::class)],
+                    ['label' => 'Тексты блока: надзаголовок, заголовок, описание', 'url' => $this->permanentGroupUrl('services-home')],
                     ['label' => 'Общие блоки детальной услуги', 'url' => $this->permanentGroupUrl('service-detail')],
                 ],
             ],

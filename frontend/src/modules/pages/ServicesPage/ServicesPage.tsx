@@ -106,7 +106,7 @@ function ServicesHero() {
 export function ServicesSummary() {
   const { servicePageItems } = useCms();
   const text = useCmsText();
-  const coreServiceIds = [
+  const fallbackHomeServiceIds = [
     "arhitekturnoe-proektirovanie",
     "arhitekturnaya-3d-vizualizaciya",
     "dizajn-interyera",
@@ -114,11 +114,17 @@ export function ServicesSummary() {
     "landshaftnyj-dizajn",
     "avtorskij-nadzor",
   ];
-  const mainServices = coreServiceIds
+  const selectedHomeServices = servicePageItems.filter((item) =>
+    Boolean((item as { isHomeItem?: boolean }).isHomeItem),
+  );
+  const fallbackHomeServices = fallbackHomeServiceIds
     .map((id) => servicePageItems.find((item) => item.id === id))
     .filter((service): service is NonNullable<typeof service> =>
       Boolean(service),
     );
+  const mainServices = selectedHomeServices.length
+    ? selectedHomeServices
+    : fallbackHomeServices;
 
   return (
     <section

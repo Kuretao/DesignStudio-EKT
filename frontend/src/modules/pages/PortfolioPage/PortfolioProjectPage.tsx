@@ -308,15 +308,31 @@ function ProjectGallery({
   gallery: string[];
   related: Project[];
 }) {
-  const text = useCmsText();
+  const cmsText = useCmsText();
+  const text = (key: string, fallback: string) => {
+    if (key === "portfolioCase.gallery.sectionLabel" && project.galleryEyebrow) {
+      return project.galleryEyebrow;
+    }
+
+    if (key === "portfolioCase.gallery.title" && project.galleryTitle) {
+      return project.galleryTitle;
+    }
+
+    if (key === "portfolioCase.gallery.text" && project.galleryText) {
+      return project.galleryText;
+    }
+
+    return cmsText(key, fallback);
+  };
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const labels = [
+  const defaultLabels = [
     text("portfolioCase.gallery.label1", "Главный ракурс"),
     text("portfolioCase.gallery.label2", "Финальная подача"),
     text("portfolioCase.gallery.label3", "Исходная сцена"),
     text("portfolioCase.gallery.label4", "Материалы"),
     text("portfolioCase.gallery.label5", "Контекст"),
   ];
+  const labels = defaultLabels.map((label, index) => project.galleryLabels?.[index] || label);
   const lightboxImage = lightboxIndex === null ? null : gallery[lightboxIndex];
   const currentLightboxIndex = lightboxIndex ?? 0;
 
@@ -333,11 +349,11 @@ function ProjectGallery({
           </p>
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="grid gap-5">
           <button
             type="button"
             onClick={() => setLightboxIndex(0)}
-            className="group relative min-h-[520px] overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] text-left transition duration-300 hover:-translate-y-1 hover:border-[#D69A66]/60"
+            className="group relative min-h-[420px] overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] text-left transition duration-300 hover:-translate-y-1 hover:border-[#D69A66]/60 md:min-h-[560px]"
           >
             <CinematicImage frames={[gallery[0], gallery[1], gallery[2]]} alt={project.title} fill hint="view" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/70 via-transparent to-[#D69A66]/10" />
@@ -347,13 +363,13 @@ function ProjectGallery({
             </div>
           </button>
 
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">
+          <div className="grid gap-5 md:grid-cols-3">
             {gallery.slice(1, 4).map((image, index) => (
               <button
                 type="button"
                 key={`${image}-${index}`}
                 onClick={() => setLightboxIndex(index + 1)}
-                className="group relative min-h-[160px] overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] text-left transition duration-300 hover:-translate-y-1 hover:border-[#D69A66]/60"
+                className="group relative min-h-[210px] overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] text-left transition duration-300 hover:-translate-y-1 hover:border-[#D69A66]/60"
               >
                 <CinematicImage
                   frames={[image, gallery[(index + 2) % gallery.length], related[index]?.image]}
@@ -610,6 +626,7 @@ function PortfolioProjectPage({ project }: { project: Project }) {
   const gallery = useMemo(
     () =>
       uniqueImages([
+        ...(currentProject.galleryImages ?? []),
         currentProject.image,
         currentProject.afterImage,
         currentProject.beforeImage,
