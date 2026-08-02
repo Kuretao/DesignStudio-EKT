@@ -392,7 +392,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
       <Noise />
       {children}
       {!isStandaloneExperience && (
-        <div className="fixed right-3 top-24 z-[70] flex flex-col gap-2 md:bottom-8 md:right-8 md:top-auto">
+        <div className="fixed bottom-5 right-3 z-[70] flex flex-col gap-2 md:bottom-8 md:right-8">
           {floatingMessengers.map((messenger) => {
             const href = messenger.icon === "telegram" ? messengerLinks.telegram : messenger.icon === "vk" ? messengerLinks.vk : messengerLinks.max;
 

@@ -223,6 +223,15 @@ function hasText(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+function decodeCmsText(value: string) {
+  return value
+    .replace(/&amp;quot;|&#34;|&quot;/giu, '"')
+    .replace(/&amp;#039;|&#039;|&apos;/giu, "'")
+    .replace(/&amp;laquo;|&laquo;/giu, "«")
+    .replace(/&amp;raquo;|&raquo;/giu, "»")
+    .replace(/&amp;amp;/giu, "&");
+}
+
 function localizeString(
   item: Record<string, any> | null | undefined,
   base: string,
@@ -230,15 +239,15 @@ function localizeString(
   fallback: string | null = "",
 ) {
   const localized = item?.[`${base}${localeSuffix(locale)}`];
-  if (hasText(localized)) return localized;
+  if (hasText(localized)) return decodeCmsText(localized);
 
   const ru = item?.[`${base}Ru`];
-  if (hasText(ru)) return ru;
+  if (hasText(ru)) return decodeCmsText(ru);
 
   const direct = item?.[base];
-  if (hasText(direct)) return direct;
+  if (hasText(direct)) return decodeCmsText(direct);
 
-  return fallback;
+  return typeof fallback === "string" ? decodeCmsText(fallback) : fallback;
 }
 
 function localizeArray<T>(
@@ -248,13 +257,22 @@ function localizeArray<T>(
   fallback: T[] = [],
 ) {
   const localized = item?.[`${base}${localeSuffix(locale)}`];
-  if (Array.isArray(localized) && localized.length) return localized as T[];
+  if (Array.isArray(localized) && localized.length)
+    return localized.map((value) =>
+      typeof value === "string" ? decodeCmsText(value) : value,
+    ) as T[];
 
   const ru = item?.[`${base}Ru`];
-  if (Array.isArray(ru) && ru.length) return ru as T[];
+  if (Array.isArray(ru) && ru.length)
+    return ru.map((value) =>
+      typeof value === "string" ? decodeCmsText(value) : value,
+    ) as T[];
 
   const direct = item?.[base];
-  if (Array.isArray(direct) && direct.length) return direct as T[];
+  if (Array.isArray(direct) && direct.length)
+    return direct.map((value) =>
+      typeof value === "string" ? decodeCmsText(value) : value,
+    ) as T[];
 
   return fallback;
 }
@@ -294,6 +312,20 @@ function localizeProject(project: any, locale: SiteLocale) {
     image: optimizeImageUrl(project?.image, 1600, 76),
     beforeImage: optimizeImageUrl(project?.beforeImage, 1200, 74),
     afterImage: optimizeImageUrl(project?.afterImage, 1200, 74),
+    featuredLabel:
+      localizeString(project, "featuredLabel", locale, project?.featuredLabel ?? "") ??
+      "",
+    featuredTitle:
+      localizeString(project, "featuredTitle", locale, project?.featuredTitle ?? "") ??
+      "",
+    featuredDescription:
+      localizeString(
+        project,
+        "featuredDescription",
+        locale,
+        project?.featuredDescription ?? "",
+      ) ?? "",
+    featuredImage: optimizeImageUrl(project?.featuredImage, 1600, 76),
     category:
       localizeString(project, "category", locale, project?.category ?? "") ??
       "",
@@ -328,6 +360,10 @@ function localizeService(service: any, locale: SiteLocale) {
     price: localizeString(service, "price", locale, service?.price ?? "") ?? "",
     timeline:
       localizeString(service, "timeline", locale, service?.timeline ?? "") ??
+      "",
+    pdfUrl: service?.pdfUrl ?? "",
+    pdfTitle:
+      localizeString(service, "pdfTitle", locale, service?.pdfTitle ?? "") ??
       "",
     deliverables: localizeArray<string>(
       service,

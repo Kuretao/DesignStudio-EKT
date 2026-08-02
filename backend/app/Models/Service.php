@@ -18,6 +18,7 @@ class Service extends Model
         'text',
         'price',
         'timeline',
+        'pdf_title',
         'deliverables',
         'benefits',
         'process',
@@ -64,5 +65,14 @@ class Service extends Model
         }
 
         return $this->image ?: null;
+    }
+
+    public function getEffectivePdfAttribute(): ?string
+    {
+        if (! empty($this->pdf_file)) {
+            return Storage::disk('public')->url($this->pdf_file);
+        }
+
+        return null;
     }
 }

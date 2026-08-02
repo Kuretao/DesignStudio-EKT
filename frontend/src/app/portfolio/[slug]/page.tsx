@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { projects } from "@/src/data";
 import type { Project } from "@/src/types";
 import PortfolioProjectClient from "@/src/modules/pages/PortfolioPage/PortfolioProjectClient";
+import { absoluteSiteUrl, getSocialPreviewImage } from "../../siteMetadata";
 
 export const dynamicParams = true;
 export const dynamic = "force-dynamic";
@@ -21,9 +22,22 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
   }
 
+  const previewImage = absoluteSiteUrl(project.image) ?? (await getSocialPreviewImage());
+
   return {
     title: `${project.title} | Портфолио 3D Smart Design Studio`,
     description: project.description,
+    openGraph: {
+      title: project.title,
+      description: project.description,
+      images: previewImage ? [{ url: previewImage, width: 1200, height: 630 }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: project.title,
+      description: project.description,
+      images: previewImage ? [previewImage] : undefined,
+    },
   };
 }
 

@@ -26,16 +26,19 @@ type HomePageProps = {
 
 function FeatureProject({
   project,
-  label,
+  fallbackLabel,
   labels,
   reverse = false,
 }: {
   project: Project;
-  label: string;
+  fallbackLabel: string;
   labels: { type: string; location: string; year: string };
   reverse?: boolean;
 }) {
-  const image = optimizeImageUrl(project.image, 1600, 76);
+  const image = optimizeImageUrl(project.featuredImage || project.image, 1600, 76);
+  const title = project.featuredTitle || project.title;
+  const description = project.featuredDescription || project.description;
+  const label = project.featuredLabel || fallbackLabel;
 
   return (
     <section className="snap-section feature-project-section relative flex min-h-screen items-end overflow-hidden px-5 py-16 md:px-10 lg:px-16">
@@ -47,8 +50,8 @@ function FeatureProject({
       <div className={`relative z-10 grid w-full gap-8 md:grid-cols-2 ${reverse ? "md:[&>*:first-child]:col-start-2" : ""}`}>
         <GlassPanel className="section-in magnetic-card rounded-[2rem] p-7 md:p-10">
           <p className="mb-6 text-xs uppercase tracking-[0.42em] text-[#D69A66]">{label}</p>
-          <h2 className="text-5xl font-light tracking-[-0.055em] md:text-7xl">{project.title}</h2>
-          <p className="mt-5 max-w-xl text-base leading-relaxed text-[#D6D1CA] md:text-lg">{project.description}</p>
+          <h2 className="text-5xl font-light tracking-normal [overflow-wrap:anywhere] md:text-7xl">{title}</h2>
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-[#D6D1CA] md:text-lg">{description}</p>
           <div className="mt-9 grid grid-cols-3 gap-4 border-t border-white/15 pt-6 text-sm text-[#D6D1CA]">
             <div><span className="block text-white">{project.category}</span>{labels.type}</div>
             <div><span className="block text-white">{project.location}</span>{labels.location}</div>
@@ -71,6 +74,9 @@ function HomePage({ activeProject, setActiveProject }: HomePageProps) {
     location: text("home.projectLocationLabel", "Локация"),
     year: text("home.projectYearLabel", "Год"),
   };
+  const featuredProjects = projects.filter((project) => project.isFeatured);
+  const primaryFeatured = featuredProjects[0] ?? projects[0];
+  const secondaryFeatured = featuredProjects[1] ?? projects[2] ?? projects[1] ?? projects[0];
 
   return (
     <>
@@ -130,7 +136,7 @@ function HomePage({ activeProject, setActiveProject }: HomePageProps) {
           </div>
         </section>
 
-        <FeatureProject project={projects[0]} label={text("home.featureProject01", "Избранный проект 01")} labels={projectLabels} />
+        <FeatureProject project={primaryFeatured} fallbackLabel={text("home.featureProject01", "Избранный проект 01")} labels={projectLabels} />
 
         <section className="snap-section story-section relative z-[1] flex min-h-screen items-center  px-5 py-28 md:px-10 lg:px-16">
           <div className="story-backdrop absolute inset-0" aria-hidden="true" />
@@ -147,7 +153,7 @@ function HomePage({ activeProject, setActiveProject }: HomePageProps) {
           </div>
         </section>
 
-        <FeatureProject project={projects[2]} label={text("home.featureProject02", "Избранный проект 02")} labels={projectLabels} reverse />
+        <FeatureProject project={secondaryFeatured} fallbackLabel={text("home.featureProject02", "Избранный проект 02")} labels={projectLabels} reverse />
 
         <section className="snap-section portfolio-grid-section relative z-[1] min-h-screen px-5 py-28 md:px-10 lg:px-16">
           <PortfolioGrid onSelectProject={setActiveProject} />

@@ -12,4 +12,9 @@ export type Project = {
   image: string;
   beforeImage?: string;
   afterImage?: string;
+  isFeatured?: boolean;
+  featuredLabel?: string;
+  featuredTitle?: string;
+  featuredDescription?: string;
+  featuredImage?: string;
 };

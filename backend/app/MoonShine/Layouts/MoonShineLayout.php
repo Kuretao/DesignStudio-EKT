@@ -67,7 +67,7 @@ final class MoonShineLayout extends AppLayout
                 MenuItem::make(SiteSettingResource::class, 'Настройки')->icon('cog-6-tooth'),
                 MenuItem::make(ImageGalleryPage::class, 'Галерея')->icon('photo'),
                 MenuItem::make(PageContentBuilderPage::class, 'Конструктор страниц')->icon('rectangle-stack'),
-                MenuItem::make(StyleLabEditorPage::class, 'Редактор Style Lab')->icon('swatch'),
+                MenuItem::make(fn (): string => url('/' . trim((string) config('moonshine.prefix', 'admin'), '/') . '/style-lab-editor'), 'Редактор Style Lab')->icon('swatch'),
                 MenuItem::make(MenuItemResource::class, 'Меню сайта')->icon('bars-3'),
                 MenuItem::make(PageResource::class, 'Страницы')->icon('document-text'),
             ], 'globe-alt'),

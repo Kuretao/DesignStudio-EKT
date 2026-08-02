@@ -17,6 +17,9 @@ class Project extends Model
         'category',
         'location',
         'description',
+        'featured_label',
+        'featured_title',
+        'featured_description',
     ];
 
     protected function casts(): array
@@ -46,5 +49,12 @@ class Project extends Model
         return ! empty($this->after_image_file)
             ? Storage::disk('public')->url($this->after_image_file)
             : ($this->after_image ?: null);
+    }
+
+    public function getEffectiveFeaturedImageAttribute(): ?string
+    {
+        return ! empty($this->featured_image_file)
+            ? Storage::disk('public')->url($this->featured_image_file)
+            : ($this->featured_image ?: null);
     }
 }

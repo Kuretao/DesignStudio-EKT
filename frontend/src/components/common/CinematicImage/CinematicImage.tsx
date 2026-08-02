@@ -42,7 +42,7 @@ export default function CinematicImage({
     <div
       className={`cinematic-image media-frame group/cinema overflow-hidden bg-[#17130f] bg-cover bg-center ${
         fill ? "absolute inset-0" : "relative"
-      } ${loaded ? "media-frame-loaded" : ""} ${mode === "frames" ? "cinematic-image-frames" : "cinematic-image-preview"} ${className}`}
+      } bg-no-repeat ${loaded ? "media-frame-loaded" : ""} ${mode === "frames" ? "cinematic-image-frames" : "cinematic-image-preview"} ${className}`}
       style={{ backgroundImage: `url(${baseFrame})` }}
     >
       <img

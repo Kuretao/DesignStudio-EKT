@@ -161,6 +161,10 @@
     function activeAllowedTypes() {
         const input = state.activeInput;
 
+        if (input instanceof HTMLTextAreaElement) {
+            return input.dataset.galleryMedia === 'image' ? ['image'] : ['image', 'video'];
+        }
+
         if (!(input instanceof HTMLInputElement)) {
             return ['image', 'video'];
         }

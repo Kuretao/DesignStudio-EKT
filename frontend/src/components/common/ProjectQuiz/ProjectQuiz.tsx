@@ -461,9 +461,13 @@ function buildMockEstimate(answers: Answers, defaultTimeline: string) {
 export default function ProjectQuiz({
   kind = "interior",
   serviceTitle,
+  pdfUrl,
+  pdfTitle,
 }: {
   kind?: ServiceQuizKind;
   serviceTitle?: string;
+  pdfUrl?: string;
+  pdfTitle?: string;
 }) {
   const { messengerLinks } = useCms();
   const text = useCmsText();
@@ -534,6 +538,8 @@ export default function ProjectQuiz({
       source: "project-cost-quiz",
       channel,
       service: serviceTitle ?? kind,
+      pdfUrl,
+      pdfTitle,
       name: name.trim(),
       contact: contact.trim(),
       answers: Object.fromEntries(
@@ -580,7 +586,7 @@ export default function ProjectQuiz({
             <p className="mt-6 max-w-3xl text-lg leading-relaxed text-[#D6D1CA]">
               {text(
                 "quiz.intro",
-                "Ответьте на 5 вопросов, и мы подготовим персональное предложение. Бонусом отправим PDF-чек-лист «Подготовка к ремонту: с чего начать».",
+                "Ответьте на 5 вопросов, и мы подготовим персональное предложение. Бонусом откроем PDF по выбранной услуге, если он загружен в CMS.",
               )}
             </p>
           </div>
@@ -745,7 +751,7 @@ export default function ProjectQuiz({
                     <p className="mt-5 max-w-2xl text-base leading-relaxed text-[#D6D1CA]">
                       {text(
                         "quiz.finalText",
-                        "Оставьте контакт, а мы подготовим персональное предложение и PDF-чек-лист по старту ремонта.",
+                        "Оставьте контакт, а мы подготовим персональное предложение. Если для услуги загружен PDF-бонус, ссылка появится сразу после отправки заявки.",
                       )}
                     </p>
                   </div>
@@ -820,12 +826,24 @@ export default function ProjectQuiz({
                       </span>
                     </label>
                     {submittedTo && (
-                      <p className="rounded-2xl border border-[#D69A66]/25 bg-[#D69A66]/10 px-4 py-3 text-sm text-[#F5F2EC]">
-                        {text(
-                          "quiz.submitted",
-                          "Заявка сохранена. Мы свяжемся с вами в выбранном канале: {channel}.",
-                        ).replace("{channel}", submittedTo)}
-                      </p>
+                      <div className="rounded-2xl border border-[#D69A66]/25 bg-[#D69A66]/10 px-4 py-3 text-sm text-[#F5F2EC]">
+                        <p>
+                          {text(
+                            "quiz.submitted",
+                            "Заявка сохранена. Мы свяжемся с вами в выбранном канале: {channel}.",
+                          ).replace("{channel}", submittedTo)}
+                        </p>
+                        {pdfUrl ? (
+                          <a
+                            href={pdfUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mt-3 inline-flex rounded-full border border-[#D69A66]/45 px-4 py-2 text-xs uppercase tracking-[0.18em] text-[#D69A66] transition hover:bg-[#D69A66] hover:text-[#050505]"
+                          >
+                            {pdfTitle || text("quiz.pdfDownloadButton", "Скачать PDF-бонус")}
+                          </a>
+                        ) : null}
+                      </div>
                     )}
                   </div>
 

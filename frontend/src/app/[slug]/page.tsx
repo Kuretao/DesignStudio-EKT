@@ -9,6 +9,7 @@ import {
 import ServiceDetailPage from "@/src/modules/pages/ServiceDetailPage";
 import SeoLandingPage from "@/src/modules/pages/SeoLandingPage";
 import ContentPage from "@/src/modules/pages/ContentPage";
+import { absoluteSiteUrl, getSocialPreviewImage } from "../siteMetadata";
 
 // Slugs that have their own dedicated app routes - exclude from [slug].
 const DEDICATED_ROUTES = new Set(["novosti", "akcii-i-skidki", "otzyvy-o-nas"]);
@@ -35,10 +36,12 @@ export async function generateMetadata({
   const servicePage = servicePageItems.find((item) => item.id === slug);
   const seoLandingPage = seoLandingPageItems.find((item) => item.id === slug);
   const cmsServicePage = await loadCmsService(slug, servicePage);
+  const defaultPreviewImage = await getSocialPreviewImage();
 
   if (cmsServicePage || servicePage) {
     const item = cmsServicePage ?? servicePage!;
     const copy = getServiceLandingCopy(item);
+    const previewImage = absoluteSiteUrl(item.image) ?? defaultPreviewImage;
 
     return {
       title: `${item.title || copy.offerTitle} | 3D Smart Design Studio`,
@@ -47,13 +50,20 @@ export async function generateMetadata({
       openGraph: {
         title: item.title || copy.offerTitle,
         description: copy.seoDescription,
-        images: [item.image],
+        images: previewImage ? [{ url: previewImage, width: 1200, height: 630 }] : undefined,
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: item.title || copy.offerTitle,
+        description: copy.seoDescription,
+        images: previewImage ? [previewImage] : undefined,
       },
     };
   }
 
   if (seoLandingPage) {
     const copy = getServiceLandingCopy(seoLandingPage);
+    const previewImage = absoluteSiteUrl(seoLandingPage.image) ?? defaultPreviewImage;
 
     return {
       title: `${copy.offerTitle} | 3D Smart Design Studio`,
@@ -66,7 +76,13 @@ export async function generateMetadata({
       openGraph: {
         title: copy.offerTitle,
         description: copy.seoDescription,
-        images: [seoLandingPage.image],
+        images: previewImage ? [{ url: previewImage, width: 1200, height: 630 }] : undefined,
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: copy.offerTitle,
+        description: copy.seoDescription,
+        images: previewImage ? [previewImage] : undefined,
       },
     };
   }

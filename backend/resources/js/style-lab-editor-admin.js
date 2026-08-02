@@ -6,6 +6,7 @@
         style: styles[0],
         material: materials[0],
         light: lights[0],
+        source: 'style',
     };
 
     function ready(callback) {
@@ -50,7 +51,12 @@
         const style = state.style;
         const material = state.material;
         const light = state.light;
-        const image = value(root, `styleLab.styles.${style}.image`) || '/images/cms/river-park-interior.webp';
+        const image =
+            state.source === 'light'
+                ? imageValue(root, `styleLab.lights.${light}.image`, root)
+                : state.source === 'material'
+                    ? imageValue(root, `styleLab.materials.${material}.image`, root)
+                    : imageValue(root, `styleLab.styles.${style}.image`, root);
         const colors = lines(value(root, `styleLab.styles.${style}.colors`));
         const accent = value(root, `styleLab.materials.${material}.accent`) || '#B78352';
         const lightOverlay = value(root, `styleLab.lights.${light}.overlay`) || 'linear-gradient(120deg, rgba(245,242,236,.22), rgba(214,154,102,.08), rgba(5,5,5,.18))';
@@ -82,16 +88,23 @@
 
         renderButtons(root, '[data-sl-preview-style-buttons]', styles, state.style, 'styleLab.styles', (id) => {
             state.style = id;
+            state.source = 'style';
             render(root);
         });
         renderButtons(root, '[data-sl-preview-material-buttons]', materials, state.material, 'styleLab.materials', (id) => {
             state.material = id;
+            state.source = 'material';
             render(root);
         });
         renderButtons(root, '[data-sl-preview-light-buttons]', lights, state.light, 'styleLab.lights', (id) => {
             state.light = id;
+            state.source = 'light';
             render(root);
         });
+    }
+
+    function imageValue(root, key) {
+        return value(root, key) || value(root, `styleLab.styles.${state.style}.image`) || '/images/cms/river-park-interior.webp';
     }
 
     function setText(root, selector, text) {

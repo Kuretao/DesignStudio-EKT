@@ -89,9 +89,9 @@ export default function Breadcrumbs() {
       aria-label={text("breadcrumbs.aria", "Хлебные крошки")}
       itemScope
       itemType="https://schema.org/BreadcrumbList"
-      className="fixed left-0 right-0 top-[72px] z-[45] border-b border-white/10 bg-[#050505]/38 px-5 text-white backdrop-blur-[10px] md:top-[76px] md:px-10 lg:px-12"
+      className="fixed left-0 right-0 top-[72px] z-[45] border-b border-white/10 bg-[#050505]/58 px-5 text-white backdrop-blur-[10px] md:top-[76px] md:px-10 lg:px-12"
     >
-      <ol className="mx-auto flex h-10 max-w-[1680px] items-center gap-2 overflow-x-auto whitespace-nowrap text-[11px] text-white/54">
+      <ol className="mx-auto flex min-h-10 max-w-[1680px] items-center gap-2 overflow-x-auto py-2 text-[11px] leading-snug text-white/54 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {crumbs.map((crumb, index) => {
           const isLast = index === crumbs.length - 1;
 
@@ -104,11 +104,11 @@ export default function Breadcrumbs() {
               className="flex items-center gap-2"
             >
               {isLast ? (
-                <span itemProp="name" className="max-w-[58vw] truncate text-white/78 md:max-w-none">
+                <span itemProp="name" className="block max-w-[58vw] whitespace-normal break-words text-white/78 md:max-w-none md:whitespace-nowrap">
                   {crumb.label}
                 </span>
               ) : (
-                <Link href={crumb.href} itemProp="item" className="transition hover:text-[#D69A66]">
+                <Link href={crumb.href} itemProp="item" className="whitespace-nowrap transition hover:text-[#D69A66]">
                   <span itemProp="name">{crumb.label}</span>
                 </Link>
               )}

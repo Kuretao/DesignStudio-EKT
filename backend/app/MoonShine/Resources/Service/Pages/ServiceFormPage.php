@@ -101,6 +101,18 @@ class ServiceFormPage extends FormPage
                         ]),
                     ])->icon('photo')->customAttributes(['class' => 'svc-form-section']),
                 ])->icon('photo'),
+                Tab::make('PDF-бонус', [
+                    Box::make('Файл после заявки', [
+                        $this->sectionNote(
+                            'Отдельный PDF для этой услуги',
+                            'Квиз покажет клиенту ссылку на этот файл после отправки заявки. Для визуализации загрузите PDF по визуализации, для ремонта - свой документ.'
+                        ),
+                        Grid::make([
+                            Column::make(array_slice(CmsFieldSets::serviceSection('pdf'), 0, 1))->columnSpan(5),
+                            Column::make(array_slice(CmsFieldSets::serviceSection('pdf'), 1))->columnSpan(7),
+                        ]),
+                    ])->icon('document-arrow-down')->customAttributes(['class' => 'svc-form-section']),
+                ])->icon('document-arrow-down'),
                 Tab::make('Списки', [
                     Box::make('Что входит, преимущества и этапы', [
                         $this->sectionNote(
@@ -150,6 +162,9 @@ class ServiceFormPage extends FormPage
             'price_en' => ['nullable', 'string', 'max:255'],
             'timeline_ru' => ['nullable', 'string', 'max:255'],
             'timeline_en' => ['nullable', 'string', 'max:255'],
+            'pdf_file' => ['nullable'],
+            'pdf_title_ru' => ['nullable', 'string', 'max:255'],
+            'pdf_title_en' => ['nullable', 'string', 'max:255'],
             'text_ru' => ['nullable', 'string'],
             'text_en' => ['nullable', 'string'],
             'image' => ['nullable', 'string', 'max:2048'],

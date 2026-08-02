@@ -8,38 +8,13 @@ import Analytics from "@/src/components/layout/Analytics";
 import SiteMetadata from "@/src/components/layout/SiteMetadata/SiteMetadata";
 import { CmsProvider } from "@/src/cms";
 import { SiteI18nProvider } from "@/src/i18n";
+import { getSiteMetadata } from "./siteMetadata";
 import "pannellum/build/pannellum.css";
 import "./globals.css";
 
-const googleSiteVerification =
-  process.env.GOOGLE_SITE_VERIFICATION ??
-  "HlopiXKhbxQ7ylgQsea3aHhSYGyqjgy6Xgq55kBJffc";
-
-export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://3dsmartdesign.ru",
-  ),
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/logo.png",
-  },
-  title:
-    "Студия дизайна интерьера, архитектуры и ландшафта в Самаре | 3D Smart Design Studio",
-  description:
-    "3D Smart Design Studio: дизайн интерьера, архитектурное проектирование, 3D-визуализация, ландшафтный дизайн, комплектация и авторский надзор в Самаре.",
-  keywords: [
-    "дизайн интерьера Самара",
-    "архитектура Самара",
-    "ландшафтный дизайн Самара",
-    "3D-визуализация",
-    "3D Smart Design Studio",
-  ],
-  verification: {
-    google: googleSiteVerification,
-    yandex: process.env.YANDEX_SITE_VERIFICATION,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return getSiteMetadata();
+}
 
 export default function RootLayout({
   children,

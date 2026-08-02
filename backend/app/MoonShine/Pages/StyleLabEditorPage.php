@@ -52,6 +52,46 @@ class StyleLabEditorPage extends Page
         ];
     }
 
+    public function standaloneHtml(): string
+    {
+        $this->texts = $this->loadTexts();
+        $css = file_get_contents(resource_path('css/style-lab-editor-admin.css'));
+        $galleryCss = file_get_contents(resource_path('css/image-gallery-admin.css'));
+        $galleryJs = file_get_contents(resource_path('js/admin-image-gallery.js'));
+        $js = file_get_contents(resource_path('js/style-lab-editor-admin.js'));
+        $galleryEndpoint = '/' . trim((string) config('moonshine.prefix', 'admin'), '/') . '/image-gallery';
+        $title = e($this->getTitle());
+
+        return <<<HTML
+        <!doctype html>
+        <html lang="ru">
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>{$title}</title>
+            <style>
+                :root { color-scheme: dark; }
+                * { box-sizing: border-box; }
+                body { margin: 0; min-height: 100vh; background: #160f2b; color: #fff; font-family: Inter, Arial, sans-serif; }
+                body::before { content: ""; position: fixed; inset: 0; pointer-events: none; background: radial-gradient(circle at 12% 0%, rgba(151,104,255,.18), transparent 34%), linear-gradient(180deg, rgba(255,255,255,.04), transparent 35%); }
+                a { color: inherit; }
+                {$galleryCss}
+                {$css}
+            </style>
+        </head>
+        <body>
+            <main style="position: relative; z-index: 1; padding: 24px;">
+                <a href="/admin/page/page-content-builder-page" style="display:inline-flex;margin-bottom:16px;color:#cdbdff;text-decoration:none;">← Конструктор страниц</a>
+                {$this->html()}
+            </main>
+            <script>window.AdminImageGallery = { endpoint: "{$galleryEndpoint}" };</script>
+            <script>{$galleryJs}</script>
+            <script>{$js}</script>
+        </body>
+        </html>
+        HTML;
+    }
+
     private function html(): string
     {
         $action = e(route('admin.style-lab-editor.update'));
@@ -134,6 +174,7 @@ class StyleLabEditorPage extends Page
                 . $this->field('Текстура RU', "styleLab.materials.{$id}.texture", 'ru')
                 . $this->field('Текстура EN', "styleLab.materials.{$id}.texture", 'en')
                 . $this->techField('Акцентный цвет HEX', "styleLab.materials.{$id}.accent")
+                . $this->techArea('Картинка материала', "styleLab.materials.{$id}.image", true)
                 . '</div></div>';
         }
 
@@ -151,6 +192,7 @@ class StyleLabEditorPage extends Page
                 . $this->field('Название EN', "styleLab.lights.{$id}.label", 'en')
                 . $this->field('Заметка RU', "styleLab.lights.{$id}.note", 'ru')
                 . $this->field('Заметка EN', "styleLab.lights.{$id}.note", 'en')
+                . $this->techArea('Картинка света', "styleLab.lights.{$id}.image", true)
                 . $this->techArea('CSS overlay', "styleLab.lights.{$id}.overlay")
                 . '</div></div>';
         }
@@ -227,7 +269,7 @@ class StyleLabEditorPage extends Page
     {
         $value = e($this->value($key, 'ru'));
         $name = e("texts[{$key}][value]");
-        $galleryAttr = $gallery ? ' data-gallery-lines="1"' : '';
+        $galleryAttr = $gallery ? ' data-gallery-lines="1" data-gallery-media="image"' : '';
 
         return "<label class=\"sl-field\"><span>{$label}</span><textarea name=\"{$name}\" rows=\"3\" data-sl-key=\"{$key}\" data-sl-locale=\"value\"{$galleryAttr}>{$value}</textarea></label>";
     }

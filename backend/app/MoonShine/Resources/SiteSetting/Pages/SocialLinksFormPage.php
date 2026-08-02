@@ -146,6 +146,7 @@ class SocialLinksFormPage extends FormPage
             'phone' => ['nullable', 'string', 'max:255'],
             'phone_href' => ['nullable', 'string', 'max:255', 'regex:/^(tel:|https?:\/\/)/i'],
             'emails' => ['nullable', 'string', 'max:4000', $this->emailLinesRule()],
+            'lead_notification_email' => ['nullable', 'email', 'max:255'],
             'schedule' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string', 'max:2000'],
             'map_src' => ['nullable', 'url', 'max:2048'],

@@ -449,27 +449,29 @@ final class DefaultUiTexts
         }
 
         $materials = [
-            ['wood', 'Теплое дерево', 'Warm wood', 'лиственница / дуб', 'larch / oak', '#B78352'],
-            ['stone', 'Крупный камень', 'Large-format stone', 'травертин / кварц', 'travertine / quartz', '#CFC3AD'],
-            ['textile', 'Мягкий текстиль', 'Soft textile', 'лен / букле', 'linen / boucle', '#E1D8C8'],
-            ['metal', 'Темный металл', 'Dark metal', 'графит / бронза', 'graphite / bronze', '#4C4841'],
+            ['wood', 'Теплое дерево', 'Warm wood', 'лиственница / дуб', 'larch / oak', '#B78352', '/images/cms/country-house-interior.webp'],
+            ['stone', 'Крупный камень', 'Large-format stone', 'травертин / кварц', 'travertine / quartz', '#CFC3AD', '/images/cms/natural-living-room.webp'],
+            ['textile', 'Мягкий текстиль', 'Soft textile', 'лен / букле', 'linen / boucle', '#E1D8C8', '/images/cms/modern-living-room.webp'],
+            ['metal', 'Темный металл', 'Dark metal', 'графит / бронза', 'graphite / bronze', '#4C4841', '/images/cms/river-park-interior.webp'],
         ];
 
-        foreach ($materials as [$id, $labelRu, $labelEn, $textureRu, $textureEn, $accent]) {
+        foreach ($materials as [$id, $labelRu, $labelEn, $textureRu, $textureEn, $accent, $image]) {
             $rows[] = self::row("styleLab.materials.{$id}.label", 'style-lab', "Материал {$id}: название", $labelRu, $labelEn);
             $rows[] = self::row("styleLab.materials.{$id}.texture", 'style-lab', "Материал {$id}: текстура", $textureRu, $textureEn);
             $rows[] = self::row("styleLab.materials.{$id}.accent", 'style-lab', "Материал {$id}: акцент", $accent, $accent);
+            $rows[] = self::row("styleLab.materials.{$id}.image", 'style-lab', "Материал {$id}: изображение", $image, $image);
         }
 
         $lights = [
-            ['morning', 'Утро', 'Morning', 'мягкий дневной свет', 'soft daylight', 'linear-gradient(120deg, rgba(245,242,236,.22), rgba(214,154,102,.08), rgba(5,5,5,.18))'],
-            ['evening', 'Вечер', 'Evening', 'теплые акцентные группы', 'warm accent groups', 'linear-gradient(120deg, rgba(214,154,102,.24), rgba(70,54,43,.12), rgba(5,5,5,.32))'],
-            ['gallery', 'Галерея', 'Gallery', 'контраст и точечные акценты', 'contrast and spot accents', 'linear-gradient(120deg, rgba(245,242,236,.1), rgba(126,139,116,.14), rgba(5,5,5,.24))'],
+            ['morning', 'Утро', 'Morning', 'мягкий дневной свет', 'soft daylight', '/images/cms/modern-living-room.webp', 'linear-gradient(120deg, rgba(245,242,236,.22), rgba(214,154,102,.08), rgba(5,5,5,.18))'],
+            ['evening', 'Вечер', 'Evening', 'теплые акцентные группы', 'warm accent groups', '/images/cms/country-house-interior.webp', 'linear-gradient(120deg, rgba(214,154,102,.24), rgba(70,54,43,.12), rgba(5,5,5,.32))'],
+            ['gallery', 'Галерея', 'Gallery', 'контраст и точечные акценты', 'contrast and spot accents', '/images/cms/natural-living-room.webp', 'linear-gradient(120deg, rgba(245,242,236,.1), rgba(126,139,116,.14), rgba(5,5,5,.24))'],
         ];
 
-        foreach ($lights as [$id, $labelRu, $labelEn, $noteRu, $noteEn, $overlay]) {
+        foreach ($lights as [$id, $labelRu, $labelEn, $noteRu, $noteEn, $image, $overlay]) {
             $rows[] = self::row("styleLab.lights.{$id}.label", 'style-lab', "Свет {$id}: название", $labelRu, $labelEn);
             $rows[] = self::row("styleLab.lights.{$id}.note", 'style-lab', "Свет {$id}: заметка", $noteRu, $noteEn);
+            $rows[] = self::row("styleLab.lights.{$id}.image", 'style-lab', "Свет {$id}: изображение", $image, $image);
             $rows[] = self::row("styleLab.lights.{$id}.overlay", 'style-lab', "Свет {$id}: overlay", $overlay, $overlay);
         }
 
@@ -483,7 +485,7 @@ final class DefaultUiTexts
             self::row('quiz.titlePrefix', 'quiz', 'Квиз: начало заголовка', 'Рассчитайте стоимость и сроки', 'Estimate the cost and timeline'),
             self::row('quiz.titleDefaultProject', 'quiz', 'Квиз: проект по умолчанию', ' вашего проекта', ' of your project'),
             self::row('quiz.titleSuffix', 'quiz', 'Квиз: конец заголовка', 'за 1 минуту', 'in 1 minute'),
-            self::row('quiz.intro', 'quiz', 'Квиз: вводный текст', 'Ответьте на 5 вопросов, и мы подготовим персональное предложение. Бонусом отправим PDF-чек-лист «Подготовка к ремонту: с чего начать».', 'Answer 5 questions and we will prepare a personal proposal. As a bonus, we will send a PDF checklist: “Preparing for renovation: where to start”.'),
+            self::row('quiz.intro', 'quiz', 'Квиз: вводный текст', 'Ответьте на 5 вопросов, и мы подготовим персональное предложение. Бонусом откроем PDF по выбранной услуге, если он загружен в CMS.', 'Answer 5 questions and we will prepare a personal proposal. As a bonus, we will open the PDF for the selected service if it is uploaded in the CMS.'),
             self::row('quiz.estimateLabel', 'quiz', 'Квиз: блок оценки', 'Предварительный ориентир', 'Preliminary estimate'),
             self::row('quiz.priceLabel', 'quiz', 'Квиз: стоимость', 'Стоимость', 'Cost'),
             self::row('quiz.timelineLabel', 'quiz', 'Квиз: сроки', 'Сроки', 'Timeline'),
@@ -494,7 +496,7 @@ final class DefaultUiTexts
             self::row('quiz.toEstimateButton', 'quiz', 'Квиз: к расчету', 'К расчету', 'To estimate'),
             self::row('quiz.finalEyebrow', 'quiz', 'Квиз: финальная подпись', 'Спасибо! Мы уже начали расчет вашего проекта.', 'Thank you! We have already started estimating your project.'),
             self::row('quiz.finalTitle', 'quiz', 'Квиз: финальный заголовок', 'Укажите, куда прислать расчет и ваш бонус', 'Tell us where to send the estimate and your bonus'),
-            self::row('quiz.finalText', 'quiz', 'Квиз: финальный текст', 'Оставьте контакт, а мы подготовим персональное предложение и PDF-чек-лист по старту ремонта.', 'Leave your contact details and we will prepare a personal proposal and a PDF checklist for starting renovation.'),
+            self::row('quiz.finalText', 'quiz', 'Квиз: финальный текст', 'Оставьте контакт, а мы подготовим персональное предложение. Если для услуги загружен PDF-бонус, ссылка появится сразу после отправки заявки.', 'Leave your contact details and we will prepare a personal proposal. If the service has a PDF bonus, the link will appear right after submitting the request.'),
             self::row('quiz.namePlaceholder', 'quiz', 'Квиз: имя', 'Ваше имя', 'Your name'),
             self::row('quiz.contactPlaceholder', 'quiz', 'Квиз: контакт', 'Телефон, e-mail или @username', 'Phone, email, or @username'),
             self::row('quiz.contactError', 'quiz', 'Квиз: ошибка контакта', 'Добавьте контакт и подтвердите согласие, чтобы мы знали, куда отправить расчет.', 'Add a contact and confirm consent so we know where to send the estimate.'),
@@ -505,6 +507,7 @@ final class DefaultUiTexts
             self::row('quiz.and', 'quiz', 'Квиз: союз', 'и', 'and'),
             self::row('quiz.privacy', 'quiz', 'Квиз: политика', 'политикой конфиденциальности', 'privacy policy'),
             self::row('quiz.submitted', 'quiz', 'Квиз: заявка сохранена', 'Заявка сохранена. Мы свяжемся с вами в выбранном канале: {channel}.', 'Request saved. We will contact you in the selected channel: {channel}.'),
+            self::row('quiz.pdfDownloadButton', 'quiz', 'Квиз: скачать PDF', 'Скачать PDF-бонус', 'Download PDF bonus'),
             self::row('quiz.restartButton', 'quiz', 'Квиз: пройти заново', 'Пройти заново', 'Start again'),
             self::row('quiz.defaultTimeline', 'quiz', 'Квиз: срок по умолчанию', '3-12 недель', '3-12 weeks'),
             self::row('quiz.imageAlt', 'quiz', 'Квиз: alt изображения', 'Интерьер с мягким светом и натуральными материалами', 'Interior with soft light and natural materials'),

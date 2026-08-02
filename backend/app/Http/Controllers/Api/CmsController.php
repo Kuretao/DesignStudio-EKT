@@ -144,7 +144,8 @@ class CmsController extends Controller
 
     private function sendLeadNotification(Lead $lead): void
     {
-        $recipient = config('mail.leads.to');
+        $recipient = SiteSetting::query()->value('lead_notification_email')
+            ?: config('mail.leads.to');
 
         if (blank($recipient)) {
             return;
@@ -173,6 +174,7 @@ class CmsController extends Controller
             'phone' => $settings?->phone,
             'phoneHref' => $settings?->phone_href,
             'emails' => $this->lines($settings?->emails),
+            'leadNotificationEmail' => $settings?->lead_notification_email,
             'schedule' => $settings?->schedule,
             'address' => $settings?->address,
             'mapSrc' => $settings?->map_src,
@@ -413,6 +415,16 @@ class CmsController extends Controller
             'beforeImage' => $project->effective_before_image,
             'afterImage' => $project->effective_after_image,
             'isFeatured' => $project->is_featured,
+            'featuredLabel' => $project->fieldRu('featured_label'),
+            'featuredLabelRu' => $project->fieldRu('featured_label'),
+            'featuredLabelEn' => $project->fieldEn('featured_label'),
+            'featuredTitle' => $project->fieldRu('featured_title'),
+            'featuredTitleRu' => $project->fieldRu('featured_title'),
+            'featuredTitleEn' => $project->fieldEn('featured_title'),
+            'featuredDescription' => $project->fieldRu('featured_description'),
+            'featuredDescriptionRu' => $project->fieldRu('featured_description'),
+            'featuredDescriptionEn' => $project->fieldEn('featured_description'),
+            'featuredImage' => $project->effective_featured_image,
         ];
     }
 
@@ -435,6 +447,10 @@ class CmsController extends Controller
             'image' => $images[0] ?? $service->effective_image,
             'images' => $images,
             'heroImages' => $images,
+            'pdfUrl' => $service->effective_pdf,
+            'pdfTitle' => $service->fieldRu('pdf_title'),
+            'pdfTitleRu' => $service->fieldRu('pdf_title'),
+            'pdfTitleEn' => $service->fieldEn('pdf_title'),
             'price' => $service->fieldRu('price'),
             'priceRu' => $service->fieldRu('price'),
             'priceEn' => $service->fieldEn('price'),

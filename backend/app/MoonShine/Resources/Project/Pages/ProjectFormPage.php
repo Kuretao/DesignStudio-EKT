@@ -97,6 +97,15 @@ class ProjectFormPage extends FormPage
                         ]),
                     ])->icon('check-circle')->customAttributes(['class' => 'proj-form-section']),
                 ])->icon('check-circle'),
+                Tab::make('Избранный кейс', [
+                    Box::make('Большая структура на главной', [
+                        $this->sectionNote('Поля работают только для избранного', 'Включите статус "Избранный" во вкладке публикации. После этого проект попадет в fullscreen-секцию на главной и возьмет эти отдельные подписи, заголовок, описание и фон.'),
+                        Grid::make([
+                            Column::make(array_slice($fields, 20, 4))->columnSpan(6),
+                            Column::make(array_slice($fields, 24, 4))->columnSpan(6),
+                        ]),
+                    ])->icon('star')->customAttributes(['class' => 'proj-form-section']),
+                ])->icon('star'),
             ])->vertical()->customAttributes(['class' => 'proj-form-tabs']),
         ];
     }
@@ -123,6 +132,13 @@ class ProjectFormPage extends FormPage
             'image' => ['nullable', 'string', 'max:2048'],
             'before_image' => ['nullable', 'string', 'max:2048'],
             'after_image' => ['nullable', 'string', 'max:2048'],
+            'featured_label_ru' => ['nullable', 'string', 'max:255'],
+            'featured_label_en' => ['nullable', 'string', 'max:255'],
+            'featured_title_ru' => ['nullable', 'string', 'max:255'],
+            'featured_title_en' => ['nullable', 'string', 'max:255'],
+            'featured_description_ru' => ['nullable', 'string', 'max:10000'],
+            'featured_description_en' => ['nullable', 'string', 'max:10000'],
+            'featured_image' => ['nullable', 'string', 'max:2048'],
             'position' => ['required', 'integer', 'min:0', 'max:9999'],
             'is_featured' => ['nullable', 'boolean'],
             'is_published' => ['nullable', 'boolean'],

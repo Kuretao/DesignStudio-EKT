@@ -5,13 +5,20 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\MoonShine\Pages\StyleLabEditorPage;
 use App\Models\UiText;
 use App\Support\DefaultUiTexts;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class StyleLabEditorController extends Controller
 {
+    public function show(StyleLabEditorPage $page): Response
+    {
+        return response($page->standaloneHtml());
+    }
+
     public function update(Request $request): RedirectResponse
     {
         $payload = $request->input('texts', []);

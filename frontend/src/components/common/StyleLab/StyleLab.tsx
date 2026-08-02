@@ -19,6 +19,7 @@ type MaterialOption = {
   label: string;
   texture: string;
   accent: string;
+  image: string;
 };
 
 type LightOption = {
@@ -26,6 +27,7 @@ type LightOption = {
   label: string;
   overlay: string;
   note: string;
+  image: string;
 };
 
 function listFromText(value: string, fallback: string[]) {
@@ -73,10 +75,10 @@ const styles: StyleOption[] = [
 ];
 
 const materials: MaterialOption[] = [
-  { id: "wood", label: "Теплое дерево", texture: "лиственница / дуб", accent: "#B78352" },
-  { id: "stone", label: "Крупный камень", texture: "травертин / кварц", accent: "#CFC3AD" },
-  { id: "textile", label: "Мягкий текстиль", texture: "лен / букле", accent: "#E1D8C8" },
-  { id: "metal", label: "Темный металл", texture: "графит / бронза", accent: "#4C4841" },
+  { id: "wood", label: "Теплое дерево", texture: "лиственница / дуб", accent: "#B78352", image: "/images/cms/country-house-interior.webp" },
+  { id: "stone", label: "Крупный камень", texture: "травертин / кварц", accent: "#CFC3AD", image: "/images/cms/natural-living-room.webp" },
+  { id: "textile", label: "Мягкий текстиль", texture: "лен / букле", accent: "#E1D8C8", image: "/images/cms/modern-living-room.webp" },
+  { id: "metal", label: "Темный металл", texture: "графит / бронза", accent: "#4C4841", image: "/images/cms/river-park-interior.webp" },
 ];
 
 const lights: LightOption[] = [
@@ -85,18 +87,21 @@ const lights: LightOption[] = [
     label: "Утро",
     overlay: "linear-gradient(120deg, rgba(245,242,236,.22), rgba(214,154,102,.08), rgba(5,5,5,.18))",
     note: "мягкий дневной свет",
+    image: "/images/cms/modern-living-room.webp",
   },
   {
     id: "evening",
     label: "Вечер",
     overlay: "linear-gradient(120deg, rgba(214,154,102,.24), rgba(70,54,43,.12), rgba(5,5,5,.32))",
     note: "теплые акцентные группы",
+    image: "/images/cms/country-house-interior.webp",
   },
   {
     id: "gallery",
     label: "Галерея",
     overlay: "linear-gradient(120deg, rgba(245,242,236,.1), rgba(126,139,116,.14), rgba(5,5,5,.24))",
     note: "контраст и точечные акценты",
+    image: "/images/cms/natural-living-room.webp",
   },
 ];
 
@@ -105,6 +110,7 @@ export default function StyleLab() {
   const [styleId, setStyleId] = useState(styles[0].id);
   const [materialId, setMaterialId] = useState(materials[0].id);
   const [lightId, setLightId] = useState(lights[0].id);
+  const [imageSource, setImageSource] = useState<"style" | "material" | "light">("style");
   const [saved, setSaved] = useState(false);
 
   const localizedStyles = styles.map((item) => ({
@@ -123,17 +129,25 @@ export default function StyleLab() {
     label: text(`styleLab.materials.${item.id}.label`, item.label),
     texture: text(`styleLab.materials.${item.id}.texture`, item.texture),
     accent: text(`styleLab.materials.${item.id}.accent`, item.accent),
+    image: text(`styleLab.materials.${item.id}.image`, item.image),
   }));
   const localizedLights = lights.map((item) => ({
     ...item,
     label: text(`styleLab.lights.${item.id}.label`, item.label),
     note: text(`styleLab.lights.${item.id}.note`, item.note),
     overlay: text(`styleLab.lights.${item.id}.overlay`, item.overlay),
+    image: text(`styleLab.lights.${item.id}.image`, item.image),
   }));
 
   const activeStyle = useMemo(() => localizedStyles.find((item) => item.id === styleId) ?? localizedStyles[0], [localizedStyles, styleId]);
   const activeMaterial = useMemo(() => localizedMaterials.find((item) => item.id === materialId) ?? localizedMaterials[0], [localizedMaterials, materialId]);
   const activeLight = useMemo(() => localizedLights.find((item) => item.id === lightId) ?? localizedLights[0], [localizedLights, lightId]);
+  const activeImage =
+    imageSource === "light"
+      ? activeLight.image || activeStyle.image
+      : imageSource === "material"
+        ? activeMaterial.image || activeStyle.image
+        : activeStyle.image;
 
   const saveConcept = () => {
     const payload = {
@@ -151,17 +165,13 @@ export default function StyleLab() {
   return (
     <section className="style-lab-section relative z-[2] min-h-[136vh] overflow-hidden bg-[#0c0b09] px-5 py-36 md:px-10 md:py-44 lg:px-16">
       <div className="absolute inset-0">
-        {localizedStyles.map((item) => (
-          <img
-            key={`bg-${item.id}`}
-            src={item.image}
-            alt=""
-            aria-hidden="true"
-            className={`absolute inset-0 h-full w-full scale-110 object-cover blur-sm transition duration-700 ${
-              item.id === activeStyle.id ? "opacity-45" : "opacity-0"
-            }`}
-          />
-        ))}
+        <img
+          key={`bg-${activeImage}`}
+          src={activeImage}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full scale-110 object-cover blur-sm opacity-45 transition duration-700"
+        />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,5,.92)_0%,rgba(13,12,10,.78)_44%,rgba(5,5,5,.54)_100%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,#0c0b09_0%,rgba(12,11,9,.5)_18%,rgba(12,11,9,.42)_72%,#0c0b09_100%)]" />
         <div
@@ -211,16 +221,12 @@ export default function StyleLab() {
 
         <GlassPanel className="grid overflow-hidden rounded-[2rem] lg:grid-rows-[1fr_auto]">
           <div className="relative min-h-[560px] overflow-hidden md:min-h-[760px]">
-            {localizedStyles.map((item) => (
-              <img
-                key={item.id}
-                src={item.image}
-                alt={item.label}
-                className={`absolute inset-0 h-full w-full object-cover transition duration-700 ${
-                  item.id === activeStyle.id ? "scale-100 opacity-100" : "scale-105 opacity-0"
-                }`}
-              />
-            ))}
+            <img
+              key={activeImage}
+              src={activeImage}
+              alt={activeStyle.label}
+              className="absolute inset-0 h-full w-full object-cover transition duration-700"
+            />
             <div className="absolute inset-0 transition duration-700" style={{ background: activeLight.overlay }} />
             <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/82 via-[#050505]/14 to-transparent" />
 
@@ -261,7 +267,10 @@ export default function StyleLab() {
                     key={item.id}
                     type="button"
                     aria-pressed={item.id === activeStyle.id}
-                    onClick={() => setStyleId(item.id)}
+                    onClick={() => {
+                      setStyleId(item.id);
+                      setImageSource("style");
+                    }}
                     className={`min-h-12 rounded-2xl border px-3 text-sm transition ${
                       item.id === activeStyle.id
                         ? "border-[#D69A66]/70 bg-[#D69A66]/12 text-[#F5F2EC]"
@@ -283,7 +292,10 @@ export default function StyleLab() {
                       key={item.id}
                       type="button"
                       aria-pressed={item.id === activeMaterial.id}
-                      onClick={() => setMaterialId(item.id)}
+                      onClick={() => {
+                        setMaterialId(item.id);
+                        setImageSource("material");
+                      }}
                       className={`flex min-h-12 items-center gap-3 rounded-2xl border px-3 text-left text-sm transition ${
                         item.id === activeMaterial.id
                           ? "border-[#D69A66]/70 bg-[#D69A66]/12 text-[#F5F2EC]"
@@ -305,7 +317,10 @@ export default function StyleLab() {
                       key={item.id}
                       type="button"
                       aria-pressed={item.id === activeLight.id}
-                      onClick={() => setLightId(item.id)}
+                      onClick={() => {
+                        setLightId(item.id);
+                        setImageSource("light");
+                      }}
                       className={`min-h-12 rounded-2xl border px-3 text-sm transition ${
                         item.id === activeLight.id
                           ? "border-[#D69A66]/70 bg-[#D69A66]/12 text-[#F5F2EC]"

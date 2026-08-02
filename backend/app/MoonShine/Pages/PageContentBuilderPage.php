@@ -404,7 +404,7 @@ class PageContentBuilderPage extends Page
                 ],
                 'description' => 'Заголовок Style Lab, варианты стилей, материалов, света, кнопки и служебные подписи.',
                 'links' => [
-                    ['label' => 'Открыть редактор с предпросмотром', 'url' => $this->moonshinePageUrl(StyleLabEditorPage::class)],
+                    ['label' => 'Открыть редактор с предпросмотром', 'url' => url('/' . trim((string) config('moonshine.prefix', 'admin'), '/') . '/style-lab-editor')],
                     ['label' => 'Таблица текстов', 'url' => $this->permanentGroupUrl('style-lab')],
                 ],
             ],

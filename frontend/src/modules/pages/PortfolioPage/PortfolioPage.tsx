@@ -418,6 +418,7 @@ export function ProjectShowcase({ project }: { project: Project }) {
                 frames={[image, gallery[(index + 1) % gallery.length], gallery[(index + 2) % gallery.length]]}
                 alt={`${project.title} gallery ${index + 1}`}
                 className="h-80 w-full"
+                imageClassName="h-full w-full"
                 hint="frames"
                 mode="frames"
               />

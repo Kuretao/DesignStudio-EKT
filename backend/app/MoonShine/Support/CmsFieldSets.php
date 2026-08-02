@@ -142,6 +142,9 @@ final class CmsFieldSets
                 Textarea::make('Email, по одному в строке', 'emails')
                     ->placeholder("mail@example.ru\ninfo@example.ru - вопросы по рекламе")
                     ->hint('В начале каждой строки должен быть email. После него можно добавить пояснение через дефис.'),
+                Text::make('Email для заявок', 'lead_notification_email')
+                    ->placeholder('info@3dsmartdesign.ru')
+                    ->hint('На этот адрес уходят заявки с форм и квиза. Если оставить пустым, используется LEAD_NOTIFICATION_TO из .env.'),
                 Text::make('Режим работы', 'schedule')
                     ->placeholder('Пн-Пт 9:00-20:00, Сб-Вс 10:00-19:00')
                     ->hint('Короткая строка для блока контактов.'),
@@ -722,6 +725,32 @@ final class CmsFieldSets
                 ->customAttributes(['data-gallery-lines' => '1'])
                 ->hint('Вставьте путь из галереи или внешнюю ссылку. Используется если файл выше не загружен.'),
             Switcher::make('Избранный', 'is_featured'),
+            Text::make('Избранный: подпись RU', 'featured_label_ru')
+                ->placeholder('Избранный проект 01')
+                ->hint('Показывается в большой секции избранного кейса на главной. Работает только если включен статус "Избранный".'),
+            Text::make('Избранный: подпись EN', 'featured_label_en')
+                ->placeholder('Featured project 01')
+                ->hint('Английская подпись большой секции избранного кейса.'),
+            Text::make('Избранный: заголовок RU', 'featured_title_ru')
+                ->placeholder('Можно оставить пустым - будет обычный заголовок кейса')
+                ->hint('Отдельный заголовок для большой структуры избранного кейса.'),
+            Text::make('Избранный: заголовок EN', 'featured_title_en')
+                ->hint('Английский заголовок для избранной структуры.'),
+            Textarea::make('Избранный: описание RU', 'featured_description_ru')
+                ->placeholder('Можно оставить пустым - будет обычное описание кейса')
+                ->hint('Отдельное описание для большой структуры избранного кейса.'),
+            Textarea::make('Избранный: описание EN', 'featured_description_en')
+                ->hint('Английское описание для избранной структуры.'),
+            Image::make('Избранный: загрузить фон', 'featured_image_file')
+                ->disk('public')
+                ->dir('projects/featured')
+                ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])
+                ->disableDeleteFiles()
+                ->removable()
+                ->hint('Отдельная картинка для fullscreen-блока избранного кейса. Если пусто, берется главное изображение.'),
+            Textarea::make('Избранный: или URL фона', 'featured_image')
+                ->customAttributes(['data-gallery-lines' => '1'])
+                ->hint('Можно выбрать картинку из галереи. Используется если файл выше не загружен.'),
         ];
     }
 
@@ -742,6 +771,7 @@ final class CmsFieldSets
             ...self::serviceSection('pricing'),
             ...self::serviceSection('content'),
             ...self::serviceSection('media'),
+            ...self::serviceSection('pdf'),
             ...self::serviceSection('lists'),
             ...self::serviceSection('publish'),
         ];
@@ -805,6 +835,20 @@ final class CmsFieldSets
                     ->customAttributes(['data-gallery-lines' => '1'])
                     ->placeholder("/images/cms/slide-1.webp\n/images/cms/slide-2.webp")
                     ->hint('Карусель на посадочной странице услуги. Нажмите "Вставить из галереи" и добавляйте слайды построчно.'),
+            ],
+            'pdf' => [
+                File::make('PDF-файл услуги', 'pdf_file')
+                    ->disk('public')
+                    ->dir('services/pdf')
+                    ->allowedExtensions(['pdf'])
+                    ->removable()
+                    ->hint('Индивидуальный PDF для этой услуги. Ссылка появится после заявки в квизе именно этой услуги.'),
+                Text::make('Название PDF RU', 'pdf_title_ru')
+                    ->placeholder('PDF-бонус по визуализации')
+                    ->hint('Как назвать файл/бонус для клиента после отправки квиза.'),
+                Text::make('Название PDF EN', 'pdf_title_en')
+                    ->placeholder('Visualization PDF bonus')
+                    ->hint('Английское название PDF-бонуса.'),
             ],
             'lists' => [
                 Textarea::make('Что входит RU, по одному пункту в строке', 'deliverables_ru')

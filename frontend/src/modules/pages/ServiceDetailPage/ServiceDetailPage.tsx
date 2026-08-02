@@ -491,6 +491,8 @@ function ServiceDetailPage({ item }: { item: ServicePageItem }) {
       <ProjectQuiz
         kind={landingCopy.quizKind}
         serviceTitle={currentItem.title}
+        pdfUrl={(currentItem as any).pdfUrl}
+        pdfTitle={(currentItem as any).pdfTitle}
       />
       <ExpertFooter />
       <ContactSection />

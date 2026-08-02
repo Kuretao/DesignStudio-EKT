@@ -232,7 +232,7 @@ export default function Header() {
                   src={siteSettings.logoSmall ?? siteSettings.logo ?? ""}
                   alt=""
                   aria-hidden="true"
-                  className="block h-12 w-12 object-contain"
+                  className="block h-auto max-h-12 w-auto max-w-[164px] object-contain"
                 />
                 <span className="text-[9px] font-medium leading-none tracking-[0.24em] text-white">
                   3D Smart
