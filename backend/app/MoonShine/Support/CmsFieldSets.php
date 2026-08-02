@@ -487,6 +487,8 @@ final class CmsFieldSets
                         e(self::pageBlockTypeLabel($type)),
                     );
                 }),
+                Text::make('Вариант', 'visual_variant'),
+                Text::make('Motion', 'motion_preset'),
                 Text::make('Заголовок RU', 'title_ru')->sortable(),
                 Text::make('Заголовок EN', 'title_en'),
                 Number::make('Порядок', 'position')->sortable(),
@@ -497,7 +499,9 @@ final class CmsFieldSets
         return [
             ...self::pageBlockSection('target'),
             ...self::pageBlockSection('content'),
-            ...self::pageBlockSection('link'),
+            ...self::pageBlockSection('media'),
+            ...self::pageBlockSection('action'),
+            ...self::pageBlockSection('behavior'),
             ...self::pageBlockSection('display'),
         ];
     }
@@ -519,6 +523,50 @@ final class CmsFieldSets
                     ->default('hero')
                     ->required()
                     ->hint('Для главной и шапок страниц выбирайте "Первый экран". Это блок с маленькой строкой, большим заголовком, описанием и кнопкой.'),
+            ],
+            'behavior' => [
+                Select::make('Визуальный вариант блока', 'visual_variant')
+                    ->options([
+                        'default' => 'Обычный',
+                        'wide' => 'Широкий / больше воздуха',
+                        'accent' => 'Акцентный',
+                        'compact' => 'Компактный',
+                        'split' => 'Разделенный текст + медиа',
+                    ])
+                    ->default('default')
+                    ->hint('Влияет на плотность и акцент блока на контентных страницах.'),
+                Select::make('Положение медиа', 'media_position')
+                    ->options([
+                        '' => 'Автоматически',
+                        'right' => 'Картинка справа',
+                        'left' => 'Картинка слева',
+                        'top' => 'Картинка сверху',
+                        'background' => 'Картинка фоном',
+                    ])
+                    ->nullable()
+                    ->hint('Для блоков с изображением. Если оставить "Автоматически", сайт сам чередует стороны.'),
+                Select::make('Motion / подпись слайдера', 'motion_preset')
+                    ->options([
+                        'none' => 'Без motion-подписи',
+                        'motion' => 'Motion',
+                        'slides' => 'Slides',
+                        'story' => 'Story',
+                        'read' => 'Read',
+                        'preview' => 'Preview',
+                    ])
+                    ->default('motion')
+                    ->hint('Подпись и режим интерактивной карточки с несколькими изображениями.'),
+                Select::make('Состояние карточки', 'card_state')
+                    ->options([
+                        'normal' => 'Обычная',
+                        'featured' => 'Выделенная',
+                        'muted' => 'Спокойная',
+                        'disabled' => 'Приглушенная',
+                    ])
+                    ->default('normal')
+                    ->hint('Состояние для карточек/секций. Удобно выделять важный блок без правки кода.'),
+                Json::make('Дополнительные настройки JSON', 'settings')
+                    ->hint('Для редких тонких настроек: подписи, технические ключи, будущие параметры. Если не нужно - оставьте пустым.'),
             ],
             'content' => [
                 Text::make('Маленькая строка над заголовком RU', 'eyebrow_ru')
@@ -544,7 +592,7 @@ final class CmsFieldSets
                 Textarea::make('Дополнительный текст блока EN', 'text_en')
                     ->hint('Английский дополнительный текст блока.'),
             ],
-            'link' => [
+            'action' => [
                 Text::make('Текст кнопки RU', 'link_label_ru')
                     ->placeholder('Обсудить проект')
                     ->hint('Русская надпись на кнопке. Если кнопка в этом блоке не нужна, оставьте поле пустым.'),
@@ -554,8 +602,17 @@ final class CmsFieldSets
                 Text::make('Куда ведет кнопка', 'link_href')
                     ->placeholder('/kontakty')
                     ->hint('Для страницы сайта укажите путь с /. Например: /kontakty. Можно вставить и полную внешнюю ссылку.'),
+            ],
+            'media' => [
                 Textarea::make('Изображения / слайды', 'image')
+                    ->placeholder("/images/cms/slide-1.webp\n/images/cms/slide-2.webp")
                     ->hint('Укажите полный URL или путь из хранилища. Для слайдера и галереи добавляйте каждую картинку с новой строки.'),
+                Text::make('Alt изображения RU', 'image_alt_ru')
+                    ->placeholder('Интерьер гостиной в современном стиле')
+                    ->hint('Описание изображения для доступности и SEO. Если пусто, сайт возьмет заголовок блока.'),
+                Text::make('Alt изображения EN', 'image_alt_en')
+                    ->placeholder('Modern living room interior')
+                    ->hint('Английский alt изображения.'),
             ],
             'display' => [
                 Number::make('Порядок на странице', 'position')
@@ -608,6 +665,7 @@ final class CmsFieldSets
             ->valuesQuery(static fn (Builder $query): Builder => $query
                 ->select(['id', 'title', 'slug', 'is_published'])
                 ->orderBy('title'))
+            ->default(request()->integer('page_id') ?: null)
             ->required()
             ->hint('Выберите страницу, на которой должен появиться блок. Для первого экрана сайта выбирайте страницу "Главная".');
     }
@@ -667,75 +725,208 @@ final class CmsFieldSets
     {
         $fields = [
             ID::make()->sortable(),
-            Text::make('Slug', 'slug')->required(),
-            Text::make('Заголовок RU', 'title_ru')->required(),
-            Text::make('Заголовок EN', 'title_en'),
-            Text::make('Стоимость RU', 'price_ru'),
-            Text::make('Стоимость EN', 'price_en'),
+            Text::make('Заголовок RU', 'title_ru')->required()->sortable(),
+            Text::make('Заголовок EN', 'title_en')->sortable(),
+            Text::make('Стоимость RU', 'price_ru')->sortable(),
             Text::make('Срок RU', 'timeline_ru'),
-            Text::make('Срок EN', 'timeline_en'),
             Number::make('Позиция', 'position')->sortable(),
             Switcher::make('Опубликовано', 'is_published'),
         ];
 
         return $compact ? $fields : [
-            ...$fields,
-            Text::make('Надзаголовок RU', 'eyebrow_ru'),
-            Text::make('Надзаголовок EN', 'eyebrow_en'),
-            CKEditor::make('Текст RU', 'text_ru'),
-            CKEditor::make('Текст EN', 'text_en'),
-            Image::make('Загрузить изображение на сервер', 'image_file')
-                ->disk('public')
-                ->dir('services')
-                ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])
-                ->disableDeleteFiles()
-                ->removable()
-                ->hint('Загрузите файл — он сохранится в хранилище. Если загружен файл, он имеет приоритет над URL ниже.'),
-            Textarea::make('Или URL изображения', 'image')
-                ->hint('Вставьте внешнюю ссылку. Используется только если файл выше не загружен.'),
-            Textarea::make('Результаты RU, по одному в строке', 'deliverables_ru'),
-            Textarea::make('Результаты EN, по одному в строке', 'deliverables_en'),
-            Textarea::make('Преимущества RU, по одному в строке', 'benefits_ru'),
-            Textarea::make('Преимущества EN, по одному в строке', 'benefits_en'),
-            Textarea::make('Этапы RU, по одному в строке', 'process_ru'),
-            Textarea::make('Этапы EN, по одному в строке', 'process_en'),
+            ...self::serviceSection('main'),
+            ...self::serviceSection('pricing'),
+            ...self::serviceSection('content'),
+            ...self::serviceSection('media'),
+            ...self::serviceSection('lists'),
+            ...self::serviceSection('publish'),
         ];
+    }
+
+    public static function serviceSection(string $section): array
+    {
+        return match ($section) {
+            'main' => [
+                Text::make('Заголовок RU', 'title_ru')
+                    ->required()
+                    ->placeholder('Дизайн-проект интерьера под ключ')
+                    ->hint('Главный заголовок услуги на сайте. Можно писать длинно, верстка теперь переносит строки аккуратно.'),
+                Text::make('Заголовок EN', 'title_en')
+                    ->placeholder('Turnkey interior design project')
+                    ->hint('Английская версия. Если оставить пустым, сайт покажет русский вариант.'),
+                Text::make('Slug', 'slug')
+                    ->required()
+                    ->placeholder('dizajn-proekt-interyera')
+                    ->hint('Адрес страницы латиницей: только буквы, цифры и дефисы. Пример: 3d-vizualizaciya-interyera.'),
+                Text::make('Надзаголовок RU', 'eyebrow_ru')
+                    ->placeholder('Интерьеры / полный цикл')
+                    ->hint('Небольшая подпись над заголовком или в карточке услуги. Лучше 2-5 слов.'),
+                Text::make('Надзаголовок EN', 'eyebrow_en')
+                    ->placeholder('Interiors / full cycle')
+                    ->hint('Короткая английская подпись для переключателя языка.'),
+            ],
+            'pricing' => [
+                Text::make('Стоимость RU', 'price_ru')
+                    ->placeholder('от 2 500 ₽/м²')
+                    ->hint('Текстом, как должно быть на сайте: "от 2 500 ₽/м²", "по запросу", "от 45 000 ₽".'),
+                Text::make('Стоимость EN', 'price_en')
+                    ->placeholder('from 2,500 RUB/m²')
+                    ->hint('Английский вариант цены. Если поле пустое, в EN-версии будет fallback на русский текст.'),
+                Text::make('Срок RU', 'timeline_ru')
+                    ->placeholder('3-8 недель')
+                    ->hint('Короткий срок выполнения услуги. Показывается рядом с ценой на посадочной странице.'),
+                Text::make('Срок EN', 'timeline_en')
+                    ->placeholder('3-8 weeks')
+                    ->hint('Английская версия срока.'),
+            ],
+            'content' => [
+                CKEditor::make('Описание RU', 'text_ru')
+                    ->hint('Основной текст услуги. Можно использовать абзацы, списки и выделения.'),
+                CKEditor::make('Описание EN', 'text_en')
+                    ->hint('Английская версия описания. Если не нужна, оставьте пустой.'),
+            ],
+            'media' => [
+                Image::make('Главная обложка', 'image_file')
+                    ->disk('public')
+                    ->dir('services')
+                    ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])
+                    ->disableDeleteFiles()
+                    ->removable()
+                    ->hint('Файл для карточки и первого слайда. Имеет приоритет над URL ниже.'),
+                Textarea::make('Или URL главной обложки', 'image')
+                    ->placeholder('/images/cms/service.webp или https://...')
+                    ->hint('Запасной вариант, если файл не загружен. Вставляйте один URL или путь.'),
+                Textarea::make('Слайды услуги, по одному URL в строке', 'hero_images')
+                    ->placeholder("/images/cms/slide-1.webp\n/images/cms/slide-2.webp")
+                    ->hint('Карусель на посадочной странице услуги. Первый слайд можно не дублировать: главная обложка добавится автоматически.'),
+            ],
+            'lists' => [
+                Textarea::make('Что входит RU, по одному пункту в строке', 'deliverables_ru')
+                    ->placeholder("Планировочное решение\n3D-визуализации\nРабочая документация")
+                    ->hint('Список документов, результатов или частей услуги. Каждый пункт с новой строки.'),
+                Textarea::make('Что входит EN, по одному пункту в строке', 'deliverables_en')
+                    ->hint('Английская версия списка результатов.'),
+                Textarea::make('Преимущества RU, по одному пункту в строке', 'benefits_ru')
+                    ->placeholder("Понятный бюджет\nКонтроль материалов\nМеньше переделок")
+                    ->hint('Короткие выгоды услуги. Лучше 3-6 пунктов.'),
+                Textarea::make('Преимущества EN, по одному пункту в строке', 'benefits_en')
+                    ->hint('Английская версия преимуществ.'),
+                Textarea::make('Этапы RU, по одному пункту в строке', 'process_ru')
+                    ->placeholder("Бриф\nКонцепция\nВизуализация\nЧертежи\nПередача")
+                    ->hint('Порядок работы. На сайте отображается как горизонтальный процесс.'),
+                Textarea::make('Этапы EN, по одному пункту в строке', 'process_en')
+                    ->hint('Английская версия этапов.'),
+            ],
+            'publish' => [
+                Number::make('Позиция', 'position')
+                    ->default(0)
+                    ->sortable()
+                    ->hint('Меньшее число ставит услугу выше в списках. Например: 10, 20, 30.'),
+                Switcher::make('Опубликовано', 'is_published')
+                    ->default(true)
+                    ->hint('Выключите, чтобы скрыть услугу на сайте без удаления.'),
+            ],
+            default => [],
+        };
     }
 
     private static function newsArticle(bool $compact): array
     {
         $fields = [
             ID::make()->sortable(),
-            Text::make('Slug', 'slug')->required(),
-            Text::make('Заголовок RU', 'title_ru')->required(),
+            Text::make('Заголовок RU', 'title_ru')->required()->sortable(),
             Text::make('Заголовок EN', 'title_en'),
             Text::make('Категория RU', 'category_ru'),
-            Text::make('Категория EN', 'category_en'),
             Date::make('Дата ISO', 'date_iso'),
             Number::make('Позиция', 'position')->sortable(),
             Switcher::make('Опубликовано', 'is_published'),
         ];
 
         return $compact ? $fields : [
-            ...$fields,
-            Text::make('Дата для показа RU', 'date_ru'),
-            Text::make('Дата для показа EN', 'date_en'),
-            Textarea::make('Анонс RU', 'preview_ru'),
-            Textarea::make('Анонс EN', 'preview_en'),
-            Image::make('Загрузить изображение на сервер', 'image_file')
-                ->disk('public')
-                ->dir('news')
-                ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])
-                ->disableDeleteFiles()
-                ->removable()
-                ->hint('Загрузите файл — он сохранится в хранилище. Если загружен файл, он имеет приоритет над URL ниже.'),
-            Textarea::make('Или URL изображения', 'image')
-                ->hint('Вставьте внешнюю ссылку. Используется только если файл выше не загружен.'),
-            Text::make('Время чтения RU', 'reading_time_ru'),
-            Text::make('Время чтения EN', 'reading_time_en'),
-            Textarea::make('Текст статьи RU', 'body_ru'),
-            Textarea::make('Текст статьи EN', 'body_en'),
+            ...self::newsArticleSection('main'),
+            ...self::newsArticleSection('date'),
+            ...self::newsArticleSection('content'),
+            ...self::newsArticleSection('media'),
+            ...self::newsArticleSection('publish'),
         ];
+    }
+
+    public static function newsArticleSection(string $section): array
+    {
+        return match ($section) {
+            'main' => [
+                Text::make('Заголовок RU', 'title_ru')
+                    ->required()
+                    ->placeholder('Один клик - вся квартира: виртуальный тур 360')
+                    ->hint('Главный заголовок новости. Длинные заголовки допустимы, но лучше держать одну мысль.'),
+                Text::make('Заголовок EN', 'title_en')
+                    ->placeholder('One click - the whole apartment: 360 tour')
+                    ->hint('Английская версия заголовка.'),
+                Text::make('Slug', 'slug')
+                    ->required()
+                    ->placeholder('virtualnyj-tur-360')
+                    ->hint('Адрес статьи латиницей: только буквы, цифры и дефисы.'),
+                Text::make('Категория RU', 'category_ru')
+                    ->placeholder('Услуги')
+                    ->hint('Короткая категория для бейджа в списке новостей.'),
+                Text::make('Категория EN', 'category_en')
+                    ->placeholder('Services')
+                    ->hint('Английская версия категории.'),
+            ],
+            'date' => [
+                Date::make('Дата для сортировки', 'date_iso')
+                    ->hint('Реальная дата публикации в формате календаря. По ней удобно сортировать и проверять актуальность.'),
+                Text::make('Дата для показа RU', 'date_ru')
+                    ->placeholder('20 августа 2026')
+                    ->hint('Как дата будет выглядеть на русском сайте.'),
+                Text::make('Дата для показа EN', 'date_en')
+                    ->placeholder('August 20, 2026')
+                    ->hint('Как дата будет выглядеть на английском сайте.'),
+                Text::make('Время чтения RU', 'reading_time_ru')
+                    ->placeholder('4 мин')
+                    ->hint('Короткая подпись рядом с датой.'),
+                Text::make('Время чтения EN', 'reading_time_en')
+                    ->placeholder('4 min')
+                    ->hint('Английская версия времени чтения.'),
+            ],
+            'content' => [
+                Textarea::make('Анонс RU', 'preview_ru')
+                    ->placeholder('Короткий лид для карточки и начала статьи.')
+                    ->hint('2-3 предложения. Показывается в карточках, hero и начале статьи.'),
+                Textarea::make('Анонс EN', 'preview_en')
+                    ->hint('Английская версия анонса.'),
+                Textarea::make('Текст статьи RU', 'body_ru')
+                    ->placeholder("Первый абзац статьи.\n\nВторой абзац статьи.")
+                    ->hint('Разделяйте абзацы пустой строкой. На сайте они автоматически превратятся в читабельные блоки.'),
+                Textarea::make('Текст статьи EN', 'body_en')
+                    ->hint('Английская версия текста.'),
+            ],
+            'media' => [
+                Image::make('Главная обложка', 'image_file')
+                    ->disk('public')
+                    ->dir('news')
+                    ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])
+                    ->disableDeleteFiles()
+                    ->removable()
+                    ->hint('Файл для карточки новости и первого слайда. Имеет приоритет над URL ниже.'),
+                Textarea::make('Или URL главной обложки', 'image')
+                    ->placeholder('/images/cms/news.webp или https://...')
+                    ->hint('Запасной вариант, если файл не загружен. Вставляйте один URL или путь.'),
+                Textarea::make('Слайды новости, по одному URL в строке', 'hero_images')
+                    ->placeholder("/images/cms/news-slide-1.webp\n/images/cms/news-slide-2.webp")
+                    ->hint('Карусель в первом экране статьи и на странице новостей. Главную обложку можно не дублировать.'),
+            ],
+            'publish' => [
+                Number::make('Позиция', 'position')
+                    ->default(0)
+                    ->sortable()
+                    ->hint('Меньшее число ставит материал выше в списке.'),
+                Switcher::make('Опубликовано', 'is_published')
+                    ->default(true)
+                    ->hint('Выключите, чтобы сохранить черновик и скрыть его от посетителей.'),
+            ],
+            default => [],
+        };
     }
 
     private static function promo(bool $compact): array

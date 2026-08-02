@@ -14,6 +14,7 @@ use MoonShine\ColorManager\ColorManager;
 use MoonShine\Contracts\ColorManager\ColorManagerContract;
 use MoonShine\Contracts\ColorManager\PaletteContract;
 use App\MoonShine\Pages\ImageGalleryPage;
+use App\MoonShine\Pages\PageContentBuilderPage;
 use App\MoonShine\Resources\SiteSetting\SiteSettingResource;
 use App\MoonShine\Resources\SiteSetting\Pages\SocialLinksFormPage;
 use MoonShine\MenuManager\MenuGroup;
@@ -66,6 +67,7 @@ final class MoonShineLayout extends AppLayout
             MenuGroup::make('Сайт', [
                 MenuItem::make(SiteSettingResource::class, 'Настройки')->icon('cog-6-tooth'),
                 MenuItem::make(ImageGalleryPage::class, 'Галерея')->icon('photo'),
+                MenuItem::make(PageContentBuilderPage::class, 'Конструктор страниц')->icon('rectangle-stack'),
                 MenuItem::make(MenuItemResource::class, 'Меню сайта')->icon('bars-3'),
                 MenuItem::make(PageResource::class, 'Страницы')->icon('document-text'),
                 MenuItem::make(PageBlockResource::class, 'Блоки страниц')->icon('squares-2x2'),

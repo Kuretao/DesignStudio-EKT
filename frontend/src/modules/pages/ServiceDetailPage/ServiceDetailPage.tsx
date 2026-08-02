@@ -242,7 +242,7 @@ function ServiceDocumentsBlock({
                   Лист 0{activeIndex + 1}
                 </span>
                 <div>
-                  <h3 className="max-w-xl text-4xl font-light tracking-[-0.045em]">
+                  <h3 className="max-w-xl text-4xl font-light tracking-normal [overflow-wrap:anywhere]">
                     {activeDoc.title}
                   </h3>
                   <p className="mt-4 text-sm uppercase tracking-[0.22em] text-white/48">
@@ -323,14 +323,25 @@ function ServiceDetailPage({ item }: { item: ServicePageItem }) {
     servicePageItems.find((service) => service.id === item.id) ?? item;
   const isVirtualTour = currentItem.id === "virtualnyj-3d-tur-360";
   const landingCopy = getServiceLandingCopy(currentItem);
-  const heroSlides = useMemo(
-    () => [
-      { image: currentItem.image, alt: currentItem.title },
-      { image: projects[1]?.image, alt: projects[1]?.title },
-      { image: projects[2]?.image, alt: projects[2]?.title },
-    ],
-    [currentItem.image, currentItem.title, projects],
-  );
+  const heroSlides = useMemo(() => {
+    const serviceImages = Array.isArray((currentItem as any).images)
+      ? ((currentItem as any).images as string[])
+      : [];
+    const fallbackImages = [
+      currentItem.image,
+      projects[1]?.image,
+      projects[2]?.image,
+    ].filter(Boolean);
+    const images = serviceImages.length ? serviceImages : fallbackImages;
+
+    return images.map((image, index) => ({
+      image,
+      alt:
+        index === 0
+          ? currentItem.title
+          : `${currentItem.title} - слайд ${index + 1}`,
+    }));
+  }, [currentItem, projects]);
 
   return (
     <div className="page-in">
@@ -341,10 +352,10 @@ function ServiceDetailPage({ item }: { item: ServicePageItem }) {
 
         <div className="relative z-10 mx-auto grid min-h-[calc(100vh-8rem)] max-w-7xl gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-end">
           <div>
-            <p className="mb-5 text-xs uppercase tracking-[0.45em] text-[#D69A66]">
+            <p className="mb-5 max-w-3xl text-xs uppercase tracking-[0.22em] text-[#D69A66] [overflow-wrap:anywhere]">
               {currentItem.title}
             </p>
-            <h1 className="max-w-4xl text-[clamp(2.75rem,5.4vw,5.6rem)] font-light leading-[0.96] tracking-[-0.045em]">
+            <h1 className="max-w-4xl text-[clamp(2.75rem,5.4vw,5.6rem)] font-light leading-[0.98] tracking-normal [overflow-wrap:anywhere]">
               {landingCopy.offerTitle}
             </h1>
             <div
@@ -373,7 +384,7 @@ function ServiceDetailPage({ item }: { item: ServicePageItem }) {
                 <span className="text-xs uppercase tracking-[0.28em] text-white/40">
                   Стоимость
                 </span>
-                <strong className="mt-3 block text-3xl font-light text-[#D69A66]">
+                <strong className="mt-3 block text-3xl font-light leading-tight text-[#D69A66] [overflow-wrap:anywhere]">
                   {currentItem.price}
                 </strong>
               </GlassPanel>
@@ -381,7 +392,7 @@ function ServiceDetailPage({ item }: { item: ServicePageItem }) {
                 <span className="text-xs uppercase tracking-[0.28em] text-white/40">
                   Срок
                 </span>
-                <strong className="mt-3 block text-3xl font-light text-white">
+                <strong className="mt-3 block text-3xl font-light leading-tight text-white [overflow-wrap:anywhere]">
                   {currentItem.timeline}
                 </strong>
               </GlassPanel>
@@ -392,8 +403,10 @@ function ServiceDetailPage({ item }: { item: ServicePageItem }) {
                   key={entry}
                   className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-[#D6D1CA]"
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#D69A66]" />
-                  {entry}
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#D69A66]" />
+                  <span className="min-w-0 [overflow-wrap:anywhere]">
+                    {entry}
+                  </span>
                 </div>
               ))}
             </div>
@@ -421,7 +434,9 @@ function ServiceDetailPage({ item }: { item: ServicePageItem }) {
             {currentItem.benefits.map((benefit, index) => (
               <GlassPanel key={benefit} className="rounded-[1.5rem] p-6">
                 <span className="text-sm text-[#D69A66]">0{index + 1}</span>
-                <h3 className="mt-6 text-2xl font-light">{benefit}</h3>
+                <h3 className="mt-6 text-2xl font-light [overflow-wrap:anywhere]">
+                  {benefit}
+                </h3>
               </GlassPanel>
             ))}
           </div>
@@ -445,7 +460,9 @@ function ServiceDetailPage({ item }: { item: ServicePageItem }) {
                 <span className="mb-12 block text-sm text-[#D69A66]">
                   0{index + 1}
                 </span>
-                <h3 className="text-xl font-light">{step}</h3>
+                <h3 className="text-xl font-light [overflow-wrap:anywhere]">
+                  {step}
+                </h3>
               </GlassPanel>
             ))}
           </div>

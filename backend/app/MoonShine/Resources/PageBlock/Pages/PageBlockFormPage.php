@@ -48,29 +48,83 @@ class PageBlockFormPage extends FormPage
             Alert::make('information-circle', 'info')
                 ->content('Для первого экрана главной выберите страницу "Главная", вид блока "Первый экран" и заполните подпись, большой заголовок, описание и кнопку. Остальные поля можно не трогать.'),
             Tabs::make([
-                Tab::make('Текст блока', [
+                Tab::make('Где блок', [
+                    Box::make('Страница и тип секции', [
+                        $this->sectionNote(
+                            'Блок всегда принадлежит одной странице',
+                            'Выберите страницу, тип блока и не смешивайте разные задачи в одной секции: hero отдельно, галерея отдельно, CTA отдельно.'
+                        ),
+                        Grid::make([
+                            Column::make(CmsFieldSets::pageBlockSection('target'))->columnSpan(6),
+                            Column::make([
+                                FlexibleRender::make($this->targetGuideHtml()),
+                            ])->columnSpan(6),
+                        ]),
+                    ])->icon('squares-2x2')->customAttributes(['class' => 'page-block-section']),
+                ])->icon('squares-2x2')->active(),
+                Tab::make('Текст', [
                     Box::make('Что увидит посетитель', [
                         $this->sectionNote(
                             'Поля повторяют первый экран сайта',
                             'Маленькая строка идет над заголовком, затем большой заголовок, описание и кнопка. Пишите коротко: этот блок должен быстро читаться.'
                         ),
                         Grid::make([
-                            Column::make(CmsFieldSets::pageBlockSection('target'))->columnSpan(4),
-                            Column::make(CmsFieldSets::pageBlockSection('content'))->columnSpan(8),
+                            Column::make(array_slice(CmsFieldSets::pageBlockSection('content'), 0, 4))->columnSpan(6),
+                            Column::make(array_slice(CmsFieldSets::pageBlockSection('content'), 4))->columnSpan(6),
                         ]),
                     ])->icon('pencil-square')->customAttributes(['class' => 'page-block-section']),
-                ])->icon('document-text')->active(),
-                Tab::make('Кнопка и показ', [
-                    Box::make('Ссылка и публикация', [
+                ])->icon('document-text'),
+                Tab::make('Медиа', [
+                    Box::make('Картинки, галереи и слайды', [
                         $this->sectionNote(
-                            'Сначала проверьте кнопку',
-                            'Для кнопки главной обычно достаточно текста и адреса /kontakty. Порядок и показ блока меняйте только когда это действительно нужно.'
+                            'Слайды - это строки',
+                            'Добавляйте URL или путь из хранилища по одному в строке. В галерее все строки станут отдельными изображениями, в hero - слайдами фона.'
                         ),
                         Grid::make([
-                            Column::make(CmsFieldSets::pageBlockSection('link'))->columnSpan(7),
-                            Column::make(CmsFieldSets::pageBlockSection('display'))->columnSpan(5),
+                            Column::make(array_slice(CmsFieldSets::pageBlockSection('media'), 0, 1))->columnSpan(7),
+                            Column::make(array_slice(CmsFieldSets::pageBlockSection('media'), 1))->columnSpan(5),
+                        ]),
+                    ])->icon('photo')->customAttributes(['class' => 'page-block-section']),
+                ])->icon('photo'),
+                Tab::make('Кнопка', [
+                    Box::make('Ссылка блока', [
+                        $this->sectionNote(
+                            'Сначала проверьте кнопку',
+                            'Для кнопки главной обычно достаточно текста и адреса /kontakty. Если кнопка не нужна, оставьте текст кнопки пустым.'
+                        ),
+                        Grid::make([
+                            Column::make(CmsFieldSets::pageBlockSection('action'))->columnSpan(7),
+                            Column::make([
+                                FlexibleRender::make($this->buttonGuideHtml()),
+                            ])->columnSpan(5),
                         ]),
                     ])->icon('link')->customAttributes(['class' => 'page-block-section']),
+                ])->icon('link'),
+                Tab::make('Поведение', [
+                    Box::make('Визуальный режим и motion', [
+                        $this->sectionNote(
+                            'Настройки без правки кода',
+                            'Здесь меняются акцентность блока, положение медиа, подпись motion-карточки и технические JSON-настройки для редких случаев.'
+                        ),
+                        Grid::make([
+                            Column::make(array_slice(CmsFieldSets::pageBlockSection('behavior'), 0, 4))->columnSpan(6),
+                            Column::make(array_slice(CmsFieldSets::pageBlockSection('behavior'), 4))->columnSpan(6),
+                        ]),
+                    ])->icon('sparkles')->customAttributes(['class' => 'page-block-section']),
+                ])->icon('sparkles'),
+                Tab::make('Публикация', [
+                    Box::make('Порядок и видимость', [
+                        $this->sectionNote(
+                            'Показывать или спрятать',
+                            'Позицию удобно задавать десятками: 10, 20, 30. Так потом можно вставить новый блок между существующими.'
+                        ),
+                        Grid::make([
+                            Column::make(CmsFieldSets::pageBlockSection('display'))->columnSpan(5),
+                            Column::make([
+                                FlexibleRender::make($this->publishGuideHtml()),
+                            ])->columnSpan(7),
+                        ]),
+                    ])->icon('check-circle')->customAttributes(['class' => 'page-block-section']),
                 ])->icon('check-circle'),
             ])->vertical()->customAttributes(['class' => 'page-block-tabs']),
         ];
@@ -81,6 +135,10 @@ class PageBlockFormPage extends FormPage
         return [
             'page_id' => ['required', 'integer', 'exists:pages,id'],
             'type' => ['required', Rule::in(['hero', 'text', 'media', 'gallery', 'quote', 'cta'])],
+            'visual_variant' => ['nullable', Rule::in(['default', 'wide', 'accent', 'compact', 'split'])],
+            'media_position' => ['nullable', Rule::in(['', 'right', 'left', 'top', 'background'])],
+            'motion_preset' => ['nullable', Rule::in(['none', 'motion', 'slides', 'story', 'read', 'preview'])],
+            'card_state' => ['nullable', Rule::in(['normal', 'featured', 'muted', 'disabled'])],
             'eyebrow_ru' => ['nullable', 'string', 'max:255'],
             'eyebrow_en' => ['nullable', 'string', 'max:255'],
             'title_ru' => ['nullable', 'string', 'max:255'],
@@ -90,9 +148,12 @@ class PageBlockFormPage extends FormPage
             'text_ru' => ['nullable', 'string'],
             'text_en' => ['nullable', 'string'],
             'image' => ['nullable', 'string'],
+            'image_alt_ru' => ['nullable', 'string', 'max:255'],
+            'image_alt_en' => ['nullable', 'string', 'max:255'],
             'link_label_ru' => ['nullable', 'string', 'max:255'],
             'link_label_en' => ['nullable', 'string', 'max:255'],
             'link_href' => ['nullable', 'string', 'max:2048'],
+            'settings' => ['nullable'],
             'position' => ['required', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
         ];
@@ -105,10 +166,16 @@ class PageBlockFormPage extends FormPage
             'page_id.exists' => 'Выбранная страница не найдена. Выберите страницу из списка.',
             'type.required' => 'Выберите вид блока.',
             'type.in' => 'Выберите вид блока из списка.',
+            'visual_variant.in' => 'Выберите визуальный вариант блока из списка.',
+            'media_position.in' => 'Выберите положение медиа из списка.',
+            'motion_preset.in' => 'Выберите motion-режим из списка.',
+            'card_state.in' => 'Выберите состояние карточки из списка.',
             'eyebrow_ru.max' => 'Маленькая строка RU над заголовком должна быть короче 255 символов.',
             'eyebrow_en.max' => 'Маленькая строка EN над заголовком должна быть короче 255 символов.',
             'title_ru.max' => 'Заголовок блока RU должен быть короче 255 символов.',
             'title_en.max' => 'Заголовок блока EN должен быть короче 255 символов.',
+            'image_alt_ru.max' => 'Alt изображения RU должен быть короче 255 символов.',
+            'image_alt_en.max' => 'Alt изображения EN должен быть короче 255 символов.',
             'link_label_ru.max' => 'Текст кнопки RU должен быть короче 255 символов.',
             'link_label_en.max' => 'Текст кнопки EN должен быть короче 255 символов.',
             'link_href.max' => 'Адрес кнопки получился слишком длинным.',
@@ -125,6 +192,36 @@ class PageBlockFormPage extends FormPage
             e($title),
             e($text),
         ));
+    }
+
+    private function targetGuideHtml(): string
+    {
+        return <<<HTML
+        <div class="page-block-editor-tip">
+            <strong>Как выбирать тип:</strong>
+            <span>Hero - первый экран. Media - текст с изображением. Gallery - несколько изображений. Quote - крупная цитата. CTA - финальный призыв с кнопкой.</span>
+        </div>
+        HTML;
+    }
+
+    private function buttonGuideHtml(): string
+    {
+        return <<<HTML
+        <div class="page-block-editor-tip">
+            <strong>Адрес кнопки:</strong>
+            <span>Внутренние страницы начинаются с /, внешние - с https://. Для модалки или якоря можно использовать #section.</span>
+        </div>
+        HTML;
+    }
+
+    private function publishGuideHtml(): string
+    {
+        return <<<HTML
+        <div class="page-block-editor-tip">
+            <strong>Не удаляйте без нужды:</strong>
+            <span>Если блок временно не нужен, выключите показ. Так текст, картинки и настройки останутся в CMS.</span>
+        </div>
+        HTML;
     }
 
     private function overviewHtml(): string

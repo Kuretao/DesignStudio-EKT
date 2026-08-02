@@ -267,14 +267,23 @@ function normalizeBlock(block: any, locale: SiteLocale) {
   return {
     ...block,
     type: block?.type ?? "text",
+    visualVariant: block?.visualVariant ?? "default",
+    mediaPosition: block?.mediaPosition ?? null,
+    motionPreset: block?.motionPreset ?? "motion",
+    cardState: block?.cardState ?? "normal",
     eyebrow: localizeString(block, "eyebrow", locale, null),
     title: localizeString(block, "title", locale, null),
     subtitle: localizeString(block, "subtitle", locale, null),
     text: localizeString(block, "text", locale, null),
     image: images[0] ?? null,
     images,
+    imageAlt: localizeString(block, "imageAlt", locale, null),
     linkLabel: localizeString(block, "linkLabel", locale, null),
     linkHref: block?.linkHref ?? null,
+    settings:
+      block?.settings && typeof block.settings === "object"
+        ? block.settings
+        : {},
   };
 }
 
@@ -302,13 +311,18 @@ function localizeProject(project: any, locale: SiteLocale) {
 }
 
 function localizeService(service: any, locale: SiteLocale) {
+  const images = normalizeImageList(
+    service?.images?.length ? service.images : service?.heroImages,
+  );
+
   return {
     ...service,
     title: localizeString(service, "title", locale, service?.title ?? "") ?? "",
     eyebrow:
       localizeString(service, "eyebrow", locale, service?.eyebrow ?? "") ?? "",
     text: localizeString(service, "text", locale, service?.text ?? "") ?? "",
-    image: optimizeImageUrl(service?.image, 1400, 76),
+    image: images[0] ?? optimizeImageUrl(service?.image, 1400, 76),
+    images,
     price: localizeString(service, "price", locale, service?.price ?? "") ?? "",
     timeline:
       localizeString(service, "timeline", locale, service?.timeline ?? "") ??
@@ -335,6 +349,10 @@ function localizeService(service: any, locale: SiteLocale) {
 }
 
 function localizeNewsArticle(article: any, locale: SiteLocale) {
+  const images = normalizeImageList(
+    article?.images?.length ? article.images : article?.heroImages,
+  );
+
   return {
     ...article,
     title: localizeString(article, "title", locale, article?.title ?? "") ?? "",
@@ -344,7 +362,8 @@ function localizeNewsArticle(article: any, locale: SiteLocale) {
       "",
     preview:
       localizeString(article, "preview", locale, article?.preview ?? "") ?? "",
-    image: optimizeImageUrl(article?.image, 1400, 76),
+    image: images[0] ?? optimizeImageUrl(article?.image, 1400, 76),
+    images,
     readingTime:
       localizeString(
         article,

@@ -342,9 +342,267 @@
 .dark .svc-stat { background: rgba(255, 255, 255, .04); border-color: rgba(255, 255, 255, .08); }
 .dark .svc-stat-value { color: #e2e8f0; }
 
+/* =====================================================
+   Service Form Styles
+   ===================================================== */
+
+.svc-form-overview {
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) minmax(360px, 1fr);
+    gap: 18px;
+    padding: 26px;
+    border: 1px solid rgba(5, 150, 105, .2);
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(5, 150, 105, .14), rgba(2, 132, 199, .09));
+    color: var(--ms-cm-base-text, #0f172a);
+}
+
+.svc-form-overview__intro {
+    min-width: 0;
+}
+
+.svc-form-overview__eyebrow {
+    margin-bottom: 8px;
+    color: #047857;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.svc-form-overview h1 {
+    margin: 0 0 8px;
+    font-size: 25px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: 0;
+    overflow-wrap: anywhere;
+}
+
+.svc-form-overview p {
+    max-width: 68ch;
+    margin: 0;
+    color: rgba(15, 23, 42, .74);
+    font-size: 14px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+.svc-form-overview code {
+    display: inline-block;
+    max-width: 38ch;
+    padding: 3px 7px;
+    border-radius: 6px;
+    background: rgba(15, 23, 42, .07);
+    color: #0f172a;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.svc-form-overview__saved {
+    display: inline-flex;
+    min-height: 30px;
+    align-items: center;
+    margin-top: 15px;
+    padding: 5px 11px;
+    border: 1px solid rgba(5, 150, 105, .18);
+    border-radius: 7px;
+    background: rgba(255, 255, 255, .72);
+    color: #047857;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.svc-form-overview__steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.svc-form-guide {
+    display: flex;
+    min-width: 0;
+    min-height: 116px;
+    flex-direction: column;
+    gap: 7px;
+    padding: 15px;
+    border: 1px solid rgba(15, 23, 42, .12);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .84);
+}
+
+.svc-form-guide__icon {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border-radius: 8px;
+    background: #047857;
+    color: #fff;
+}
+
+.svc-form-guide__icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.svc-form-guide strong {
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+.svc-form-guide > span:last-child {
+    color: rgba(15, 23, 42, .66);
+    font-size: 12px;
+    line-height: 1.42;
+}
+
+.svc-form-tabs > .tabs-list {
+    gap: 8px;
+    min-width: 230px;
+}
+
+.svc-form-tabs .tabs-button {
+    min-height: 46px;
+    border-radius: 8px;
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+.svc-form-section {
+    border: 1px solid rgba(15, 23, 42, .1);
+}
+
+.svc-form-note,
+.svc-publish-guide,
+.page-slug-autofill {
+    display: grid;
+    gap: 6px;
+    padding: 13px 15px;
+    border-radius: 8px;
+    line-height: 1.5;
+}
+
+.svc-form-note {
+    border-left: 4px solid #047857;
+    background: rgba(5, 150, 105, .09);
+}
+
+.svc-publish-guide {
+    border: 1px solid rgba(5, 150, 105, .16);
+    background: rgba(5, 150, 105, .08);
+}
+
+.svc-form-note strong,
+.svc-publish-guide strong {
+    color: #047857;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+.svc-form-note span,
+.svc-publish-guide span,
+.svc-form-section .form-hint {
+    color: rgba(15, 23, 42, .68);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.page-slug-autofill {
+    margin-top: -2px;
+    border: 1px solid rgba(15, 23, 42, .12);
+    background: rgba(248, 250, 252, .82);
+}
+
+.page-slug-autofill__label {
+    display: inline-flex;
+    width: max-content;
+    max-width: 100%;
+    align-items: center;
+    gap: 8px;
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0;
+    cursor: pointer;
+}
+
+.page-slug-autofill__checkbox {
+    width: 16px;
+    height: 16px;
+    accent-color: #047857;
+}
+
+.page-slug-autofill__hint {
+    color: rgba(15, 23, 42, .62);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.page-slug-autofill-field--enabled .field-slug-element {
+    background: rgba(248, 250, 252, .78);
+    color: rgba(15, 23, 42, .72);
+    cursor: not-allowed;
+}
+
+.dark .svc-form-overview {
+    border-color: rgba(52, 211, 153, .22);
+    background: linear-gradient(135deg, rgba(6, 95, 70, .3), rgba(14, 116, 144, .18));
+}
+
+.dark .svc-form-overview__eyebrow,
+.dark .svc-form-note strong,
+.dark .svc-publish-guide strong {
+    color: #6ee7b7;
+}
+
+.dark .svc-form-overview p,
+.dark .svc-form-guide > span:last-child,
+.dark .svc-form-note span,
+.dark .svc-publish-guide span,
+.dark .svc-form-section .form-hint,
+.dark .page-slug-autofill__hint {
+    color: rgba(226, 232, 240, .74);
+}
+
+.dark .svc-form-guide,
+.dark .svc-form-overview__saved,
+.dark .svc-publish-guide,
+.dark .page-slug-autofill {
+    border-color: rgba(148, 163, 184, .22);
+    background: rgba(15, 23, 42, .56);
+}
+
+.dark .svc-form-guide strong,
+.dark .svc-form-overview code,
+.dark .page-slug-autofill__label {
+    color: #f8fafc;
+}
+
+.dark .svc-form-overview__saved {
+    color: #a7f3d0;
+}
+
+.dark .svc-form-section {
+    border-color: rgba(148, 163, 184, .2);
+}
+
+.dark .svc-form-note {
+    background: rgba(6, 95, 70, .18);
+}
+
+.dark .page-slug-autofill-field--enabled .field-slug-element {
+    background: rgba(15, 23, 42, .62);
+    color: rgba(226, 232, 240, .68);
+}
+
 /* ── Responsive ── */
 @media (max-width: 1200px) {
     .svc-overview__hero-grid,
+    .svc-form-overview,
     .svc-stats { grid-template-columns: 1fr; }
 }
 
@@ -352,4 +610,8 @@
     .svc-overview__hero { padding: 20px; }
     .svc-overview__title { font-size: 26px; }
     .svc-overview__spotlight { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .svc-form-overview { padding: 20px; }
+    .svc-form-overview h1 { font-size: 20px; }
+    .svc-form-overview__steps { grid-template-columns: 1fr; }
+    .svc-form-guide { min-height: 0; }
 }

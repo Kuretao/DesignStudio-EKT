@@ -18,12 +18,14 @@ class PageBlock extends Model
         'subtitle',
         'text',
         'link_label',
+        'image_alt',
     ];
 
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
+            'settings' => 'array',
         ];
     }
 

@@ -10,7 +10,7 @@ import { GlassPanel } from "@/src/ui";
 function BodyBlock({ block }: { block: NewsArticle["body"][number] }) {
   if (block.type === "heading") {
     return (
-      <h2 className="mt-12 text-3xl font-light tracking-[-0.04em] text-[#F5F2EC] md:text-4xl">
+      <h2 className="mt-12 text-3xl font-light tracking-normal text-[#F5F2EC] [overflow-wrap:anywhere] md:text-4xl">
         {block.text}
       </h2>
     );
@@ -21,34 +21,48 @@ function BodyBlock({ block }: { block: NewsArticle["body"][number] }) {
         {block.items?.map((item, i) => (
           <li key={i} className="flex gap-4 leading-relaxed text-[#D6D1CA]">
             <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#D69A66]" />
-            {item}
+            <span className="min-w-0 [overflow-wrap:anywhere]">{item}</span>
           </li>
         ))}
       </ul>
     );
   }
   return (
-    <p className="mt-6 text-lg leading-relaxed text-[#D6D1CA]">{block.text}</p>
+    <p className="mt-6 text-lg leading-relaxed text-[#D6D1CA] [overflow-wrap:anywhere]">
+      {block.text}
+    </p>
   );
 }
 
 function NewsArticlePage({ article }: { article: NewsArticle }) {
   const { newsArticles } = useCms();
-  const currentArticle = newsArticles.find((a) => a.slug === article.slug) ?? article;
-  const related = newsArticles.filter((a) => a.slug !== currentArticle.slug).slice(0, 3);
+  const currentArticle =
+    newsArticles.find((a) => a.slug === article.slug) ?? article;
+  const related = newsArticles
+    .filter((a) => a.slug !== currentArticle.slug)
+    .slice(0, 3);
+  const articleImages = Array.isArray((currentArticle as any).images)
+    ? ((currentArticle as any).images as string[])
+    : [];
+  const heroSlides = articleImages.length
+    ? articleImages.map((image, index) => ({
+        image,
+        alt:
+          index === 0
+            ? currentArticle.title
+            : `${currentArticle.title} - слайд ${index + 1}`,
+      }))
+    : [
+        { image: currentArticle.image, alt: currentArticle.title },
+        { image: related[0]?.image, alt: related[0]?.title },
+        { image: related[1]?.image, alt: related[1]?.title },
+      ];
 
   return (
     <article className="page-in">
       {/* Hero */}
       <section className="relative flex min-h-[70vh] items-end overflow-hidden px-5 pb-16 md:px-10 lg:px-16">
-        <HeroBackdropSlider
-          slides={[
-            { image: currentArticle.image, alt: currentArticle.title },
-            { image: related[0]?.image, alt: related[0]?.title },
-            { image: related[1]?.image, alt: related[1]?.title },
-          ]}
-          controlsClassName="bottom-6"
-        />
+        <HeroBackdropSlider slides={heroSlides} controlsClassName="bottom-6" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/55 to-[#050505]/10" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#050505]/60 to-transparent" />
         <div className="relative z-10 mx-auto w-full max-w-5xl">
@@ -57,9 +71,11 @@ function NewsArticlePage({ article }: { article: NewsArticle }) {
               {currentArticle.category}
             </span>
             <span className="text-sm text-white/50">{currentArticle.date}</span>
-            <span className="text-sm text-white/35">{currentArticle.readingTime} чтения</span>
+            <span className="text-sm text-white/35">
+              {currentArticle.readingTime} чтения
+            </span>
           </div>
-          <h1 className="max-w-4xl text-[clamp(2.7rem,5.2vw,5.4rem)] font-light leading-[0.98] tracking-[-0.04em]">
+          <h1 className="max-w-4xl text-[clamp(2.7rem,5.2vw,5.4rem)] font-light leading-[1] tracking-normal [overflow-wrap:anywhere]">
             {currentArticle.title}
           </h1>
         </div>
@@ -93,15 +109,21 @@ function NewsArticlePage({ article }: { article: NewsArticle }) {
             {/* Sidebar */}
             <aside className="space-y-4 lg:sticky lg:top-32">
               <GlassPanel className="rounded-[1.75rem] p-6">
-                <p className="mb-4 text-xs uppercase tracking-[0.3em] text-[#D69A66]">Об авторе</p>
+                <p className="mb-4 text-xs uppercase tracking-[0.3em] text-[#D69A66]">
+                  Об авторе
+                </p>
                 <p className="text-sm leading-relaxed text-[#D6D1CA]">
-                  Команда 3D Smart Design Studio — студия концептуального дизайна. Интерьеры, архитектура, ландшафт и 3D-визуализация.
+                  Команда 3D Smart Design Studio — студия концептуального
+                  дизайна. Интерьеры, архитектура, ландшафт и 3D-визуализация.
                 </p>
               </GlassPanel>
               <GlassPanel className="rounded-[1.75rem] p-6">
-                <p className="mb-4 text-xs uppercase tracking-[0.3em] text-[#D69A66]">Обсудить проект</p>
+                <p className="mb-4 text-xs uppercase tracking-[0.3em] text-[#D69A66]">
+                  Обсудить проект
+                </p>
                 <p className="mb-5 text-sm leading-relaxed text-[#D6D1CA]">
-                  Есть идея или вопрос? Свяжитесь с нами — ответим в течение рабочего дня.
+                  Есть идея или вопрос? Свяжитесь с нами — ответим в течение
+                  рабочего дня.
                 </p>
                 <Link
                   href="/kontakty"
@@ -119,7 +141,9 @@ function NewsArticlePage({ article }: { article: NewsArticle }) {
       {related.length > 0 && (
         <section className="border-t border-white/10 px-5 py-20 md:px-10 lg:px-16">
           <div className="mx-auto max-w-7xl">
-            <p className="mb-3 text-xs uppercase tracking-[0.45em] text-[#D69A66]">Читать также</p>
+            <p className="mb-3 text-xs uppercase tracking-[0.45em] text-[#D69A66]">
+              Читать также
+            </p>
             <h2 className="mb-10 text-4xl font-light tracking-[-0.045em] md:text-6xl">
               Другие новости
             </h2>
@@ -148,7 +172,7 @@ function NewsArticlePage({ article }: { article: NewsArticle }) {
                   </div>
                   <div className="p-5">
                     <p className="mb-2 text-xs text-white/40">{a.date}</p>
-                    <h3 className="text-lg font-light leading-snug tracking-[-0.03em] transition duration-500 group-hover:translate-x-0.5">
+                    <h3 className="text-lg font-light leading-snug tracking-normal [overflow-wrap:anywhere] transition duration-500 group-hover:translate-x-0.5">
                       {a.title}
                     </h3>
                   </div>

@@ -54,10 +54,12 @@ class ServiceIndexPage extends IndexPage
                 $eyebrow = $eyebrowValue ? e($eyebrowValue) : null;
                 $initial = mb_strtoupper(mb_substr($rawTitle !== '' ? $rawTitle : 'S', 0, 1));
 
-                $thumb = ! empty($item->image)
+                $image = $item->effective_image;
+
+                $thumb = ! empty($image)
                     ? sprintf(
                         '<div class="svc-card__thumb"><img src="%s" alt="" loading="lazy"></div>',
-                        e($item->image)
+                        e($image)
                     )
                     : sprintf('<div class="svc-card__thumb">%s</div>', $initial);
 
@@ -139,7 +141,12 @@ class ServiceIndexPage extends IndexPage
                         ->where('price', '!=', '');
                 });
         })->count();
-        $withImage = Service::whereNotNull('image')->where('image', '!=', '')->count();
+        $withImage = Service::where(function ($query): void {
+            $query->whereNotNull('image_file')->where('image_file', '!=', '')
+                ->orWhere(function ($fallback): void {
+                    $fallback->whereNotNull('image')->where('image', '!=', '');
+                });
+        })->count();
         $withoutPrice = max($total - $withPrice, 0);
 
         $thisMonth = Service::whereYear('created_at', now()->year)

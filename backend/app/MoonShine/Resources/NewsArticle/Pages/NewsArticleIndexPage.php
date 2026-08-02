@@ -54,10 +54,12 @@ class NewsArticleIndexPage extends IndexPage
                 $category = $categoryValue ? e($categoryValue) : null;
                 $initial = mb_strtoupper(mb_substr($rawTitle !== '' ? $rawTitle : 'N', 0, 1));
 
-                $thumb = ! empty($item->image)
+                $image = $item->effective_image;
+
+                $thumb = ! empty($image)
                     ? sprintf(
                         '<div class="news-card__thumb"><img src="%s" alt="" loading="lazy"></div>',
-                        e($item->image)
+                        e($image)
                     )
                     : sprintf('<div class="news-card__thumb">%s</div>', $initial);
 
@@ -145,7 +147,12 @@ class NewsArticleIndexPage extends IndexPage
             ->filter()
             ->unique()
             ->count();
-        $withImage = NewsArticle::whereNotNull('image')->where('image', '!=', '')->count();
+        $withImage = NewsArticle::where(function ($query): void {
+            $query->whereNotNull('image_file')->where('image_file', '!=', '')
+                ->orWhere(function ($fallback): void {
+                    $fallback->whereNotNull('image')->where('image', '!=', '');
+                });
+        })->count();
 
         $thisMonth = NewsArticle::whereYear('created_at', now()->year)
             ->whereMonth('created_at', now()->month)

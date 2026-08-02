@@ -18,6 +18,12 @@ type ContentBlock = {
   text?: string | null;
   image?: string | null;
   images?: string[];
+  imageAlt?: string | null;
+  visualVariant?: string | null;
+  mediaPosition?: string | null;
+  motionPreset?: string | null;
+  cardState?: string | null;
+  settings?: Record<string, unknown>;
   linkLabel?: string | null;
   linkHref?: string | null;
 };
@@ -47,11 +53,15 @@ export function ContentPagesOverview() {
               href={`/${page.id}`}
               className="group min-w-0 scroll-mt-28 rounded-[2rem] border border-white/10 bg-white/[0.03] p-7 transition duration-500 hover:-translate-y-2 hover:border-[#D69A66]/60"
             >
-              <p className="mb-8 text-xs uppercase tracking-[0.32em] text-[#D69A66] [overflow-wrap:anywhere]">{page.eyebrow}</p>
+              <p className="mb-8 text-xs uppercase tracking-[0.32em] text-[#D69A66] [overflow-wrap:anywhere]">
+                {page.eyebrow}
+              </p>
               <h3 className="text-3xl font-light tracking-normal [overflow-wrap:anywhere] transition duration-500 group-hover:translate-x-1">
                 {page.title}
               </h3>
-              <p className="mt-5 leading-relaxed text-[#D6D1CA] [overflow-wrap:anywhere]">{page.text}</p>
+              <p className="mt-5 leading-relaxed text-[#D6D1CA] [overflow-wrap:anywhere]">
+                {page.text}
+              </p>
             </Link>
           ))}
         </div>
@@ -62,7 +72,10 @@ export function ContentPagesOverview() {
 
 function ContentPage({ page }: { page: ContentPageItem }) {
   const { careerVacancies, contentPages, newsArticles, projects } = useCms();
-  const currentPage: ContentPageItem = (contentPages.find((item) => item.id === page.id) as ContentPageItem | undefined) ?? page;
+  const currentPage: ContentPageItem =
+    (contentPages.find((item) => item.id === page.id) as
+      | ContentPageItem
+      | undefined) ?? page;
   const allBlocks = currentPage.blocks?.filter(hasVisibleBlock) ?? [];
   const heroBlock = allBlocks.find((block) => block.type === "hero");
   const contentBlocks = allBlocks.filter((block) => block !== heroBlock);
@@ -108,7 +121,9 @@ function ContentPage({ page }: { page: ContentPageItem }) {
   return (
     <div className="page-in">
       <section className="relative overflow-hidden px-5 py-28 md:px-10 lg:px-16">
-        <HeroBackdropSlider slides={sliderImages.map((image) => ({ image, alt: heroTitle }))} />
+        <HeroBackdropSlider
+          slides={sliderImages.map((image) => ({ image, alt: heroTitle }))}
+        />
         <div className="absolute inset-0 bg-[#050505]/70" />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,#050505,rgba(5,5,5,.82),rgba(5,5,5,.45))]" />
         <div className="relative mx-auto max-w-7xl">
@@ -116,7 +131,11 @@ function ContentPage({ page }: { page: ContentPageItem }) {
           <h1 className="max-w-5xl text-[clamp(2.9rem,6.1vw,5.9rem)] font-light leading-[0.98] tracking-normal [overflow-wrap:anywhere]">
             {heroTitle}
           </h1>
-          {heroText ? <p className="mt-8 max-w-3xl text-xl leading-relaxed text-[#D6D1CA] [overflow-wrap:anywhere]">{heroText}</p> : null}
+          {heroText ? (
+            <p className="mt-8 max-w-3xl text-xl leading-relaxed text-[#D6D1CA] [overflow-wrap:anywhere]">
+              {heroText}
+            </p>
+          ) : null}
           {heroBlock?.linkHref && heroBlock.linkLabel ? (
             <SmartLink
               href={heroBlock.linkHref}
@@ -131,8 +150,13 @@ function ContentPage({ page }: { page: ContentPageItem }) {
       <section className="px-5 py-24 md:px-10 lg:px-16">
         <div className="mx-auto max-w-7xl space-y-8">
           {hasBody ? (
-            <GlassPanel className={`cms-rich-panel rounded-[2rem] p-7 md:p-10 ${currentPage.template === "legal" ? "mx-auto max-w-4xl" : ""}`}>
-              <div className="cms-rich-text" dangerouslySetInnerHTML={{ __html: currentPage.body ?? "" }} />
+            <GlassPanel
+              className={`cms-rich-panel rounded-[2rem] p-7 md:p-10 ${currentPage.template === "legal" ? "mx-auto max-w-4xl" : ""}`}
+            >
+              <div
+                className="cms-rich-text"
+                dangerouslySetInnerHTML={{ __html: currentPage.body ?? "" }}
+              />
             </GlassPanel>
           ) : null}
 
@@ -165,7 +189,13 @@ function ContentPage({ page }: { page: ContentPageItem }) {
   );
 }
 
-function CmsBlocks({ blocks, pageTitle }: { blocks: ContentBlock[]; pageTitle: string }) {
+function CmsBlocks({
+  blocks,
+  pageTitle,
+}: {
+  blocks: ContentBlock[];
+  pageTitle: string;
+}) {
   return (
     <div className="space-y-8">
       {blocks.map((block, index) => {
@@ -183,22 +213,75 @@ function CmsBlocks({ blocks, pageTitle }: { blocks: ContentBlock[]; pageTitle: s
           return <CtaBlock key={key} block={block} />;
         }
 
-        return <MediaBlock key={key} block={block} index={index} pageTitle={pageTitle} />;
+        return (
+          <MediaBlock
+            key={key}
+            block={block}
+            index={index}
+            pageTitle={pageTitle}
+          />
+        );
       })}
     </div>
   );
 }
 
-function MediaBlock({ block, index, pageTitle }: { block: ContentBlock; index: number; pageTitle: string }) {
+function MediaBlock({
+  block,
+  index,
+  pageTitle,
+}: {
+  block: ContentBlock;
+  index: number;
+  pageTitle: string;
+}) {
   const images = imagesFromBlock(block);
   const hasImage = images.length > 0;
-  const imageFirst = index % 2 === 1;
+  const imageBackground = hasImage && block.mediaPosition === "background";
+  const imageFirst =
+    block.mediaPosition === "left" || (!block.mediaPosition && index % 2 === 1);
+  const imageTop = block.mediaPosition === "top";
+  const motionPreset = block.motionPreset ?? "slides";
+  const frames = motionPreset === "none" ? images.slice(0, 1) : images;
+  const contentPadding =
+    block.visualVariant === "compact"
+      ? "p-6 md:p-7"
+      : block.visualVariant === "wide"
+        ? "p-8 md:p-12"
+        : "p-7 md:p-9";
+  const panelClassName = [
+    "overflow-hidden rounded-[2rem]",
+    block.visualVariant === "accent"
+      ? "border-[#D69A66]/45 bg-[#D69A66]/[0.055]"
+      : "",
+    block.cardState === "featured"
+      ? "border-[#D69A66]/45 bg-[#D69A66]/[0.055]"
+      : "",
+    block.cardState === "muted" ? "opacity-82" : "",
+    block.cardState === "disabled" ? "opacity-55 grayscale" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
   const copy = (
-    <div className="min-w-0 self-center p-7 md:p-9">
-      {block.eyebrow ? <SectionLabel className="mb-5">{block.eyebrow}</SectionLabel> : null}
-      {block.title ? <h2 className="text-4xl font-light leading-tight tracking-normal [overflow-wrap:anywhere] md:text-5xl">{block.title}</h2> : null}
-      {block.subtitle ? <p className="mt-5 text-lg leading-relaxed text-[#D6D1CA] [overflow-wrap:anywhere]">{block.subtitle}</p> : null}
-      {block.text ? <p className="cms-copy mt-5 whitespace-pre-line leading-relaxed text-[#E8E0D8]/80 [overflow-wrap:anywhere]">{block.text}</p> : null}
+    <div className={`min-w-0 self-center ${contentPadding}`}>
+      {block.eyebrow ? (
+        <SectionLabel className="mb-5">{block.eyebrow}</SectionLabel>
+      ) : null}
+      {block.title ? (
+        <h2 className="text-4xl font-light leading-tight tracking-normal [overflow-wrap:anywhere] md:text-5xl">
+          {block.title}
+        </h2>
+      ) : null}
+      {block.subtitle ? (
+        <p className="mt-5 text-lg leading-relaxed text-[#D6D1CA] [overflow-wrap:anywhere]">
+          {block.subtitle}
+        </p>
+      ) : null}
+      {block.text ? (
+        <p className="cms-copy mt-5 whitespace-pre-line leading-relaxed text-[#E8E0D8]/80 [overflow-wrap:anywhere]">
+          {block.text}
+        </p>
+      ) : null}
       {block.linkHref && block.linkLabel ? (
         <SmartLink
           href={block.linkHref}
@@ -212,19 +295,43 @@ function MediaBlock({ block, index, pageTitle }: { block: ContentBlock; index: n
   const media = hasImage ? (
     <div className="relative min-h-[320px] overflow-hidden rounded-[1.5rem] lg:min-h-[440px]">
       <CinematicImage
-        frames={images}
-        alt={block.title || pageTitle}
+        frames={frames}
+        alt={block.imageAlt || block.title || pageTitle}
         fill
-        mode={images.length > 1 ? "frames" : "preview"}
-        hint="slides"
+        mode={frames.length > 1 ? "frames" : "preview"}
+        hint={motionPreset === "none" ? "" : motionPreset}
         overlayClassName="bg-gradient-to-t from-[#050505]/55 via-transparent to-transparent"
       />
     </div>
   ) : null;
 
+  if (imageBackground) {
+    return (
+      <GlassPanel className={`${panelClassName} relative min-h-[460px]`}>
+        <CinematicImage
+          frames={frames}
+          alt={block.imageAlt || block.title || pageTitle}
+          fill
+          mode={frames.length > 1 ? "frames" : "preview"}
+          hint={motionPreset === "none" ? "" : motionPreset}
+          overlayClassName="bg-gradient-to-r from-[#050505]/88 via-[#050505]/62 to-[#050505]/22"
+        />
+        <div className="relative z-10 max-w-3xl">{copy}</div>
+      </GlassPanel>
+    );
+  }
+
   return (
-    <GlassPanel className="overflow-hidden rounded-[2rem]">
-      <div className={`grid min-w-0 gap-0 ${hasImage ? "lg:grid-cols-[0.92fr_1.08fr]" : ""}`}>
+    <GlassPanel className={panelClassName}>
+      <div
+        className={`grid min-w-0 gap-0 ${
+          hasImage && !imageTop
+            ? block.visualVariant === "split"
+              ? "lg:grid-cols-2"
+              : "lg:grid-cols-[0.92fr_1.08fr]"
+            : ""
+        }`}
+      >
         {imageFirst ? media : copy}
         {imageFirst ? copy : media}
       </div>
@@ -232,25 +339,53 @@ function MediaBlock({ block, index, pageTitle }: { block: ContentBlock; index: n
   );
 }
 
-function GalleryBlock({ block, pageTitle }: { block: ContentBlock; pageTitle: string }) {
+function GalleryBlock({
+  block,
+  pageTitle,
+}: {
+  block: ContentBlock;
+  pageTitle: string;
+}) {
   const images = imagesFromBlock(block);
-  if (!images.length) return <MediaBlock block={block} index={0} pageTitle={pageTitle} />;
+  if (!images.length)
+    return <MediaBlock block={block} index={0} pageTitle={pageTitle} />;
 
   return (
     <section className="min-w-0">
       <div className="mb-6 max-w-3xl">
-        {block.eyebrow ? <SectionLabel className="mb-5">{block.eyebrow}</SectionLabel> : null}
-        {block.title ? <h2 className="text-4xl font-light leading-tight tracking-normal [overflow-wrap:anywhere] md:text-5xl">{block.title}</h2> : null}
+        {block.eyebrow ? (
+          <SectionLabel className="mb-5">{block.eyebrow}</SectionLabel>
+        ) : null}
+        {block.title ? (
+          <h2 className="text-4xl font-light leading-tight tracking-normal [overflow-wrap:anywhere] md:text-5xl">
+            {block.title}
+          </h2>
+        ) : null}
         {block.subtitle || block.text ? (
-          <p className="mt-5 whitespace-pre-line text-lg leading-relaxed text-[#D6D1CA] [overflow-wrap:anywhere]">{block.subtitle || block.text}</p>
+          <p className="mt-5 whitespace-pre-line text-lg leading-relaxed text-[#D6D1CA] [overflow-wrap:anywhere]">
+            {block.subtitle || block.text}
+          </p>
         ) : null}
       </div>
       <div className="grid gap-4 md:grid-cols-3">
         {images.map((image, index) => (
-          <div key={image} className={`relative min-h-[260px] overflow-hidden rounded-[1.5rem] border border-white/10 ${index === 0 ? "md:col-span-2 md:min-h-[360px]" : ""}`}>
-            <img src={image} alt={index === 0 ? block.title || pageTitle : ""} className="h-full w-full object-cover" loading={index === 0 ? "eager" : "lazy"} decoding="async" />
+          <div
+            key={image}
+            className={`relative min-h-[260px] overflow-hidden rounded-[1.5rem] border border-white/10 ${index === 0 ? "md:col-span-2 md:min-h-[360px]" : ""}`}
+          >
+            <img
+              src={image}
+              alt={
+                index === 0 ? block.imageAlt || block.title || pageTitle : ""
+              }
+              className="h-full w-full object-cover"
+              loading={index === 0 ? "eager" : "lazy"}
+              decoding="async"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/65 via-transparent to-transparent" />
-            <span className="absolute bottom-5 left-5 text-sm text-[#D69A66]">0{index + 1}</span>
+            <span className="absolute bottom-5 left-5 text-sm text-[#D69A66]">
+              0{index + 1}
+            </span>
           </div>
         ))}
       </div>
@@ -262,21 +397,43 @@ function QuoteBlock({ block }: { block: ContentBlock }) {
   const quote = block.text || block.subtitle;
 
   return (
-    <GlassPanel className="rounded-[2rem] p-8 md:p-12">
-      {block.eyebrow ? <SectionLabel className="mb-6">{block.eyebrow}</SectionLabel> : null}
-      {quote ? <blockquote className="max-w-5xl text-3xl font-light leading-tight tracking-normal [overflow-wrap:anywhere] md:text-5xl">{quote}</blockquote> : null}
-      {block.title ? <p className="mt-7 text-lg text-[#D69A66] [overflow-wrap:anywhere]">{block.title}</p> : null}
+    <GlassPanel
+      className={`rounded-[2rem] p-8 md:p-12 ${block.cardState === "featured" ? "border-[#D69A66]/45 bg-[#D69A66]/[0.055]" : ""}`}
+    >
+      {block.eyebrow ? (
+        <SectionLabel className="mb-6">{block.eyebrow}</SectionLabel>
+      ) : null}
+      {quote ? (
+        <blockquote className="max-w-5xl text-3xl font-light leading-tight tracking-normal [overflow-wrap:anywhere] md:text-5xl">
+          {quote}
+        </blockquote>
+      ) : null}
+      {block.title ? (
+        <p className="mt-7 text-lg text-[#D69A66] [overflow-wrap:anywhere]">
+          {block.title}
+        </p>
+      ) : null}
     </GlassPanel>
   );
 }
 
 function CtaBlock({ block }: { block: ContentBlock }) {
   return (
-    <section className="rounded-[2rem] border border-[#D69A66]/35 bg-[#D69A66]/10 p-8 md:p-12">
-      {block.eyebrow ? <SectionLabel className="mb-6">{block.eyebrow}</SectionLabel> : null}
-      {block.title ? <h2 className="max-w-4xl text-4xl font-light leading-tight tracking-normal [overflow-wrap:anywhere] md:text-6xl">{block.title}</h2> : null}
+    <section
+      className={`rounded-[2rem] border border-[#D69A66]/35 bg-[#D69A66]/10 p-8 md:p-12 ${block.cardState === "muted" ? "opacity-82" : ""}`}
+    >
+      {block.eyebrow ? (
+        <SectionLabel className="mb-6">{block.eyebrow}</SectionLabel>
+      ) : null}
+      {block.title ? (
+        <h2 className="max-w-4xl text-4xl font-light leading-tight tracking-normal [overflow-wrap:anywhere] md:text-6xl">
+          {block.title}
+        </h2>
+      ) : null}
       {block.subtitle || block.text ? (
-        <p className="mt-6 max-w-3xl whitespace-pre-line text-lg leading-relaxed text-[#E8E0D8]/85 [overflow-wrap:anywhere]">{block.subtitle || block.text}</p>
+        <p className="mt-6 max-w-3xl whitespace-pre-line text-lg leading-relaxed text-[#E8E0D8]/85 [overflow-wrap:anywhere]">
+          {block.subtitle || block.text}
+        </p>
       ) : null}
       {block.linkHref && block.linkLabel ? (
         <SmartLink
@@ -303,22 +460,35 @@ function CareerContent({ careerVacancies }: { careerVacancies: any[] }) {
                 : String(vacancy.requirements ?? "")
                     .split(/\r?\n/u)
                     .filter(Boolean);
-              const format = vacancy.format ?? vacancy.employment ?? vacancy.location;
+              const format =
+                vacancy.format ?? vacancy.employment ?? vacancy.location;
               const workload = vacancy.workload ?? vacancy.salary;
 
               return (
-                <article key={vacancy.title} className="min-w-0 rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-6">
+                <article
+                  key={vacancy.title}
+                  className="min-w-0 rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-6"
+                >
                   <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.22em] text-[#D69A66]">
                     {format ? <span>{format}</span> : null}
-                    {format && workload ? <span className="h-1 w-1 rounded-full bg-white/25" /> : null}
+                    {format && workload ? (
+                      <span className="h-1 w-1 rounded-full bg-white/25" />
+                    ) : null}
                     {workload ? <span>{workload}</span> : null}
                   </div>
-                  <h2 className="mt-4 text-3xl font-light tracking-normal [overflow-wrap:anywhere]">{vacancy.title}</h2>
-                  <p className="mt-4 leading-relaxed text-[#D6D1CA] [overflow-wrap:anywhere]">{vacancy.description}</p>
+                  <h2 className="mt-4 text-3xl font-light tracking-normal [overflow-wrap:anywhere]">
+                    {vacancy.title}
+                  </h2>
+                  <p className="mt-4 leading-relaxed text-[#D6D1CA] [overflow-wrap:anywhere]">
+                    {vacancy.description}
+                  </p>
                   {requirements.length ? (
                     <ul className="mt-5 space-y-2 text-sm text-white/55">
                       {requirements.map((item: string) => (
-                        <li key={item} className="flex gap-3 [overflow-wrap:anywhere]">
+                        <li
+                          key={item}
+                          className="flex gap-3 [overflow-wrap:anywhere]"
+                        >
                           <span className="mt-2 h-px w-4 shrink-0 bg-[#D69A66]" />
                           {item}
                         </li>
@@ -331,16 +501,23 @@ function CareerContent({ careerVacancies }: { careerVacancies: any[] }) {
           </div>
         ) : (
           <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-7">
-            <h2 className="text-3xl font-light tracking-normal">Открытых вакансий пока нет</h2>
-            <p className="mt-4 max-w-2xl leading-relaxed text-[#D6D1CA]">Резюме и портфолио можно отправить на почту студии.</p>
+            <h2 className="text-3xl font-light tracking-normal">
+              Открытых вакансий пока нет
+            </h2>
+            <p className="mt-4 max-w-2xl leading-relaxed text-[#D6D1CA]">
+              Резюме и портфолио можно отправить на почту студии.
+            </p>
           </div>
         )}
       </GlassPanel>
       <GlassPanel className="rounded-[2rem] p-7 md:p-9">
         <SectionLabel className="mb-5">Отклик</SectionLabel>
-        <h2 className="text-3xl font-light tracking-normal">Прислать портфолио</h2>
+        <h2 className="text-3xl font-light tracking-normal">
+          Прислать портфолио
+        </h2>
         <p className="mt-4 leading-relaxed text-[#D6D1CA]">
-          Напишите пару строк о себе, приложите ссылку на портфолио и укажите направление: интерьер, архитектура или ландшафт.
+          Напишите пару строк о себе, приложите ссылку на портфолио и укажите
+          направление: интерьер, архитектура или ландшафт.
         </p>
         <a
           href="mailto:3dsmartdesign@bk.ru?subject=Отклик%20на%20вакансию%20с%20сайта"
@@ -389,20 +566,42 @@ function PartnersContent({
             "Девелоперские и коммерческие проекты для визуализации",
             "Коллаборации с шоурумами, брендами и профильными специалистами",
           ].map((item, index) => (
-            <div key={item} className="flex min-w-0 gap-4 rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-5">
+            <div
+              key={item}
+              className="flex min-w-0 gap-4 rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-5"
+            >
               <span className="text-sm text-[#D69A66]">0{index + 1}</span>
-              <p className="leading-relaxed text-[#D6D1CA] [overflow-wrap:anywhere]">{item}</p>
+              <p className="leading-relaxed text-[#D6D1CA] [overflow-wrap:anywhere]">
+                {item}
+              </p>
             </div>
           ))}
         </div>
       </GlassPanel>
       <GlassPanel className="rounded-[2rem] p-7 md:p-9">
         <SectionLabel className="mb-5">Обратная связь</SectionLabel>
-        <h2 className="text-3xl font-light tracking-normal">Предложить сотрудничество</h2>
+        <h2 className="text-3xl font-light tracking-normal">
+          Предложить сотрудничество
+        </h2>
         <div className="mt-8 grid gap-3">
-          <input className={inputCls} placeholder="Ваше имя" value={partnerName} onChange={(event) => onNameChange(event.target.value)} />
-          <input className={inputCls} placeholder="Компания или направление" value={partnerCompany} onChange={(event) => onCompanyChange(event.target.value)} />
-          <input className={inputCls} placeholder="Телефон, e-mail или Telegram" value={partnerContact} onChange={(event) => onContactChange(event.target.value)} />
+          <input
+            className={inputCls}
+            placeholder="Ваше имя"
+            value={partnerName}
+            onChange={(event) => onNameChange(event.target.value)}
+          />
+          <input
+            className={inputCls}
+            placeholder="Компания или направление"
+            value={partnerCompany}
+            onChange={(event) => onCompanyChange(event.target.value)}
+          />
+          <input
+            className={inputCls}
+            placeholder="Телефон, e-mail или Telegram"
+            value={partnerContact}
+            onChange={(event) => onContactChange(event.target.value)}
+          />
           <textarea
             className={`${inputCls} min-h-[140px] resize-none`}
             placeholder="Коротко о предложении"
@@ -443,11 +642,17 @@ function BlogContent({ newsArticles }: { newsArticles: any[] }) {
               hint="read"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/85 via-transparent to-transparent" />
-            <span className="absolute bottom-5 left-5 text-xs uppercase tracking-[0.28em] text-[#D69A66]">{article.category}</span>
+            <span className="absolute bottom-5 left-5 text-xs uppercase tracking-[0.28em] text-[#D69A66]">
+              {article.category}
+            </span>
           </div>
           <div className="p-6">
-            <h2 className="text-2xl font-light leading-tight tracking-normal [overflow-wrap:anywhere]">{article.title}</h2>
-            <p className="mt-4 text-sm leading-relaxed text-[#D6D1CA] [overflow-wrap:anywhere]">{article.preview}</p>
+            <h2 className="text-2xl font-light leading-tight tracking-normal [overflow-wrap:anywhere]">
+              {article.title}
+            </h2>
+            <p className="mt-4 text-sm leading-relaxed text-[#D6D1CA] [overflow-wrap:anywhere]">
+              {article.preview}
+            </p>
           </div>
         </Link>
       ))}
@@ -459,13 +664,25 @@ function EmptyContent({ page }: { page: ContentPageItem }) {
   return (
     <GlassPanel className="rounded-[2rem] p-7 md:p-10">
       <SectionLabel className="mb-5">{page.eyebrow}</SectionLabel>
-      <h2 className="text-4xl font-light tracking-normal [overflow-wrap:anywhere]">{page.title}</h2>
-      <p className="mt-5 max-w-3xl leading-relaxed text-[#D6D1CA] [overflow-wrap:anywhere]">{page.text}</p>
+      <h2 className="text-4xl font-light tracking-normal [overflow-wrap:anywhere]">
+        {page.title}
+      </h2>
+      <p className="mt-5 max-w-3xl leading-relaxed text-[#D6D1CA] [overflow-wrap:anywhere]">
+        {page.text}
+      </p>
     </GlassPanel>
   );
 }
 
-function SmartLink({ href, className, children }: { href: string; className: string; children: ReactNode }) {
+function SmartLink({
+  href,
+  className,
+  children,
+}: {
+  href: string;
+  className: string;
+  children: ReactNode;
+}) {
   if (/^https?:\/\//i.test(href)) {
     return (
       <a href={href} className={className} target="_blank" rel="noreferrer">
@@ -484,11 +701,11 @@ function SmartLink({ href, className, children }: { href: string; className: str
 function hasVisibleBlock(block: ContentBlock) {
   return Boolean(
     block.eyebrow?.trim() ||
-      block.title?.trim() ||
-      block.subtitle?.trim() ||
-      block.text?.trim() ||
-      imagesFromBlock(block).length ||
-      block.linkLabel?.trim(),
+    block.title?.trim() ||
+    block.subtitle?.trim() ||
+    block.text?.trim() ||
+    imagesFromBlock(block).length ||
+    block.linkLabel?.trim(),
   );
 }
 
@@ -498,7 +715,13 @@ function imagesFromBlock(block?: ContentBlock | null) {
 }
 
 function uniqueImages(images: Array<string | null | undefined>) {
-  return Array.from(new Set(images.map((image) => image?.trim()).filter((image): image is string => Boolean(image))));
+  return Array.from(
+    new Set(
+      images
+        .map((image) => image?.trim())
+        .filter((image): image is string => Boolean(image)),
+    ),
+  );
 }
 
 export default ContentPage;

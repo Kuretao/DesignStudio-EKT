@@ -32,12 +32,14 @@ trait HasTranslations
             foreach ($model->getTranslatable() as $field) {
                 $ruField = $field . '_ru';
 
-                if (blank($model->{$ruField}) && filled($model->{$field})) {
-                    $model->{$ruField} = $model->{$field};
+                if (filled($model->{$ruField}) && ($model->isDirty($ruField) || blank($model->{$field}))) {
+                    $model->{$field} = $model->{$ruField};
+
+                    continue;
                 }
 
-                if (blank($model->{$field}) && filled($model->{$ruField})) {
-                    $model->{$field} = $model->{$ruField};
+                if (blank($model->{$ruField}) && filled($model->{$field})) {
+                    $model->{$ruField} = $model->{$field};
                 }
             }
         });

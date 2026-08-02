@@ -320,6 +320,10 @@ class CmsController extends Controller
 
                 return [
                     'type' => $block->type,
+                    'visualVariant' => $block->visual_variant,
+                    'mediaPosition' => $block->media_position,
+                    'motionPreset' => $block->motion_preset,
+                    'cardState' => $block->card_state,
                     'eyebrow' => $block->fieldRu('eyebrow'),
                     'eyebrowRu' => $block->fieldRu('eyebrow'),
                     'eyebrowEn' => $block->fieldEn('eyebrow'),
@@ -334,10 +338,14 @@ class CmsController extends Controller
                     'textEn' => $block->fieldEn('text'),
                     'image' => $images[0] ?? null,
                     'images' => $images,
+                    'imageAlt' => $block->fieldRu('image_alt'),
+                    'imageAltRu' => $block->fieldRu('image_alt'),
+                    'imageAltEn' => $block->fieldEn('image_alt'),
                     'linkLabel' => $block->fieldRu('link_label'),
                     'linkLabelRu' => $block->fieldRu('link_label'),
                     'linkLabelEn' => $block->fieldEn('link_label'),
                     'linkHref' => $block->link_href,
+                    'settings' => $block->settings ?? [],
                 ];
             })->values(),
         ];
@@ -410,6 +418,8 @@ class CmsController extends Controller
 
     private function servicePayload(Service $service): array
     {
+        $images = $this->mediaSlides($service->effective_image, $service->hero_images);
+
         return [
             'id' => $service->slug,
             'slug' => $service->slug,
@@ -422,7 +432,9 @@ class CmsController extends Controller
             'text' => $service->fieldRu('text'),
             'textRu' => $service->fieldRu('text'),
             'textEn' => $service->fieldEn('text'),
-            'image' => $service->effective_image,
+            'image' => $images[0] ?? $service->effective_image,
+            'images' => $images,
+            'heroImages' => $images,
             'price' => $service->fieldRu('price'),
             'priceRu' => $service->fieldRu('price'),
             'priceEn' => $service->fieldEn('price'),
@@ -443,6 +455,8 @@ class CmsController extends Controller
 
     private function newsPayload(NewsArticle $article): array
     {
+        $images = $this->mediaSlides($article->effective_image, $article->hero_images);
+
         return [
             'slug' => $article->slug,
             'title' => $article->fieldRu('title'),
@@ -458,7 +472,9 @@ class CmsController extends Controller
             'preview' => $article->fieldRu('preview'),
             'previewRu' => $article->fieldRu('preview'),
             'previewEn' => $article->fieldEn('preview'),
-            'image' => $article->effective_image,
+            'image' => $images[0] ?? $article->effective_image,
+            'images' => $images,
+            'heroImages' => $images,
             'readingTime' => $article->fieldRu('reading_time'),
             'readingTimeRu' => $article->fieldRu('reading_time'),
             'readingTimeEn' => $article->fieldEn('reading_time'),
@@ -573,6 +589,18 @@ class CmsController extends Controller
         return collect(preg_split('/\R/u', (string) $value) ?: [])
             ->map(fn (string $line) => $this->assetUrl(trim($line)))
             ->filter()
+            ->values()
+            ->all();
+    }
+
+    private function mediaSlides(?string $primary, ?string $extra): array
+    {
+        return collect([
+            $this->assetUrl($primary),
+            ...$this->imageList($extra),
+        ])
+            ->filter()
+            ->unique()
             ->values()
             ->all();
     }
