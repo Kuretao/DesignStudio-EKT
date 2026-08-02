@@ -30,9 +30,16 @@ function scrollToProjectShowcase() {
 
 function PortfolioHeroSlider({ onSelectProject }: PortfolioGridProps) {
   const { projects } = useCms();
+  const text = useCmsText();
   const heroSlides = projects.slice(0, 4).map((project, index) => ({
     project,
-    kicker: ["Featured interior", "City apartment", "Landscape story", "Commercial space"][index] || "Selected project",
+    kicker:
+      [
+        text("portfolio.hero.kicker1", "Featured interior"),
+        text("portfolio.hero.kicker2", "City apartment"),
+        text("portfolio.hero.kicker3", "Landscape story"),
+        text("portfolio.hero.kicker4", "Commercial space"),
+      ][index] || text("portfolio.hero.kickerDefault", "Selected project"),
   }));
   const [activeSlide, setActiveSlide] = useState(0);
   const heroRef = useRef<HTMLDivElement | null>(null);
@@ -110,7 +117,7 @@ function PortfolioHeroSlider({ onSelectProject }: PortfolioGridProps) {
               }}
               className="rounded-full border border-[#D69A66] bg-[#D69A66] px-6 py-4 text-xs uppercase tracking-[0.24em] text-[#050505] transition duration-300 hover:-translate-y-0.5 hover:bg-[#E3AD7B]"
             >
-              Смотреть проект
+              {text("portfolio.hero.viewButton", "Смотреть проект")}
             </button>
             <span className="rounded-full border border-white/15 bg-black/25 px-5 py-4 text-xs uppercase tracking-[0.24em] text-white/75 backdrop-blur">
               {slide.project.category} / {slide.project.location}
@@ -125,7 +132,7 @@ function PortfolioHeroSlider({ onSelectProject }: PortfolioGridProps) {
             <button
               key={project.id}
               type="button"
-              aria-label={`Слайд ${index + 1}`}
+              aria-label={text("slider.dotAria", "Слайд {number}").replace("{number}", String(index + 1))}
               onClick={() => setActiveSlide(index)}
               className={`h-1.5 rounded-full transition-all duration-500 ${
                 activeSlide === index ? "w-12 bg-[#D69A66]" : "w-5 bg-white/30 hover:bg-white/60"
@@ -137,7 +144,7 @@ function PortfolioHeroSlider({ onSelectProject }: PortfolioGridProps) {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            aria-label="Предыдущий слайд"
+            aria-label={text("slider.prevAria", "Предыдущий слайд")}
             onClick={() => moveSlide(-1)}
             className="grid h-12 w-12 place-items-center rounded-full border border-white/15 bg-black/25 text-xl text-white backdrop-blur transition hover:border-[#D69A66]/70 hover:text-[#D69A66]"
           >
@@ -145,7 +152,7 @@ function PortfolioHeroSlider({ onSelectProject }: PortfolioGridProps) {
           </button>
           <button
             type="button"
-            aria-label="Следующий слайд"
+            aria-label={text("slider.nextAria", "Следующий слайд")}
             onClick={() => moveSlide(1)}
             className="grid h-12 w-12 place-items-center rounded-full border border-white/15 bg-black/25 text-xl text-white backdrop-blur transition hover:border-[#D69A66]/70 hover:text-[#D69A66]"
           >

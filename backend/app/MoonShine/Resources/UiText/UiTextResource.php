@@ -18,7 +18,7 @@ class UiTextResource extends ModelResource
 {
     protected string $model = UiText::class;
 
-    protected string $title = 'UI-тексты';
+    protected string $title = 'Постоянные тексты блоков';
 
     /**
      * @return list<class-string<PageContract>>

@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { useCms } from "@/src/cms";
+import { useCms, useCmsText } from "@/src/cms";
 import { testimonials as fallbackTestimonials } from "@/src/data";
 import CinematicImage from "@/src/components/common/CinematicImage";
 import HeroBackdropSlider from "@/src/components/common/HeroBackdropSlider";
@@ -9,6 +9,7 @@ import { GlassPanel } from "@/src/ui";
 
 function ReviewsHero({ featuredReview }: { featuredReview: (typeof fallbackTestimonials)[number] }) {
   const { reviewStats, testimonials } = useCms();
+  const text = useCmsText();
   return (
     <section className="relative min-h-screen overflow-hidden px-5 pb-16 pt-28 md:px-10 lg:px-16">
       <HeroBackdropSlider
@@ -23,25 +24,25 @@ function ReviewsHero({ featuredReview }: { featuredReview: (typeof fallbackTesti
 
       <div className="relative z-10 mx-auto grid min-h-[calc(100vh-7rem)] max-w-7xl gap-10 lg:grid-cols-[0.96fr_1.04fr] lg:items-end">
         <div className="pb-8">
-          <p className="text-xs uppercase tracking-[0.38em] text-[#D69A66]">Client stories</p>
+          <p className="text-xs uppercase tracking-[0.38em] text-[#D69A66]">{text("reviews.hero.label", "Client stories")}</p>
           <h1 className="mt-5 max-w-5xl text-[clamp(3rem,6.4vw,6.2rem)] font-light leading-[0.94] tracking-[-0.045em] text-white">
-            Отзывы о нас
+            {text("reviews.hero.title", "Отзывы о нас")}
           </h1>
           <p className="mt-7 max-w-2xl text-lg leading-relaxed text-[#E8E0D8]/85 md:text-xl">
-            Здесь важны не громкие обещания, а то, как клиенты описывают процесс: сроки, внимание к деталям, спокойную коммуникацию и результат, который хочется показывать.
+            {text("reviews.hero.text", "Здесь важны не громкие обещания, а то, как клиенты описывают процесс: сроки, внимание к деталям, спокойную коммуникацию и результат, который хочется показывать.")}
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
             <Link
               href="/kontakty"
               className="rounded-full border border-[#D69A66] bg-[#D69A66] px-6 py-4 text-xs uppercase tracking-[0.24em] text-[#050505] transition duration-300 hover:-translate-y-0.5 hover:bg-[#E3AD7B]"
             >
-              Стать клиентом
+              {text("reviews.hero.primaryButton", "Стать клиентом")}
             </Link>
             <Link
               href="/portfolio"
               className="rounded-full border border-white/15 bg-black/25 px-6 py-4 text-xs uppercase tracking-[0.24em] text-white/75 backdrop-blur transition duration-300 hover:border-[#D69A66]/70 hover:text-white"
             >
-              Смотреть портфолио
+              {text("reviews.hero.secondaryButton", "Смотреть портфолио")}
             </Link>
           </div>
         </div>
@@ -75,6 +76,7 @@ function ReviewsHero({ featuredReview }: { featuredReview: (typeof fallbackTesti
 
 function ReviewsPage() {
   const { reviewStats, testimonials } = useCms();
+  const text = useCmsText();
   const featuredReview = testimonials[0];
 
   return (
@@ -84,15 +86,14 @@ function ReviewsPage() {
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-end">
             <div>
-              <p className="review-card mb-5 text-xs uppercase tracking-[0.45em] text-[#D69A66]">Опыт клиентов</p>
+              <p className="review-card mb-5 text-xs uppercase tracking-[0.45em] text-[#D69A66]">{text("reviews.list.label", "Опыт клиентов")}</p>
               <h2 className="review-card max-w-5xl text-5xl font-light leading-[0.92] tracking-[-0.055em] md:text-7xl">
-                Слова, за которыми виден процесс
+                {text("reviews.list.title", "Слова, за которыми виден процесс")}
               </h2>
             </div>
             <div className="review-card">
               <p className="max-w-xl text-lg leading-relaxed text-[#D6D1CA]">
-                Перенесли отзывы с исходной страницы и собрали их в живую презентационную витрину: реальные даты,
-                направления работ, короткие выводы и ответы студии.
+                {text("reviews.list.text", "Перенесли отзывы с исходной страницы и собрали их в живую презентационную витрину: реальные даты, направления работ, короткие выводы и ответы студии.")}
               </p>
             </div>
           </div>
@@ -155,11 +156,10 @@ function ReviewsPage() {
       <section className="border-t border-white/10 px-5 py-28 md:px-10 lg:px-16">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.8fr_1.2fr]">
           <div className="review-card">
-            <p className="mb-5 text-xs uppercase tracking-[0.45em] text-[#D69A66]">Диалог со студией</p>
-            <h2 className="text-5xl font-light tracking-[-0.055em] md:text-7xl">Ответы администратора без сухой формальности</h2>
+            <p className="mb-5 text-xs uppercase tracking-[0.45em] text-[#D69A66]">{text("reviews.replies.label", "Диалог со студией")}</p>
+            <h2 className="text-5xl font-light tracking-[-0.055em] md:text-7xl">{text("reviews.replies.title", "Ответы администратора без сухой формальности")}</h2>
             <p className="mt-6 text-lg leading-relaxed text-[#D6D1CA]">
-              Для страницы оставили не только клиентские впечатления, но и короткий ответ студии — так блок выглядит
-              живым и поддерживает доверие.
+              {text("reviews.replies.text", "Для страницы оставили не только клиентские впечатления, но и короткий ответ студии — так блок выглядит живым и поддерживает доверие.")}
             </p>
           </div>
 
@@ -171,8 +171,8 @@ function ReviewsPage() {
                   <span className="absolute left-0 top-7 hidden h-3 w-3 rounded-full bg-[#D69A66] shadow-[0_0_28px_rgba(214,154,102,0.8)] md:block" />
                   <GlassPanel className="rounded-[1.75rem] p-6 transition duration-500 hover:-translate-y-1 hover:border-[#D69A66]/50">
                     <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                      <span className="text-sm text-[#D69A66]">Ответ на отзыв #{index + 1}</span>
-                      <span className="text-xs uppercase tracking-[0.18em] text-white/45">Администратор</span>
+                      <span className="text-sm text-[#D69A66]">{text("reviews.replies.itemLabel", "Ответ на отзыв #{number}").replace("{number}", String(index + 1))}</span>
+                      <span className="text-xs uppercase tracking-[0.18em] text-white/45">{text("reviews.replies.role", "Администратор")}</span>
                     </div>
                     <p className="text-lg leading-relaxed text-[#F5F2EC]">{review.adminReply}</p>
                   </GlassPanel>
@@ -188,36 +188,36 @@ function ReviewsPage() {
           <GlassPanel className="review-card overflow-hidden rounded-[2.5rem] p-0">
             <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
               <div className="relative min-h-[420px] overflow-hidden">
-                <CinematicImage frames={[testimonials[1].image, testimonials[2]?.image, testimonials[0]?.image]} alt="Оставить отзыв" fill hint="review" />
+                <CinematicImage frames={[testimonials[1].image, testimonials[2]?.image, testimonials[0]?.image]} alt={text("reviews.form.imageAlt", "Оставить отзыв")} fill hint="review" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/35 to-transparent" />
                 <div className="absolute bottom-8 left-8 right-8">
-                  <p className="mb-4 text-xs uppercase tracking-[0.36em] text-[#D69A66]">Оставить отзыв</p>
+                  <p className="mb-4 text-xs uppercase tracking-[0.36em] text-[#D69A66]">{text("reviews.form.label", "Оставить отзыв")}</p>
                   <h2 className="max-w-lg text-4xl font-light tracking-[-0.05em] md:text-6xl">
-                    Расскажите, каким был ваш проект
+                    {text("reviews.form.title", "Расскажите, каким был ваш проект")}
                   </h2>
                 </div>
               </div>
               <form className="grid gap-4 p-6 md:p-9">
                 <input
                   className="rounded-2xl border border-white/10 bg-black/20 px-5 py-4 outline-none transition placeholder:text-white/35 focus:border-[#D69A66]"
-                  placeholder="Имя *"
+                  placeholder={text("reviews.form.namePlaceholder", "Имя *")}
                 />
                 <input
                   className="rounded-2xl border border-white/10 bg-black/20 px-5 py-4 outline-none transition placeholder:text-white/35 focus:border-[#D69A66]"
-                  placeholder="E-mail *"
+                  placeholder={text("reviews.form.emailPlaceholder", "E-mail *")}
                 />
                 <textarea
                   className="min-h-44 rounded-2xl border border-white/10 bg-black/20 px-5 py-4 outline-none transition placeholder:text-white/35 focus:border-[#D69A66]"
-                  placeholder="Текст *"
+                  placeholder={text("reviews.form.textPlaceholder", "Текст *")}
                 />
                 <p className="text-sm leading-relaxed text-[#D6D1CA]">
-                  Отправленное сообщение появится после проверки администратором сайта.
+                  {text("reviews.form.notice", "Отправленное сообщение появится после проверки администратором сайта.")}
                 </p>
                 <button
                   type="button"
                   className="h-14 rounded-full bg-[#D69A66] px-7 text-sm uppercase tracking-[0.24em] text-[#050505] transition hover:bg-[#F5F2EC]"
                 >
-                  Отправить отзыв
+                  {text("reviews.form.button", "Отправить отзыв")}
                 </button>
               </form>
             </div>

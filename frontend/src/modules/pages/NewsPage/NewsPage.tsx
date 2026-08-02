@@ -1,12 +1,13 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { useCms } from "@/src/cms";
+import { useCms, useCmsText } from "@/src/cms";
 import CinematicImage from "@/src/components/common/CinematicImage";
 import HeroBackdropSlider from "@/src/components/common/HeroBackdropSlider";
 
 function NewsPage() {
   const { newsArticles } = useCms();
+  const text = useCmsText();
   const [featured, ...rest] = newsArticles;
   const featuredImages = Array.isArray((featured as any).images)
     ? ((featured as any).images as string[])
@@ -35,24 +36,26 @@ function NewsPage() {
         <div className="relative z-10 mx-auto grid min-h-[calc(100vh-7rem)] max-w-7xl gap-10 lg:grid-cols-[1fr_0.78fr] lg:items-end">
           <div className="pb-8">
             <p className="text-xs uppercase tracking-[0.38em] text-[#D69A66]">
-              Журнал студии
+              {text("news.hero.label", "Журнал студии")}
             </p>
             <h1 className="mt-5 max-w-5xl text-[clamp(3rem,6.4vw,6.2rem)] font-light leading-[0.94] tracking-[-0.045em] text-white">
-              Блог и новости
+              {text("news.hero.title", "Блог и новости")}
             </h1>
             <p className="mt-7 max-w-2xl text-lg leading-relaxed text-[#E8E0D8]/85 md:text-xl">
-              Пишем о проектах, решениях и деталях, которые делают интерьер
-              дороже на вид, спокойнее в реализации и точнее для жизни.
+              {text(
+                "news.hero.text",
+                "Пишем о проектах, решениях и деталях, которые делают интерьер дороже на вид, спокойнее в реализации и точнее для жизни.",
+              )}
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <Link
                 href={`/novosti/${featured.slug}`}
                 className="rounded-full border border-[#D69A66] bg-[#D69A66] px-6 py-4 text-xs uppercase tracking-[0.24em] text-[#050505] transition duration-300 hover:-translate-y-0.5 hover:bg-[#E3AD7B]"
               >
-                Читать главное
+                {text("news.hero.primaryButton", "Читать главное")}
               </Link>
               <span className="rounded-full border border-white/15 bg-black/25 px-5 py-4 text-xs uppercase tracking-[0.24em] text-white/75 backdrop-blur">
-                {newsArticles.length} материала
+                {text("news.hero.countTemplate", "{count} материала").replace("{count}", String(newsArticles.length))}
               </span>
             </div>
           </div>
@@ -67,7 +70,7 @@ function NewsPage() {
               </span>
               <span className="text-xs text-white/45">{featured.date}</span>
               <span className="text-xs text-white/35">
-                {featured.readingTime} чтения
+                {text("news.readingTimeSuffix", "{time} чтения").replace("{time}", featured.readingTime)}
               </span>
             </div>
             <h2 className="text-3xl font-light leading-tight tracking-normal [overflow-wrap:anywhere] transition duration-500 group-hover:translate-x-1 md:text-5xl">
@@ -77,7 +80,7 @@ function NewsPage() {
               {featured.preview}
             </p>
             <div className="mt-8 inline-flex items-center gap-3 text-xs uppercase tracking-[0.22em] text-[#D69A66] transition duration-300 group-hover:gap-5">
-              Открыть статью <span>→</span>
+              {text("news.openArticle", "Открыть статью")} <span>→</span>
             </div>
           </Link>
         </div>
@@ -86,15 +89,14 @@ function NewsPage() {
       <section className="px-5 py-24 md:px-10 lg:px-16">
         <div className="mx-auto max-w-7xl">
           <p className="mb-5 text-xs uppercase tracking-[0.45em] text-[#D69A66]">
-            Новости студии
+            {text("news.list.label", "Новости студии")}
           </p>
           <div className="mb-16 grid gap-8 md:grid-cols-[1fr_0.6fr] md:items-end">
             <h2 className="text-5xl font-light leading-[0.92] tracking-[-0.055em] md:text-7xl">
-              Все материалы
+              {text("news.list.title", "Все материалы")}
             </h2>
             <p className="text-lg leading-relaxed text-[#D6D1CA]">
-              Обновления студии, новые услуги, советы по проектированию и тренды
-              рынка.
+              {text("news.list.text", "Обновления студии, новые услуги, советы по проектированию и тренды рынка.")}
             </p>
           </div>
 
@@ -116,7 +118,7 @@ function NewsPage() {
                 </span>
                 <span className="text-xs text-white/45">{featured.date}</span>
                 <span className="text-xs text-white/35">
-                  {featured.readingTime} чтения
+                  {text("news.readingTimeSuffix", "{time} чтения").replace("{time}", featured.readingTime)}
                 </span>
               </div>
               <h2 className="max-w-3xl text-4xl font-light leading-tight tracking-normal [overflow-wrap:anywhere] transition duration-500 group-hover:translate-x-1 md:text-6xl">
@@ -126,7 +128,7 @@ function NewsPage() {
                 {featured.preview}
               </p>
               <div className="mt-8 inline-flex items-center gap-3 text-sm uppercase tracking-[0.22em] text-[#D69A66] transition duration-300 group-hover:gap-5">
-                Читать статью <span>→</span>
+                {text("news.readArticle", "Читать статью")} <span>→</span>
               </div>
             </div>
           </Link>
@@ -166,7 +168,7 @@ function NewsPage() {
                     <div className="mb-3 flex items-center gap-3 text-xs text-white/40">
                       <span>{article.date}</span>
                       <span>·</span>
-                      <span>{article.readingTime} чтения</span>
+                      <span>{text("news.readingTimeSuffix", "{time} чтения").replace("{time}", article.readingTime)}</span>
                     </div>
                     <h3 className="text-xl font-light leading-snug tracking-normal [overflow-wrap:anywhere] transition duration-500 group-hover:translate-x-0.5">
                       {article.title}
@@ -175,7 +177,7 @@ function NewsPage() {
                       {article.preview}
                     </p>
                     <div className="mt-5 inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-[#D69A66] transition duration-300 group-hover:gap-3">
-                      Читать <span>→</span>
+                      {text("news.readShort", "Читать")} <span>→</span>
                     </div>
                   </div>
                 </Link>

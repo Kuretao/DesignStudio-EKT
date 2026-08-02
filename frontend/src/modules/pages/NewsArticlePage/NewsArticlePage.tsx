@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { useCms } from "@/src/cms";
+import { useCms, useCmsText } from "@/src/cms";
 import type { NewsArticle } from "@/src/data";
 import CinematicImage from "@/src/components/common/CinematicImage";
 import HeroBackdropSlider from "@/src/components/common/HeroBackdropSlider";
@@ -36,6 +36,7 @@ function BodyBlock({ block }: { block: NewsArticle["body"][number] }) {
 
 function NewsArticlePage({ article }: { article: NewsArticle }) {
   const { newsArticles } = useCms();
+  const text = useCmsText();
   const currentArticle =
     newsArticles.find((a) => a.slug === article.slug) ?? article;
   const related = newsArticles
@@ -72,7 +73,7 @@ function NewsArticlePage({ article }: { article: NewsArticle }) {
             </span>
             <span className="text-sm text-white/50">{currentArticle.date}</span>
             <span className="text-sm text-white/35">
-              {currentArticle.readingTime} чтения
+              {text("news.readingTimeSuffix", "{time} чтения").replace("{time}", currentArticle.readingTime)}
             </span>
           </div>
           <h1 className="max-w-4xl text-[clamp(2.7rem,5.2vw,5.4rem)] font-light leading-[1] tracking-normal [overflow-wrap:anywhere]">
@@ -101,7 +102,7 @@ function NewsArticlePage({ article }: { article: NewsArticle }) {
                   href="/novosti"
                   className="inline-flex items-center gap-3 text-sm uppercase tracking-[0.22em] text-[#D69A66] transition hover:gap-5"
                 >
-                  ← Все новости
+                  {text("newsArticle.backButton", "← Все новости")}
                 </Link>
               </div>
             </div>
@@ -110,26 +111,27 @@ function NewsArticlePage({ article }: { article: NewsArticle }) {
             <aside className="space-y-4 lg:sticky lg:top-32">
               <GlassPanel className="rounded-[1.75rem] p-6">
                 <p className="mb-4 text-xs uppercase tracking-[0.3em] text-[#D69A66]">
-                  Об авторе
+                  {text("newsArticle.author.label", "Об авторе")}
                 </p>
                 <p className="text-sm leading-relaxed text-[#D6D1CA]">
-                  Команда 3D Smart Design Studio — студия концептуального
-                  дизайна. Интерьеры, архитектура, ландшафт и 3D-визуализация.
+                  {text(
+                    "newsArticle.author.text",
+                    "Команда 3D Smart Design Studio — студия концептуального дизайна. Интерьеры, архитектура, ландшафт и 3D-визуализация.",
+                  )}
                 </p>
               </GlassPanel>
               <GlassPanel className="rounded-[1.75rem] p-6">
                 <p className="mb-4 text-xs uppercase tracking-[0.3em] text-[#D69A66]">
-                  Обсудить проект
+                  {text("newsArticle.cta.label", "Обсудить проект")}
                 </p>
                 <p className="mb-5 text-sm leading-relaxed text-[#D6D1CA]">
-                  Есть идея или вопрос? Свяжитесь с нами — ответим в течение
-                  рабочего дня.
+                  {text("newsArticle.cta.text", "Есть идея или вопрос? Свяжитесь с нами — ответим в течение рабочего дня.")}
                 </p>
                 <Link
                   href="/kontakty"
                   className="inline-flex w-full items-center justify-center rounded-full bg-[#D69A66] px-5 py-3 text-xs uppercase tracking-[0.22em] text-[#050505] transition hover:bg-[#F5F2EC]"
                 >
-                  Написать нам
+                  {text("newsArticle.cta.button", "Написать нам")}
                 </Link>
               </GlassPanel>
             </aside>
@@ -142,10 +144,10 @@ function NewsArticlePage({ article }: { article: NewsArticle }) {
         <section className="border-t border-white/10 px-5 py-20 md:px-10 lg:px-16">
           <div className="mx-auto max-w-7xl">
             <p className="mb-3 text-xs uppercase tracking-[0.45em] text-[#D69A66]">
-              Читать также
+              {text("newsArticle.related.label", "Читать также")}
             </p>
             <h2 className="mb-10 text-4xl font-light tracking-[-0.045em] md:text-6xl">
-              Другие новости
+              {text("newsArticle.related.title", "Другие новости")}
             </h2>
             <div className="grid gap-5 md:grid-cols-3">
               {related.map((a, index) => (

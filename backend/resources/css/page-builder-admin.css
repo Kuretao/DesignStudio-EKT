@@ -91,6 +91,46 @@
     gap: 12px;
 }
 
+.page-builder-switch {
+    display: grid;
+    gap: 8px;
+}
+
+.page-builder-switch__item {
+    display: grid;
+    gap: 5px;
+    padding: 14px;
+    border: 1px solid var(--builder-line);
+    border-radius: 14px;
+    background: #fff;
+    color: var(--builder-ink);
+    text-decoration: none;
+    transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+
+.page-builder-switch__item:hover,
+.page-builder-switch__item--active {
+    border-color: rgba(13, 148, 136, .38);
+    box-shadow: 0 14px 36px rgba(15, 23, 42, .08);
+    transform: translateY(-1px);
+}
+
+.page-builder-switch__item--active {
+    background: linear-gradient(135deg, rgba(13, 148, 136, .12), rgba(124, 58, 237, .08));
+}
+
+.page-builder-switch__item strong {
+    color: var(--builder-ink);
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.page-builder-switch__item span {
+    color: var(--builder-muted);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
 .page-builder__sidebar-head,
 .page-builder-selected__head,
 .page-builder-block,
@@ -384,6 +424,11 @@
     margin-top: 8px;
 }
 
+.page-builder-permanent-editor {
+    display: grid;
+    gap: 14px;
+}
+
 .page-builder-home-map__head {
     padding: 22px;
     border: 1px solid var(--builder-line);
@@ -449,8 +494,124 @@
     overflow-wrap: anywhere;
 }
 
+.page-builder-section-card code {
+    width: max-content;
+    max-width: 100%;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: rgba(15, 23, 42, .06);
+    color: #475569;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
 .page-builder-section-card p {
     margin: 0;
+    color: var(--builder-muted);
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.page-builder-permanent-editor__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.page-builder-permanent-editor__actions a,
+.page-builder-group-chip,
+.page-builder-ui-field > a {
+    display: inline-flex;
+    min-height: 36px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    border: 1px solid rgba(15, 23, 42, .12);
+    border-radius: 9px;
+    background: #fff;
+    color: var(--builder-ink);
+    font-size: 12px;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.page-builder-group-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.page-builder-group-chip--active {
+    border-color: rgba(13, 148, 136, .36);
+    background: #0f766e;
+    color: #fff;
+}
+
+.page-builder-permanent-editor__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 18px 20px;
+    border: 1px solid var(--builder-line);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .86);
+}
+
+.page-builder-permanent-editor__head h4 {
+    margin: 0;
+    color: var(--builder-ink);
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.page-builder-permanent-editor__head span {
+    color: var(--builder-muted);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.page-builder-ui-fields {
+    display: grid;
+    gap: 10px;
+}
+
+.page-builder-ui-field {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    gap: 16px;
+    align-items: center;
+    padding: 16px;
+    border: 1px solid var(--builder-line);
+    border-radius: 14px;
+    background: #fff;
+}
+
+.page-builder-ui-field h5 {
+    margin: 10px 0 7px;
+    color: var(--builder-ink);
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.page-builder-ui-field code {
+    display: inline-flex;
+    width: max-content;
+    max-width: 100%;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: rgba(15, 23, 42, .06);
+    color: #475569;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.page-builder-ui-field p {
+    margin: 9px 0 0;
     color: var(--builder-muted);
     font-size: 13px;
     line-height: 1.5;
@@ -479,6 +640,7 @@
 }
 
 .dark .page-builder__sidebar-head,
+.dark .page-builder-switch__item,
 .dark .page-builder-selected__head,
 .dark .page-builder-block,
 .dark .page-builder-empty,
@@ -486,6 +648,8 @@
 .dark .page-builder-create,
 .dark .page-builder-home-map__head,
 .dark .page-builder-section-card,
+.dark .page-builder-permanent-editor__head,
+.dark .page-builder-ui-field,
 .dark .page-block-editor-tip {
     border-color: rgba(148, 163, 184, .2);
     background: rgba(15, 23, 42, .56);
@@ -495,13 +659,20 @@
     background: linear-gradient(135deg, rgba(13, 148, 136, .18), rgba(124, 58, 237, .14));
 }
 
+.dark .page-builder-switch__item--active {
+    background: linear-gradient(135deg, rgba(13, 148, 136, .2), rgba(124, 58, 237, .14));
+}
+
 .dark .page-builder__sidebar-head strong,
+.dark .page-builder-switch__item strong,
 .dark .page-builder-empty strong,
 .dark .page-builder-page,
 .dark .page-builder-page__title,
 .dark .page-builder-selected h2,
 .dark .page-builder-create strong,
 .dark .page-builder-home-map__head h3,
+.dark .page-builder-permanent-editor__head h4,
+.dark .page-builder-ui-field h5,
 .dark .page-builder-section-card h4,
 .dark .page-builder-block h3,
 .dark .page-builder-selected code {
@@ -509,17 +680,22 @@
 }
 
 .dark .page-builder__sidebar-head span,
+.dark .page-builder-switch__item span,
 .dark .page-builder-empty span,
 .dark .page-builder-page__meta,
 .dark .page-builder-block p,
 .dark .page-builder-create span,
 .dark .page-builder-home-map__head span,
+.dark .page-builder-permanent-editor__head span,
+.dark .page-builder-ui-field p,
 .dark .page-builder-section-card p,
 .dark .page-block-editor-tip span {
     color: rgba(226, 232, 240, .72);
 }
 
 .dark .page-builder-page code,
+.dark .page-builder-section-card code,
+.dark .page-builder-ui-field code,
 .dark .page-builder-selected code,
 .dark .page-builder-block__chips span {
     background: rgba(148, 163, 184, .12);
@@ -533,16 +709,26 @@
 }
 
 .dark .page-builder-create a,
-.dark .page-builder-section-card a {
+.dark .page-builder-section-card a,
+.dark .page-builder-permanent-editor__actions a,
+.dark .page-builder-group-chip,
+.dark .page-builder-ui-field > a {
     border-color: rgba(148, 163, 184, .22);
     background: rgba(15, 23, 42, .72);
     color: #f8fafc;
+}
+
+.dark .page-builder-group-chip--active {
+    border-color: rgba(45, 212, 191, .36);
+    background: #0f766e;
+    color: #fff;
 }
 
 @media (max-width: 1180px) {
     .page-builder__hero,
     .page-builder__layout,
     .page-builder-block,
+    .page-builder-ui-field,
     .page-builder-home-map__grid {
         grid-template-columns: 1fr;
     }

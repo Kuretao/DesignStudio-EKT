@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useCms } from "@/src/cms";
+import { useCms, useCmsText } from "@/src/cms";
 import type { Project, ProjectCategory } from "@/src/types";
 import CinematicImage from "@/src/components/common/CinematicImage";
 import HeroBackdropSlider from "@/src/components/common/HeroBackdropSlider";
@@ -105,8 +105,27 @@ function uniqueImages(images: Array<string | undefined>) {
   return Array.from(new Set(images.filter(Boolean))) as string[];
 }
 
-function getProjectCopy(project: Project) {
-  return projectCaseCopy[project.category] ?? fallbackCaseCopy;
+function projectCaseId(project: Project) {
+  if (project.category === "Архитектура") return "architecture";
+  if (project.category === "Ландшафт") return "landscape";
+  return "interiors";
+}
+
+function getProjectCopy(project: Project, text: (key: string, fallback?: string) => string) {
+  const copy = projectCaseCopy[project.category] ?? fallbackCaseCopy;
+  const id = projectCaseId(project);
+
+  return {
+    focus: text(`portfolioCase.${id}.focus`, copy.focus),
+    intro: text(`portfolioCase.${id}.intro`, copy.intro),
+    chapters: copy.chapters.map((chapter, index) => ({
+      title: text(`portfolioCase.${id}.chapters.${index + 1}.title`, chapter.title),
+      text: text(`portfolioCase.${id}.chapters.${index + 1}.text`, chapter.text),
+    })),
+    deliverables: copy.deliverables.map((item, index) => text(`portfolioCase.${id}.deliverables.${index + 1}`, item)),
+    process: copy.process.map((item, index) => text(`portfolioCase.${id}.process.${index + 1}`, item)),
+    values: copy.values.map((item, index) => text(`portfolioCase.${id}.values.${index + 1}`, item)),
+  };
 }
 
 function getRelatedProjects(projects: Project[], project: Project) {
@@ -117,11 +136,12 @@ function getRelatedProjects(projects: Project[], project: Project) {
 }
 
 function MetricStrip({ project, copy }: { project: Project; copy: ProjectCaseCopy }) {
+  const text = useCmsText();
   const metrics = [
-    ["Тип", project.category],
-    ["Локация", project.location || "Удаленный проект"],
-    ["Год", project.year || "В работе"],
-    ["Фокус", copy.values[0]],
+    [text("portfolioCase.metrics.type", "Тип"), project.category],
+    [text("portfolioCase.metrics.location", "Локация"), project.location || text("portfolioCase.metrics.remote", "Удаленный проект")],
+    [text("portfolioCase.metrics.year", "Год"), project.year || text("portfolioCase.metrics.inProgress", "В работе")],
+    [text("portfolioCase.metrics.focus", "Фокус"), copy.values[0]],
   ];
 
   return (
@@ -139,6 +159,7 @@ function MetricStrip({ project, copy }: { project: Project; copy: ProjectCaseCop
 }
 
 function ProjectHero({ project, gallery, copy }: { project: Project; gallery: string[]; copy: ProjectCaseCopy }) {
+  const text = useCmsText();
   return (
     <section className="relative min-h-[92vh] overflow-hidden px-5 pb-16 pt-28 md:px-10 lg:px-16">
       <HeroBackdropSlider
@@ -151,7 +172,7 @@ function ProjectHero({ project, gallery, copy }: { project: Project; gallery: st
       <div className="relative z-10 mx-auto grid min-h-[calc(92vh-7rem)] max-w-7xl gap-10 lg:grid-cols-[1fr_360px] lg:items-end">
         <div className="pb-14">
           <Link href="/portfolio" className="mb-8 inline-flex items-center gap-3 text-sm text-[#D69A66] transition hover:text-[#F5F2EC]">
-            ← Портфолио
+            {text("portfolioCase.hero.backButton", "← Портфолио")}
           </Link>
           <p className="text-xs uppercase text-[#D69A66]">{copy.focus}</p>
           <h1 className="mt-5 max-w-5xl text-[clamp(2.75rem,5.4vw,5.6rem)] font-light leading-[0.96] text-white">
@@ -165,24 +186,24 @@ function ProjectHero({ project, gallery, copy }: { project: Project; gallery: st
               href="#case-story"
               className="rounded-full border border-[#D69A66] bg-[#D69A66] px-6 py-4 text-xs uppercase text-[#050505] transition duration-300 hover:-translate-y-0.5 hover:bg-[#E3AD7B]"
             >
-              Читать кейс
+              {text("portfolioCase.hero.readButton", "Читать кейс")}
             </a>
             <Link
               href="/kontakty"
               className="rounded-full border border-white/15 bg-black/25 px-6 py-4 text-xs uppercase text-white/75 backdrop-blur transition duration-300 hover:border-[#D69A66]/70 hover:text-white"
             >
-              Обсудить похожий
+              {text("portfolioCase.hero.discussButton", "Обсудить похожий")}
             </Link>
           </div>
         </div>
 
         <GlassPanel className="mb-14 rounded-[2rem] p-6">
-          <p className="text-xs uppercase text-[#D69A66]">Паспорт проекта</p>
+          <p className="text-xs uppercase text-[#D69A66]">{text("portfolioCase.passport.label", "Паспорт проекта")}</p>
           <div className="mt-5 divide-y divide-white/10">
             {[
-              ["Направление", project.category],
-              ["Локация", project.location || "Удаленно"],
-              ["Год", project.year || "В работе"],
+              [text("portfolioCase.passport.direction", "Направление"), project.category],
+              [text("portfolioCase.passport.location", "Локация"), project.location || text("portfolioCase.passport.remote", "Удаленно")],
+              [text("portfolioCase.passport.year", "Год"), project.year || text("portfolioCase.passport.inProgress", "В работе")],
             ].map(([label, value]) => (
               <div key={label} className="flex items-center justify-between gap-5 py-4">
                 <span className="text-sm text-white/45">{label}</span>
@@ -200,11 +221,12 @@ function ProjectHero({ project, gallery, copy }: { project: Project; gallery: st
 }
 
 function CaseNavigation() {
+  const text = useCmsText();
   const items = [
-    ["История", "#case-story"],
-    ["Галерея", "#case-gallery"],
-    ["До / после", "#case-compare"],
-    ["Похожие", "#case-related"],
+    [text("portfolioCase.nav.story", "История"), "#case-story"],
+    [text("portfolioCase.nav.gallery", "Галерея"), "#case-gallery"],
+    [text("portfolioCase.nav.compare", "До / после"), "#case-compare"],
+    [text("portfolioCase.nav.related", "Похожие"), "#case-related"],
   ];
 
   return (
@@ -225,13 +247,14 @@ function CaseNavigation() {
 }
 
 function ProjectStory({ project, copy }: { project: Project; copy: ProjectCaseCopy }) {
+  const text = useCmsText();
   return (
     <section id="case-story" className="scroll-mt-36 px-5 py-24 md:px-10 lg:px-16">
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.8fr_1.2fr]">
         <div className="lg:sticky lg:top-36 lg:self-start">
-          <SectionLabel>История проекта</SectionLabel>
+          <SectionLabel>{text("portfolioCase.story.label", "История проекта")}</SectionLabel>
           <h2 className="max-w-3xl text-4xl font-light leading-tight text-[#F5F2EC] md:text-6xl">
-            Что важно увидеть в этом кейсе
+            {text("portfolioCase.story.title", "Что важно увидеть в этом кейсе")}
           </h2>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-[#D6D1CA]">
             {project.description}
@@ -255,12 +278,13 @@ function ProjectStory({ project, copy }: { project: Project; copy: ProjectCaseCo
 }
 
 function Deliverables({ copy }: { copy: ProjectCaseCopy }) {
+  const text = useCmsText();
   return (
     <section className="border-y border-white/10 px-5 py-20 md:px-10 lg:px-16">
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
         <div>
-          <SectionLabel>Состав</SectionLabel>
-          <h2 className="text-4xl font-light leading-tight md:text-6xl">Что входит в проектную подачу</h2>
+          <SectionLabel>{text("portfolioCase.deliverables.label", "Состав")}</SectionLabel>
+          <h2 className="text-4xl font-light leading-tight md:text-6xl">{text("portfolioCase.deliverables.title", "Что входит в проектную подачу")}</h2>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {copy.deliverables.map((item, index) => (
@@ -284,8 +308,15 @@ function ProjectGallery({
   gallery: string[];
   related: Project[];
 }) {
+  const text = useCmsText();
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const labels = ["Главный ракурс", "Финальная подача", "Исходная сцена", "Материалы", "Контекст"];
+  const labels = [
+    text("portfolioCase.gallery.label1", "Главный ракурс"),
+    text("portfolioCase.gallery.label2", "Финальная подача"),
+    text("portfolioCase.gallery.label3", "Исходная сцена"),
+    text("portfolioCase.gallery.label4", "Материалы"),
+    text("portfolioCase.gallery.label5", "Контекст"),
+  ];
   const lightboxImage = lightboxIndex === null ? null : gallery[lightboxIndex];
   const currentLightboxIndex = lightboxIndex ?? 0;
 
@@ -294,11 +325,11 @@ function ProjectGallery({
       <div className="mx-auto max-w-7xl">
         <div className="mb-12 grid gap-8 md:grid-cols-[1fr_0.8fr] md:items-end">
           <div>
-            <SectionLabel>Галерея</SectionLabel>
-            <h2 className="text-4xl font-light leading-tight md:text-6xl">Ракурсы и детали проекта</h2>
+            <SectionLabel>{text("portfolioCase.gallery.sectionLabel", "Галерея")}</SectionLabel>
+            <h2 className="text-4xl font-light leading-tight md:text-6xl">{text("portfolioCase.gallery.title", "Ракурсы и детали проекта")}</h2>
           </div>
           <p className="text-lg leading-relaxed text-[#D6D1CA]">
-            Изображения собраны в удобный просмотр: можно открыть крупный кадр и быстро переключиться между визуальными состояниями.
+            {text("portfolioCase.gallery.text", "Изображения собраны в удобный просмотр: можно открыть крупный кадр и быстро переключиться между визуальными состояниями.")}
           </p>
         </div>
 
@@ -346,12 +377,12 @@ function ProjectGallery({
           className="fixed inset-0 z-[140] flex items-center justify-center bg-[#050505]/90 p-4 backdrop-blur-xl md:p-8"
           role="dialog"
           aria-modal="true"
-          aria-label={`Просмотр изображения проекта ${project.title}`}
+          aria-label={`${text("portfolioCase.lightboxAria", "Просмотр изображения проекта")} ${project.title}`}
           onClick={() => setLightboxIndex(null)}
         >
           <button
             type="button"
-            aria-label="Закрыть просмотр"
+            aria-label={text("portfolioCase.closeViewAria", "Закрыть просмотр")}
             onClick={() => setLightboxIndex(null)}
             className="absolute right-5 top-5 z-10 grid h-11 w-11 place-items-center rounded-full border border-white/15 bg-white/10 text-2xl leading-none text-white transition hover:border-[#D69A66]/60 hover:text-[#D69A66]"
           >
@@ -359,7 +390,7 @@ function ProjectGallery({
           </button>
           <button
             type="button"
-            aria-label="Предыдущее изображение"
+            aria-label={text("portfolioCase.prevImageAria", "Предыдущее изображение")}
             onClick={(event) => {
               event.stopPropagation();
               setLightboxIndex((current) => (current === null ? current : (current - 1 + gallery.length) % gallery.length));
@@ -376,7 +407,7 @@ function ProjectGallery({
           />
           <button
             type="button"
-            aria-label="Следующее изображение"
+            aria-label={text("portfolioCase.nextImageAria", "Следующее изображение")}
             onClick={(event) => {
               event.stopPropagation();
               setLightboxIndex((current) => (current === null ? current : (current + 1) % gallery.length));
@@ -403,29 +434,30 @@ function CompareBlock({
   beforeImage: string;
   afterImage: string;
 }) {
+  const text = useCmsText();
   const [compare, setCompare] = useState(52);
 
   return (
     <section id="case-compare" className="scroll-mt-36 border-y border-white/10 px-5 py-24 md:px-10 lg:px-16">
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
         <div>
-          <SectionLabel>До / после</SectionLabel>
-          <h2 className="text-4xl font-light leading-tight md:text-6xl">Сравнение визуального сценария</h2>
+          <SectionLabel>{text("portfolioCase.compare.label", "До / после")}</SectionLabel>
+          <h2 className="text-4xl font-light leading-tight md:text-6xl">{text("portfolioCase.compare.title", "Сравнение визуального сценария")}</h2>
           <p className="mt-6 text-lg leading-relaxed text-[#D6D1CA]">
-            Ползунок помогает быстро увидеть разницу между исходным состоянием и финальной проектной подачей.
+            {text("portfolioCase.compare.text", "Ползунок помогает быстро увидеть разницу между исходным состоянием и финальной проектной подачей.")}
           </p>
         </div>
 
         <div className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.025]">
           <img
             src={beforeImage}
-            alt={`${project.title}: до`}
+            alt={`${project.title}: ${text("portfolioCase.compare.before", "до")}`}
             className="h-[560px] w-full object-cover transition duration-700 group-hover:scale-[1.02]"
           />
           <div className="absolute inset-y-0 left-0 overflow-hidden" style={{ width: `${compare}%` }}>
             <img
               src={afterImage}
-              alt={`${project.title}: после`}
+              alt={`${project.title}: ${text("portfolioCase.compare.after", "после")}`}
               className="h-[560px] w-[calc(100vw-40px)] max-w-none object-cover transition duration-700 group-hover:scale-[1.02] lg:w-[760px]"
             />
           </div>
@@ -439,13 +471,13 @@ function CompareBlock({
             style={{ left: `${compare}%` }}
           />
           <div className="absolute left-5 top-5 rounded-full border border-white/15 bg-[#050505]/55 px-4 py-2 text-xs text-white/70 backdrop-blur">
-            До
+            {text("portfolioCase.compare.beforeLabel", "До")}
           </div>
           <div className="absolute right-5 top-5 rounded-full border border-[#D69A66]/35 bg-[#050505]/55 px-4 py-2 text-xs text-[#D69A66] backdrop-blur">
-            После
+            {text("portfolioCase.compare.afterLabel", "После")}
           </div>
           <input
-            aria-label="Сравнение до и после"
+            aria-label={text("portfolioCase.compareAria", "Сравнение до и после")}
             type="range"
             min="0"
             max="100"
@@ -460,16 +492,17 @@ function CompareBlock({
 }
 
 function ProcessBlock({ copy }: { copy: ProjectCaseCopy }) {
+  const text = useCmsText();
   return (
     <section className="px-5 py-24 md:px-10 lg:px-16">
       <div className="mx-auto max-w-7xl">
         <div className="mb-12 grid gap-8 md:grid-cols-[1fr_0.8fr] md:items-end">
           <div>
-            <SectionLabel>Процесс</SectionLabel>
-            <h2 className="text-4xl font-light leading-tight md:text-6xl">Как проект становится понятным</h2>
+            <SectionLabel>{text("portfolioCase.process.label", "Процесс")}</SectionLabel>
+            <h2 className="text-4xl font-light leading-tight md:text-6xl">{text("portfolioCase.process.title", "Как проект становится понятным")}</h2>
           </div>
           <p className="text-lg leading-relaxed text-[#D6D1CA]">
-            Каждый этап делает следующую встречу короче: меньше догадок, больше проверенных решений и ясных материалов для согласования.
+            {text("portfolioCase.process.text", "Каждый этап делает следующую встречу короче: меньше догадок, больше проверенных решений и ясных материалов для согласования.")}
           </p>
         </div>
 
@@ -487,6 +520,7 @@ function ProcessBlock({ copy }: { copy: ProjectCaseCopy }) {
 }
 
 function RelatedProjects({ project, related }: { project: Project; related: Project[] }) {
+  const text = useCmsText();
   if (!related.length) return null;
 
   return (
@@ -494,11 +528,11 @@ function RelatedProjects({ project, related }: { project: Project; related: Proj
       <div className="mx-auto max-w-7xl">
         <div className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div>
-            <SectionLabel>Похожие проекты</SectionLabel>
-            <h2 className="text-4xl font-light leading-tight md:text-6xl">Можно открыть дальше</h2>
+            <SectionLabel>{text("portfolioCase.related.label", "Похожие проекты")}</SectionLabel>
+            <h2 className="text-4xl font-light leading-tight md:text-6xl">{text("portfolioCase.related.title", "Можно открыть дальше")}</h2>
           </div>
           <Link href="/portfolio" className="text-sm uppercase text-[#D69A66] transition hover:text-[#F5F2EC]">
-            Все портфолио →
+            {text("portfolioCase.related.allButton", "Все портфолио →")}
           </Link>
         </div>
 
@@ -529,6 +563,7 @@ function RelatedProjects({ project, related }: { project: Project; related: Proj
 }
 
 function ProjectCta({ project }: { project: Project }) {
+  const text = useCmsText();
   return (
     <section className="px-5 pb-28 pt-10 md:px-10 lg:px-16">
       <div className="mx-auto overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] md:max-w-7xl">
@@ -538,25 +573,25 @@ function ProjectCta({ project }: { project: Project }) {
             <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/60 via-transparent to-transparent" />
           </div>
           <div className="p-7 md:p-10 lg:p-12">
-            <p className="text-xs uppercase text-[#D69A66]">Следующий шаг</p>
+            <p className="text-xs uppercase text-[#D69A66]">{text("portfolioCase.cta.label", "Следующий шаг")}</p>
             <h2 className="mt-4 max-w-3xl text-4xl font-light leading-tight text-white md:text-6xl">
-              Нужен проект с такой же ясной подачей?
+              {text("portfolioCase.cta.title", "Нужен проект с такой же ясной подачей?")}
             </h2>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-[#D6D1CA]">
-              Расскажите о задаче, площади, сроках и формате работы. Мы предложим понятный маршрут: от брифа до визуальной или рабочей документации.
+              {text("portfolioCase.cta.text", "Расскажите о задаче, площади, сроках и формате работы. Мы предложим понятный маршрут: от брифа до визуальной или рабочей документации.")}
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Link
                 href="/kontakty"
                 className="rounded-full bg-[#D69A66] px-6 py-4 text-xs uppercase text-[#050505] transition hover:bg-[#F5F2EC]"
               >
-                Обсудить проект
+                {text("portfolioCase.cta.primaryButton", "Обсудить проект")}
               </Link>
               <Link
                 href="/services"
                 className="rounded-full border border-white/15 px-6 py-4 text-xs uppercase text-[#D6D1CA] transition hover:border-[#D69A66] hover:text-white"
               >
-                Услуги студии
+                {text("portfolioCase.cta.secondaryButton", "Услуги студии")}
               </Link>
             </div>
           </div>
@@ -568,9 +603,10 @@ function ProjectCta({ project }: { project: Project }) {
 
 function PortfolioProjectPage({ project }: { project: Project }) {
   const { projects } = useCms();
+  const text = useCmsText();
   const currentProject = projects.find((item) => item.slug === project.slug) ?? project;
   const related = useMemo(() => getRelatedProjects(projects.length ? projects : [project], currentProject), [currentProject, project, projects]);
-  const copy = getProjectCopy(currentProject);
+  const copy = getProjectCopy(currentProject, text);
   const gallery = useMemo(
     () =>
       uniqueImages([

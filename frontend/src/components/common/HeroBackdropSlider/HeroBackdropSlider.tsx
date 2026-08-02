@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useCmsText } from "@/src/cms";
 import { optimizeImageUrl } from "@/src/utils/images";
 
 type HeroBackdropSlide = {
@@ -21,6 +22,7 @@ export default function HeroBackdropSlider({
   className = "",
   controlsClassName = "",
 }: HeroBackdropSliderProps) {
+  const text = useCmsText();
   const cleanSlides = useMemo(
     () =>
       Array.from(
@@ -109,7 +111,7 @@ export default function HeroBackdropSlider({
               <button
                 key={`${slide.image}-dot`}
                 type="button"
-                aria-label={`Слайд ${index + 1}`}
+                aria-label={text("slider.dotAria", "Слайд {number}").replace("{number}", String(index + 1))}
                 onClick={() => setActiveSlide(index)}
                 className={`h-1.5 rounded-full transition-all duration-500 ${
                   activeSlide === index ? "w-12 bg-[#D69A66]" : "w-5 bg-white/30 hover:bg-white/60"
@@ -121,7 +123,7 @@ export default function HeroBackdropSlider({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              aria-label="Предыдущий слайд"
+              aria-label={text("slider.prevAria", "Предыдущий слайд")}
               onClick={() => moveSlide(-1)}
               className="grid h-12 w-12 place-items-center rounded-full border border-white/15 bg-black/25 text-xl text-white backdrop-blur transition hover:border-[#D69A66]/70 hover:text-[#D69A66]"
             >
@@ -129,7 +131,7 @@ export default function HeroBackdropSlider({
             </button>
             <button
               type="button"
-              aria-label="Следующий слайд"
+              aria-label={text("slider.nextAria", "Следующий слайд")}
               onClick={() => moveSlide(1)}
               className="grid h-12 w-12 place-items-center rounded-full border border-white/15 bg-black/25 text-xl text-white backdrop-blur transition hover:border-[#D69A66]/70 hover:text-[#D69A66]"
             >
