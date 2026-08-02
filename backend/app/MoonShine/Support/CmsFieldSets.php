@@ -605,8 +605,9 @@ final class CmsFieldSets
             ],
             'media' => [
                 Textarea::make('Изображения / слайды', 'image')
+                    ->customAttributes(['data-gallery-lines' => '1'])
                     ->placeholder("/images/cms/slide-1.webp\n/images/cms/slide-2.webp")
-                    ->hint('Укажите полный URL или путь из хранилища. Для слайдера и галереи добавляйте каждую картинку с новой строки.'),
+                    ->hint('Выберите изображения из галереи или укажите URL. Для слайдера и галереи добавляйте каждую картинку с новой строки.'),
                 Text::make('Alt изображения RU', 'image_alt_ru')
                     ->placeholder('Интерьер гостиной в современном стиле')
                     ->hint('Описание изображения для доступности и SEO. Если пусто, сайт возьмет заголовок блока.'),
@@ -698,7 +699,8 @@ final class CmsFieldSets
                 ->removable()
                 ->hint('Загрузите файл на сервер. Имеет приоритет над URL ниже.'),
             Textarea::make('Или URL главного изображения', 'image')
-                ->hint('Вставьте внешнюю ссылку. Используется если файл выше не загружен.'),
+                ->customAttributes(['data-gallery-lines' => '1'])
+                ->hint('Вставьте путь из галереи или внешнюю ссылку. Используется если файл выше не загружен.'),
             Image::make('Загрузить изображение «До»', 'before_image_file')
                 ->disk('public')
                 ->dir('projects')
@@ -707,7 +709,8 @@ final class CmsFieldSets
                 ->removable()
                 ->hint('Загрузите файл на сервер. Имеет приоритет над URL ниже.'),
             Textarea::make('Или URL изображения «До»', 'before_image')
-                ->hint('Вставьте внешнюю ссылку. Используется если файл выше не загружен.'),
+                ->customAttributes(['data-gallery-lines' => '1'])
+                ->hint('Вставьте путь из галереи или внешнюю ссылку. Используется если файл выше не загружен.'),
             Image::make('Загрузить изображение «После»', 'after_image_file')
                 ->disk('public')
                 ->dir('projects')
@@ -716,7 +719,8 @@ final class CmsFieldSets
                 ->removable()
                 ->hint('Загрузите файл на сервер. Имеет приоритет над URL ниже.'),
             Textarea::make('Или URL изображения «После»', 'after_image')
-                ->hint('Вставьте внешнюю ссылку. Используется если файл выше не загружен.'),
+                ->customAttributes(['data-gallery-lines' => '1'])
+                ->hint('Вставьте путь из галереи или внешнюю ссылку. Используется если файл выше не загружен.'),
             Switcher::make('Избранный', 'is_featured'),
         ];
     }
@@ -794,11 +798,13 @@ final class CmsFieldSets
                     ->removable()
                     ->hint('Файл для карточки и первого слайда. Имеет приоритет над URL ниже.'),
                 Textarea::make('Или URL главной обложки', 'image')
+                    ->customAttributes(['data-gallery-lines' => '1'])
                     ->placeholder('/images/cms/service.webp или https://...')
-                    ->hint('Запасной вариант, если файл не загружен. Вставляйте один URL или путь.'),
+                    ->hint('Запасной вариант, если файл не загружен. Можно выбрать изображение из галереи.'),
                 Textarea::make('Слайды услуги, по одному URL в строке', 'hero_images')
+                    ->customAttributes(['data-gallery-lines' => '1'])
                     ->placeholder("/images/cms/slide-1.webp\n/images/cms/slide-2.webp")
-                    ->hint('Карусель на посадочной странице услуги. Первый слайд можно не дублировать: главная обложка добавится автоматически.'),
+                    ->hint('Карусель на посадочной странице услуги. Нажмите "Вставить из галереи" и добавляйте слайды построчно.'),
             ],
             'lists' => [
                 Textarea::make('Что входит RU, по одному пункту в строке', 'deliverables_ru')
@@ -806,6 +812,10 @@ final class CmsFieldSets
                     ->hint('Список документов, результатов или частей услуги. Каждый пункт с новой строки.'),
                 Textarea::make('Что входит EN, по одному пункту в строке', 'deliverables_en')
                     ->hint('Английская версия списка результатов.'),
+                Textarea::make('Картинки для пунктов "что входит", по одному изображению в строке', 'deliverable_images')
+                    ->customAttributes(['data-gallery-lines' => '1'])
+                    ->placeholder("/images/cms/sheet-1.webp\n/images/cms/sheet-2.webp")
+                    ->hint('Порядок строк соответствует пунктам "Что входит". Если строк меньше, сайт подставит обложку услуги.'),
                 Textarea::make('Преимущества RU, по одному пункту в строке', 'benefits_ru')
                     ->placeholder("Понятный бюджет\nКонтроль материалов\nМеньше переделок")
                     ->hint('Короткие выгоды услуги. Лучше 3-6 пунктов.'),
@@ -910,11 +920,13 @@ final class CmsFieldSets
                     ->removable()
                     ->hint('Файл для карточки новости и первого слайда. Имеет приоритет над URL ниже.'),
                 Textarea::make('Или URL главной обложки', 'image')
+                    ->customAttributes(['data-gallery-lines' => '1'])
                     ->placeholder('/images/cms/news.webp или https://...')
-                    ->hint('Запасной вариант, если файл не загружен. Вставляйте один URL или путь.'),
+                    ->hint('Запасной вариант, если файл не загружен. Можно выбрать изображение из галереи.'),
                 Textarea::make('Слайды новости, по одному URL в строке', 'hero_images')
+                    ->customAttributes(['data-gallery-lines' => '1'])
                     ->placeholder("/images/cms/news-slide-1.webp\n/images/cms/news-slide-2.webp")
-                    ->hint('Карусель в первом экране статьи и на странице новостей. Главную обложку можно не дублировать.'),
+                    ->hint('Карусель в первом экране статьи и на странице новостей. Добавляйте изображения из галереи построчно.'),
             ],
             'publish' => [
                 Number::make('Позиция', 'position')
@@ -960,7 +972,8 @@ final class CmsFieldSets
                 ->removable()
                 ->hint('Загрузите файл — он сохранится в хранилище. Если загружен файл, он имеет приоритет над URL ниже.'),
             Textarea::make('Или URL изображения', 'image')
-                ->hint('Вставьте внешнюю ссылку (например, Unsplash). Используется только если файл выше не загружен.'),
+                ->customAttributes(['data-gallery-lines' => '1'])
+                ->hint('Вставьте путь из галереи или внешнюю ссылку. Используется только если файл выше не загружен.'),
         ];
     }
 
@@ -989,7 +1002,8 @@ final class CmsFieldSets
                 ->removable()
                 ->hint('Загрузите файл — он сохранится в хранилище. Если загружен файл, он имеет приоритет над URL ниже.'),
             Textarea::make('Или URL изображения', 'image')
-                ->hint('Вставьте внешнюю ссылку. Используется только если файл выше не загружен.'),
+                ->customAttributes(['data-gallery-lines' => '1'])
+                ->hint('Вставьте путь из галереи или внешнюю ссылку. Используется только если файл выше не загружен.'),
         ];
     }
 
@@ -1013,7 +1027,8 @@ final class CmsFieldSets
                 ->removable()
                 ->hint('Загрузите файл — он сохранится в хранилище. Если загружен файл, он имеет приоритет над URL ниже.'),
             Textarea::make('Или URL логотипа', 'logo')
-                ->hint('Вставьте внешнюю ссылку. Используется только если файл выше не загружен.'),
+                ->customAttributes(['data-gallery-lines' => '1'])
+                ->hint('Вставьте путь из галереи или внешнюю ссылку. Используется только если файл выше не загружен.'),
         ];
     }
 
@@ -1039,7 +1054,8 @@ final class CmsFieldSets
             Textarea::make('Текст EN', 'text_en'),
             Textarea::make('Ответ администратора RU', 'admin_reply_ru'),
             Textarea::make('Ответ администратора EN', 'admin_reply_en'),
-            Textarea::make('URL изображения или путь в хранилище', 'image'),
+            Textarea::make('URL изображения или путь в хранилище', 'image')
+                ->customAttributes(['data-gallery-lines' => '1']),
         ];
     }
 

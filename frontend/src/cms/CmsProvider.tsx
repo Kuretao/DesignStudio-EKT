@@ -314,6 +314,7 @@ function localizeService(service: any, locale: SiteLocale) {
   const images = normalizeImageList(
     service?.images?.length ? service.images : service?.heroImages,
   );
+  const deliverableImages = normalizeImageList(service?.deliverableImages);
 
   return {
     ...service,
@@ -323,6 +324,7 @@ function localizeService(service: any, locale: SiteLocale) {
     text: localizeString(service, "text", locale, service?.text ?? "") ?? "",
     image: images[0] ?? optimizeImageUrl(service?.image, 1400, 76),
     images,
+    deliverableImages,
     price: localizeString(service, "price", locale, service?.price ?? "") ?? "",
     timeline:
       localizeString(service, "timeline", locale, service?.timeline ?? "") ??
@@ -510,6 +512,11 @@ function mergeServiceItems(payloadServices: any[]) {
         Array.isArray(service.process) && service.process.length
           ? service.process
           : fallback.process,
+      deliverableImages:
+        Array.isArray(service.deliverableImages) &&
+        service.deliverableImages.length
+          ? service.deliverableImages
+          : [],
       image: service.image || fallback.image,
       price: service.price || fallback.price,
       timeline: service.timeline || fallback.timeline,

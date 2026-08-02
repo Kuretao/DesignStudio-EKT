@@ -143,12 +143,9 @@ class PageContentBuilderPage extends Page
         $title = e($page->fieldRu('title') ?: $page->title ?: 'Без названия');
         $path = $page->slug === 'home' ? 'Главная страница' : '/' . e(ltrim((string) $page->slug, '/'));
         $pageEditUrl = e($this->moonshineResourcePageUrl(PageResource::class, PageFormPage::class, $page->getKey()));
-        $createUrl = $this->createBlockUrl($page, 'hero');
-        $createUrlEscaped = e($createUrl);
-        $createButtons = $this->createBlockButtons($page);
         $blocks = $page->blocks->isNotEmpty()
             ? $page->blocks->map(fn (PageBlock $block): string => $this->blockCard($block))->implode('')
-            : $this->noBlocksHtml($createUrl);
+            : $this->noBlocksHtml();
         $homeSections = $page->slug === 'home' ? $this->homeSectionsHtml() : '';
 
         return <<<HTML
@@ -161,14 +158,7 @@ class PageContentBuilderPage extends Page
                 </div>
                 <div class="page-builder-selected__actions">
                     <a href="{$pageEditUrl}">Настройки страницы</a>
-                    <a class="page-builder-selected__primary" href="{$createUrlEscaped}">+ Добавить блок</a>
                 </div>
-            </div>
-
-            <div class="page-builder-create">
-                <strong>Добавить блок по типу</strong>
-                <span>Форма откроется сразу с нужными полями, без лишних кнопок и медиа там, где их нет.</span>
-                <div>{$createButtons}</div>
             </div>
 
             <div class="page-builder-blocks">
@@ -178,29 +168,6 @@ class PageContentBuilderPage extends Page
             {$homeSections}
         </div>
         HTML;
-    }
-
-    private function createBlockButtons(ContentPage $page): string
-    {
-        return collect([
-            'hero' => 'Hero',
-            'text' => 'Текст',
-            'media' => 'Медиа',
-            'gallery' => 'Галерея',
-            'quote' => 'Цитата',
-            'cta' => 'CTA',
-        ])->map(fn (string $label, string $type): string => sprintf(
-            '<a href="%s">%s</a>',
-            e($this->createBlockUrl($page, $type)),
-            e($label),
-        ))->implode('');
-    }
-
-    private function createBlockUrl(ContentPage $page, string $type): string
-    {
-        return $this->moonshineResourcePageUrl(PageBlockResource::class, PageBlockFormPage::class)
-            . '?page_id=' . $page->getKey()
-            . '&type=' . urlencode($type);
     }
 
     private function homeSectionsHtml(): string
@@ -306,7 +273,8 @@ class PageContentBuilderPage extends Page
                 'description' => 'Карточки услуг, цены, посадочные страницы, заголовки секций и этапы работы.',
                 'links' => [
                     ['label' => 'Услуги', 'url' => $this->moonshineResourcePageUrl(ServiceResource::class, ServiceIndexPage::class)],
-                    ['label' => 'Тексты услуг', 'url' => $this->uiTextIndexUrl('services-home')],
+                    ['label' => 'Тексты списка услуг', 'url' => $this->uiTextIndexUrl('services-home')],
+                    ['label' => 'Тексты детальной услуги', 'url' => $this->uiTextIndexUrl('service-detail')],
                 ],
             ],
             [
@@ -427,15 +395,12 @@ class PageContentBuilderPage extends Page
         return sprintf('<img src="%s" alt="" loading="lazy">', e($src));
     }
 
-    private function noBlocksHtml(string $createUrl): string
+    private function noBlocksHtml(): string
     {
-        $createUrl = e($createUrl);
-
         return <<<HTML
         <div class="page-builder-empty">
-            <strong>У страницы пока нет блоков</strong>
-            <span>Создайте первый hero, текстовый блок, галерею или CTA.</span>
-            <a href="{$createUrl}">+ Добавить блок</a>
+            <strong>У страницы пока нет подключенных блоков</strong>
+            <span>Новые блоки отсюда не создаются: редактор предназначен для существующих секций сайта.</span>
         </div>
         HTML;
     }

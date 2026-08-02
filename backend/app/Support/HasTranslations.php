@@ -31,18 +31,36 @@ trait HasTranslations
         static::saving(static function (self $model): void {
             foreach ($model->getTranslatable() as $field) {
                 $ruField = $field . '_ru';
+                $attributes = $model->getAttributes();
+                $ruValue = $attributes[$ruField] ?? null;
+                $baseValue = $attributes[$field] ?? null;
 
-                if (filled($model->{$ruField}) && ($model->isDirty($ruField) || blank($model->{$field}))) {
-                    $model->{$field} = $model->{$ruField};
+                if (filled($ruValue) && ($model->isDirty($ruField) || blank($baseValue))) {
+                    $model->{$field} = $ruValue;
 
                     continue;
                 }
 
-                if (blank($model->{$ruField}) && filled($model->{$field})) {
-                    $model->{$ruField} = $model->{$field};
+                if (blank($ruValue) && filled($baseValue)) {
+                    $model->{$ruField} = $baseValue;
                 }
             }
         });
+    }
+
+    public function getAttribute($key): mixed
+    {
+        if (is_string($key) && str_ends_with($key, '_ru')) {
+            $baseField = substr($key, 0, -3);
+
+            if (in_array($baseField, $this->getTranslatable(), true)) {
+                $value = parent::getAttribute($key);
+
+                return filled($value) ? $value : parent::getAttribute($baseField);
+            }
+        }
+
+        return parent::getAttribute($key);
     }
 
     public function fieldRu(string $field): ?string

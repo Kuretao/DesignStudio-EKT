@@ -108,9 +108,9 @@ class ServiceFormPage extends FormPage
                             'Так удобнее редактировать состав услуги, карточки документов и процесс без JSON и лишней разметки.'
                         ),
                         Grid::make([
-                            Column::make(array_slice(CmsFieldSets::serviceSection('lists'), 0, 2))->columnSpan(4),
-                            Column::make(array_slice(CmsFieldSets::serviceSection('lists'), 2, 2))->columnSpan(4),
-                            Column::make(array_slice(CmsFieldSets::serviceSection('lists'), 4))->columnSpan(4),
+                            Column::make(array_slice(CmsFieldSets::serviceSection('lists'), 0, 3))->columnSpan(4),
+                            Column::make(array_slice(CmsFieldSets::serviceSection('lists'), 3, 2))->columnSpan(4),
+                            Column::make(array_slice(CmsFieldSets::serviceSection('lists'), 5))->columnSpan(4),
                         ]),
                     ])->icon('list-bullet')->customAttributes(['class' => 'svc-form-section']),
                 ])->icon('list-bullet'),
@@ -154,6 +154,7 @@ class ServiceFormPage extends FormPage
             'text_en' => ['nullable', 'string'],
             'image' => ['nullable', 'string', 'max:2048'],
             'hero_images' => ['nullable', 'string', 'max:10000'],
+            'deliverable_images' => ['nullable', 'string', 'max:10000'],
             'deliverables_ru' => ['nullable', 'string', 'max:10000'],
             'deliverables_en' => ['nullable', 'string', 'max:10000'],
             'benefits_ru' => ['nullable', 'string', 'max:10000'],
@@ -180,6 +181,7 @@ class ServiceFormPage extends FormPage
             'timeline_en.max' => 'Срок EN должен быть короче 255 символов.',
             'image.max' => 'URL обложки слишком длинный.',
             'hero_images.max' => 'Список слайдов слишком большой. Оставьте только нужные изображения.',
+            'deliverable_images.max' => 'Список картинок для состава услуги слишком большой.',
             'position.required' => 'Укажите порядок услуги.',
             'position.integer' => 'Порядок должен быть целым числом.',
             'position.min' => 'Порядок не может быть отрицательным.',

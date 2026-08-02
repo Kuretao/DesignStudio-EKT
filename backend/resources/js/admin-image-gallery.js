@@ -27,6 +27,27 @@
         return ['image/', '.jpg', '.jpeg', '.png', '.webp', '.avif', '.gif', '.svg'].some((part) => accept.includes(part));
     }
 
+    function isGalleryTextarea(input) {
+        if (!(input instanceof HTMLTextAreaElement)) {
+            return false;
+        }
+
+        if (input.dataset.galleryLines === '1') {
+            return true;
+        }
+
+        const name = input.getAttribute('name') || '';
+
+        return [
+            'image',
+            'logo',
+            'hero_images',
+            'deliverable_images',
+            'before_image',
+            'after_image',
+        ].includes(name);
+    }
+
     function hiddenNameFor(input) {
         const name = input.getAttribute('name') || '';
 
@@ -211,7 +232,37 @@
         });
     }
 
+    function imagePath(image) {
+        return image.path || image.url || '';
+    }
+
+    function insertTextareaImage(input, image) {
+        const path = imagePath(image);
+
+        if (!path) {
+            return;
+        }
+
+        const start = input.selectionStart ?? input.value.length;
+        const end = input.selectionEnd ?? input.value.length;
+        const before = input.value.slice(0, start);
+        const after = input.value.slice(end);
+        const prefix = before.length > 0 && !before.endsWith('\n') ? '\n' : '';
+        const suffix = after.length > 0 && !after.startsWith('\n') ? '\n' : '';
+
+        input.value = `${before}${prefix}${path}${suffix}${after}`;
+        input.focus();
+        input.selectionStart = input.selectionEnd = before.length + prefix.length + path.length;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
     function selectImage(input, image) {
+        if (input instanceof HTMLTextAreaElement) {
+            insertTextareaImage(input, image);
+            return;
+        }
+
         const group = input.closest('.form-group-dropzone');
         const hiddenName = hiddenNameFor(input);
 
@@ -257,6 +308,22 @@
             button.type = 'button';
             button.className = 'admin-gallery-trigger';
             button.textContent = 'Выбрать из галереи';
+            button.addEventListener('click', () => openModal(input));
+
+            input.insertAdjacentElement('afterend', button);
+        });
+
+        root.querySelectorAll('textarea').forEach((input) => {
+            if (!isGalleryTextarea(input) || input.dataset.galleryButtonReady === '1') {
+                return;
+            }
+
+            input.dataset.galleryButtonReady = '1';
+
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'admin-gallery-trigger';
+            button.textContent = 'Вставить из галереи';
             button.addEventListener('click', () => openModal(input));
 
             input.insertAdjacentElement('afterend', button);

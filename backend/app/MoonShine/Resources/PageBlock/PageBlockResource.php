@@ -12,6 +12,8 @@ use App\MoonShine\Resources\PageBlock\Pages\PageBlockDetailPage;
 
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\Contracts\Core\PageContract;
+use MoonShine\Support\Enums\Action;
+use MoonShine\Support\ListOf;
 
 /**
  * @extends ModelResource<PageBlock, PageBlockIndexPage, PageBlockFormPage, PageBlockDetailPage>
@@ -21,6 +23,11 @@ class PageBlockResource extends ModelResource
     protected string $model = PageBlock::class;
 
     protected string $title = 'Блоки страниц';
+
+    protected function activeActions(): ListOf
+    {
+        return parent::activeActions()->except(Action::CREATE);
+    }
     
     /**
      * @return list<class-string<PageContract>>

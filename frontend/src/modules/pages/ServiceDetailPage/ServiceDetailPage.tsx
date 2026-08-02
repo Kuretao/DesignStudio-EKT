@@ -6,7 +6,7 @@ import {
   getServiceLandingCopy,
   servicePageItems as fallbackServicePageItems,
 } from "@/src/data";
-import { useCms } from "@/src/cms";
+import { useCms, useCmsText } from "@/src/cms";
 import { GlassPanel } from "@/src/ui";
 import BrandStrip from "@/src/components/common/BrandStrip";
 import HeroBackdropSlider from "@/src/components/common/HeroBackdropSlider";
@@ -44,6 +44,7 @@ function ServiceCompareBlock({
   item: ServicePageItem;
   projects: Project[];
 }) {
+  const text = useCmsText();
   const [compare, setCompare] = useState(52);
   const category = getPortfolioCategory(item);
   const project =
@@ -55,13 +56,15 @@ function ServiceCompareBlock({
     <section className="border-t border-white/10 px-5 py-24 md:px-10 lg:px-16">
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-center">
         <div>
-          <SectionLabel>До / После</SectionLabel>
+          <SectionLabel>{text("serviceDetail.compare.label", "До / После")}</SectionLabel>
           <h2 className="mt-4 text-4xl font-light tracking-[-0.045em] md:text-6xl">
-            Как идея превращается в готовое пространство
+            {text("serviceDetail.compare.title", "Как идея превращается в готовое пространство")}
           </h2>
           <p className="mt-5 text-lg leading-relaxed text-[#D6D1CA]">
-            Здесь можно поставить реальные пары изображений по услуге: исходное
-            состояние и итоговый результат после проектирования.
+            {text(
+              "serviceDetail.compare.text",
+              "Здесь можно поставить реальные пары изображений по услуге: исходное состояние и итоговый результат после проектирования.",
+            )}
           </p>
         </div>
 
@@ -82,10 +85,10 @@ function ServiceCompareBlock({
             />
           </div>
           <div className="absolute left-5 top-5 rounded-full border border-white/15 bg-[#050505]/62 px-4 py-2 text-xs uppercase tracking-[0.2em] text-white/72 backdrop-blur">
-            До
+            {text("serviceDetail.compare.before", "До")}
           </div>
           <div className="absolute right-5 top-5 rounded-full border border-[#D69A66]/40 bg-[#050505]/62 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#D69A66] backdrop-blur">
-            После
+            {text("serviceDetail.compare.after", "После")}
           </div>
           <div
             className="absolute inset-y-0 w-px bg-[#D69A66] shadow-[0_0_28px_rgba(214,154,102,0.9)]"
@@ -96,7 +99,7 @@ function ServiceCompareBlock({
             style={{ left: `${compare}%` }}
           />
           <input
-            aria-label="Сравнение до и после"
+            aria-label={text("serviceDetail.compare.aria", "Сравнение до и после")}
             type="range"
             min="0"
             max="100"
@@ -117,6 +120,7 @@ function ServicePortfolioBlock({
   item: ServicePageItem;
   projects: Project[];
 }) {
+  const text = useCmsText();
   const category = getPortfolioCategory(item);
   const targetProjects = projects.filter(
     (project) => project.category === category,
@@ -130,14 +134,16 @@ function ServicePortfolioBlock({
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 grid gap-6 md:grid-cols-[1fr_0.75fr] md:items-end">
           <div>
-            <SectionLabel>Тематическое портфолио</SectionLabel>
+            <SectionLabel>{text("serviceDetail.portfolio.label", "Тематическое портфолио")}</SectionLabel>
             <h2 className="mt-4 text-4xl font-light tracking-[-0.045em] md:text-6xl">
-              Целевые проекты по услуге
+              {text("serviceDetail.portfolio.title", "Целевые проекты по услуге")}
             </h2>
           </div>
           <p className="text-lg leading-relaxed text-[#D6D1CA]">
-            Карточки ведут на индивидуальные страницы проектов с уникальным URL.
-            После наполнения CMS здесь останутся только релевантные кейсы.
+            {text(
+              "serviceDetail.portfolio.text",
+              "Карточки ведут на индивидуальные страницы проектов с уникальным URL. После наполнения CMS здесь останутся только релевантные кейсы.",
+            )}
           </p>
         </div>
 
@@ -182,11 +188,18 @@ function ServiceDocumentsBlock({
   item: ServicePageItem;
   projects: Project[];
 }) {
+  const text = useCmsText();
   const [activeIndex, setActiveIndex] = useState(0);
   const [zoomImage, setZoomImage] = useState<string | null>(null);
+  const documentImages = Array.isArray((item as any).deliverableImages)
+    ? ((item as any).deliverableImages as string[]).filter(Boolean)
+    : [];
   const docs = item.deliverables.map((title, index) => ({
     title,
-    image: projects[(index + 2) % projects.length]?.image ?? item.image,
+    image:
+      documentImages[index] ??
+      projects[(index + 2) % projects.length]?.image ??
+      item.image,
   }));
   const activeDoc = docs[activeIndex] ?? docs[0];
 
@@ -195,14 +208,16 @@ function ServiceDocumentsBlock({
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 grid gap-6 md:grid-cols-[1fr_0.75fr] md:items-end">
           <div>
-            <SectionLabel>Документация</SectionLabel>
+            <SectionLabel>{text("serviceDetail.documents.label", "Документация")}</SectionLabel>
             <h2 className="mt-4 text-4xl font-light tracking-[-0.045em] md:text-6xl">
-              Что входит в состав рабочей документации
+              {text("serviceDetail.documents.title", "Что входит в состав рабочей документации")}
             </h2>
           </div>
           <p className="text-lg leading-relaxed text-[#D6D1CA]">
-            Блок готов под реальные чертежи, ведомости, дендропланы и схемы
-            инженерии. Изображение можно открыть крупно.
+            {text(
+              "serviceDetail.documents.text",
+              "Блок готов под реальные чертежи, ведомости, дендропланы и схемы инженерии. Изображение можно открыть крупно.",
+            )}
           </p>
         </div>
 
@@ -239,14 +254,14 @@ function ServiceDocumentsBlock({
               <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(5,5,5,.88),rgba(5,5,5,.42)),linear-gradient(rgba(245,242,236,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(245,242,236,.08)_1px,transparent_1px)] bg-[length:auto,42px_42px,42px_42px]" />
               <div className="absolute inset-6 flex flex-col justify-between rounded-[1.5rem] border border-white/16 p-6">
                 <span className="text-xs uppercase tracking-[0.28em] text-[#D69A66]">
-                  Лист 0{activeIndex + 1}
+                  {text("serviceDetail.documents.sheetLabel", "Лист")} 0{activeIndex + 1}
                 </span>
                 <div>
                   <h3 className="max-w-xl text-4xl font-light tracking-normal [overflow-wrap:anywhere]">
                     {activeDoc.title}
                   </h3>
                   <p className="mt-4 text-sm uppercase tracking-[0.22em] text-white/48">
-                    Нажмите, чтобы увеличить
+                    {text("serviceDetail.documents.zoomHint", "Нажмите, чтобы увеличить")}
                   </p>
                 </div>
               </div>
@@ -264,7 +279,7 @@ function ServiceDocumentsBlock({
         >
           <button
             type="button"
-            aria-label="Закрыть просмотр"
+            aria-label={text("serviceDetail.documents.closeAria", "Закрыть просмотр")}
             onClick={() => setZoomImage(null)}
             className="absolute right-5 top-5 z-10 grid h-11 w-11 place-items-center rounded-full border border-white/15 bg-white/10 text-2xl leading-none text-white transition hover:border-[#D69A66]/60 hover:text-[#D69A66]"
           >
@@ -272,7 +287,7 @@ function ServiceDocumentsBlock({
           </button>
           <img
             src={zoomImage}
-            alt="Увеличенный лист документации"
+            alt={text("serviceDetail.documents.zoomAlt", "Увеличенный лист документации")}
             className="max-h-[88vh] w-full max-w-6xl rounded-[1.5rem] object-contain shadow-[0_40px_140px_rgba(0,0,0,0.55)]"
           />
         </div>
@@ -283,6 +298,7 @@ function ServiceDocumentsBlock({
 
 function ExpertFooter() {
   const { reviewStats } = useCms();
+  const text = useCmsText();
 
   return (
     <section className="border-t border-white/10 px-5 py-24 md:px-10 lg:px-16">
@@ -290,9 +306,9 @@ function ExpertFooter() {
         <GlassPanel className="overflow-hidden rounded-[2rem] p-7 md:p-10">
           <div className="grid gap-8 lg:grid-cols-[0.72fr_1fr] lg:items-end">
             <div>
-              <SectionLabel>Экспертность</SectionLabel>
+              <SectionLabel>{text("serviceDetail.expert.label", "Экспертность")}</SectionLabel>
               <h2 className="mt-4 text-4xl font-light tracking-[-0.045em] md:text-6xl">
-                Остались вопросы по проекту? Давайте обсудим
+                {text("serviceDetail.expert.title", "Остались вопросы по проекту? Давайте обсудим")}
               </h2>
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
@@ -319,6 +335,7 @@ function ExpertFooter() {
 
 function ServiceDetailPage({ item }: { item: ServicePageItem }) {
   const { servicePageItems, projects } = useCms();
+  const text = useCmsText();
   const currentItem =
     servicePageItems.find((service) => service.id === item.id) ?? item;
   const isVirtualTour = currentItem.id === "virtualnyj-3d-tur-360";
@@ -367,13 +384,13 @@ function ServiceDetailPage({ item }: { item: ServicePageItem }) {
                 href="#project-quiz"
                 className="rounded-full bg-[#D69A66] px-6 py-4 text-xs uppercase tracking-[0.24em] text-[#050505] transition hover:bg-[#F5F2EC]"
               >
-                Рассчитать стоимость проекта
+                {text("serviceDetail.hero.calcButton", "Рассчитать стоимость проекта")}
               </Link>
               <Link
                 href="/services"
                 className="rounded-full border border-white/15 px-6 py-4 text-xs uppercase tracking-[0.24em] text-[#D6D1CA] transition hover:border-[#D69A66] hover:text-white"
               >
-                Все услуги
+                {text("serviceDetail.hero.allServicesButton", "Все услуги")}
               </Link>
             </div>
           </div>
@@ -382,7 +399,7 @@ function ServiceDetailPage({ item }: { item: ServicePageItem }) {
             <div className="grid gap-4 sm:grid-cols-2">
               <GlassPanel className="rounded-[1.25rem] p-5">
                 <span className="text-xs uppercase tracking-[0.28em] text-white/40">
-                  Стоимость
+                  {text("serviceDetail.hero.priceLabel", "Стоимость")}
                 </span>
                 <strong className="mt-3 block text-3xl font-light leading-tight text-[#D69A66] [overflow-wrap:anywhere]">
                   {currentItem.price}
@@ -390,7 +407,7 @@ function ServiceDetailPage({ item }: { item: ServicePageItem }) {
               </GlassPanel>
               <GlassPanel className="rounded-[1.25rem] p-5">
                 <span className="text-xs uppercase tracking-[0.28em] text-white/40">
-                  Срок
+                  {text("serviceDetail.hero.timelineLabel", "Срок")}
                 </span>
                 <strong className="mt-3 block text-3xl font-light leading-tight text-white [overflow-wrap:anywhere]">
                   {currentItem.timeline}
@@ -424,10 +441,10 @@ function ServiceDetailPage({ item }: { item: ServicePageItem }) {
         <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[0.8fr_1.2fr]">
           <div>
             <p className="mb-5 text-xs uppercase tracking-[0.45em] text-[#D69A66]">
-              Почему это работает
+              {text("serviceDetail.benefits.label", "Почему это работает")}
             </p>
             <h2 className="text-4xl font-light tracking-[-0.045em] md:text-6xl">
-              Страница собрана из реальной структуры услуги
+              {text("serviceDetail.benefits.title", "Страница собрана из реальной структуры услуги")}
             </h2>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
@@ -447,11 +464,13 @@ function ServiceDetailPage({ item }: { item: ServicePageItem }) {
         <div className="mx-auto max-w-7xl">
           <div className="mb-10 flex flex-col justify-between gap-5 md:flex-row md:items-end">
             <h2 className="max-w-3xl text-4xl font-light tracking-[-0.045em] md:text-6xl">
-              Как движется проект
+              {text("serviceDetail.process.title", "Как движется проект")}
             </h2>
             <p className="max-w-xl text-[#D6D1CA]">
-              Процесс коротко пересобран из старых страниц: от заявки и исходных
-              данных до финальных файлов, чертежей или сопровождения.
+              {text(
+                "serviceDetail.process.text",
+                "Процесс коротко пересобран из старых страниц: от заявки и исходных данных до финальных файлов, чертежей или сопровождения.",
+              )}
             </p>
           </div>
           <div className="grid gap-px overflow-hidden rounded-[2rem] border border-white/10 bg-white/10 shadow-[0_24px_90px_rgba(0,0,0,0.24)] md:grid-cols-5">

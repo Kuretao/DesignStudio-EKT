@@ -340,6 +340,122 @@
 .dark .proj-stat { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.08); }
 .dark .proj-stat-value { color: #e2e8f0; }
 
+.proj-form-tabs > .tabs-list {
+    gap: 8px;
+    min-width: 230px;
+}
+
+.proj-form-tabs .tabs-button {
+    min-height: 46px;
+    border-radius: 8px;
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+.proj-form-section {
+    border: 1px solid rgba(15, 23, 42, .1);
+}
+
+.proj-form-note,
+.proj-publish-guide,
+.page-slug-autofill {
+    display: grid;
+    gap: 6px;
+    padding: 13px 15px;
+    border-radius: 8px;
+    line-height: 1.5;
+}
+
+.proj-form-note {
+    border-left: 4px solid #2563eb;
+    background: rgba(37, 99, 235, .08);
+}
+
+.proj-publish-guide {
+    border: 1px solid rgba(37, 99, 235, .16);
+    background: rgba(37, 99, 235, .07);
+}
+
+.proj-form-note strong,
+.proj-publish-guide strong {
+    color: #1d4ed8;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+.proj-form-note span,
+.proj-publish-guide span,
+.proj-form-section .form-hint {
+    color: rgba(15, 23, 42, .68);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.page-slug-autofill {
+    margin-top: -2px;
+    border: 1px solid rgba(15, 23, 42, .12);
+    background: rgba(248, 250, 252, .82);
+}
+
+.page-slug-autofill__label {
+    display: inline-flex;
+    width: max-content;
+    max-width: 100%;
+    align-items: center;
+    gap: 8px;
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0;
+    cursor: pointer;
+}
+
+.page-slug-autofill__checkbox {
+    width: 16px;
+    height: 16px;
+    accent-color: #2563eb;
+}
+
+.page-slug-autofill__hint {
+    color: rgba(15, 23, 42, .62);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.page-slug-autofill-field--enabled .field-slug-element {
+    background: rgba(248, 250, 252, .78);
+    color: rgba(15, 23, 42, .72);
+    cursor: not-allowed;
+}
+
+.dark .proj-form-note strong,
+.dark .proj-publish-guide strong {
+    color: #93c5fd;
+}
+
+.dark .proj-form-note span,
+.dark .proj-publish-guide span,
+.dark .proj-form-section .form-hint,
+.dark .page-slug-autofill__hint {
+    color: rgba(226, 232, 240, .74);
+}
+
+.dark .proj-publish-guide,
+.dark .page-slug-autofill {
+    border-color: rgba(148, 163, 184, .22);
+    background: rgba(15, 23, 42, .56);
+}
+
+.dark .page-slug-autofill__label {
+    color: #f8fafc;
+}
+
+.dark .page-slug-autofill-field--enabled .field-slug-element {
+    background: rgba(15, 23, 42, .78);
+    color: rgba(226, 232, 240, .58);
+}
+
 /* ── Responsive ── */
 @media (max-width: 1200px) {
     .proj-overview__hero-grid,

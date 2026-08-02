@@ -444,6 +444,7 @@ class CmsController extends Controller
             'deliverables' => $this->lines($service->fieldRu('deliverables')),
             'deliverablesRu' => $this->lines($service->fieldRu('deliverables')),
             'deliverablesEn' => $this->lines($service->fieldEn('deliverables')),
+            'deliverableImages' => $this->lines($service->deliverable_images),
             'benefits' => $this->lines($service->fieldRu('benefits')),
             'benefitsRu' => $this->lines($service->fieldRu('benefits')),
             'benefitsEn' => $this->lines($service->fieldEn('benefits')),
