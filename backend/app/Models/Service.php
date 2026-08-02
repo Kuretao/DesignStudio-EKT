@@ -23,6 +23,33 @@ class Service extends Model
         'process',
     ];
 
+    protected static function booted(): void
+    {
+        static::saved(static function (Service $service): void {
+            if (! $service->wasChanged('slug')) {
+                return;
+            }
+
+            $oldSlug = (string) $service->getOriginal('slug');
+            $newSlug = (string) $service->slug;
+
+            if ($oldSlug === '' || $newSlug === '' || $oldSlug === $newSlug) {
+                return;
+            }
+
+            MenuItem::query()
+                ->where('menu_area', MenuItem::AREA_SERVICES)
+                ->whereIn('href', [
+                    '/' . ltrim($oldSlug, '/'),
+                    ltrim($oldSlug, '/'),
+                ])
+                ->update([
+                    'href' => '/' . ltrim($newSlug, '/'),
+                    'updated_at' => now(),
+                ]);
+        });
+    }
+
     protected function casts(): array
     {
         return [

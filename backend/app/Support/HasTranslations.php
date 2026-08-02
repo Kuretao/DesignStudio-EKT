@@ -41,6 +41,12 @@ trait HasTranslations
                     continue;
                 }
 
+                if ($model->isDirty($field) && ! $model->isDirty($ruField) && filled($baseValue)) {
+                    $model->{$ruField} = $baseValue;
+
+                    continue;
+                }
+
                 if (blank($ruValue) && filled($baseValue)) {
                     $model->{$ruField} = $baseValue;
                 }

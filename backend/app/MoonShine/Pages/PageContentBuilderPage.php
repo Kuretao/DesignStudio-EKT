@@ -404,7 +404,8 @@ class PageContentBuilderPage extends Page
                 ],
                 'description' => 'Заголовок Style Lab, варианты стилей, материалов, света, кнопки и служебные подписи.',
                 'links' => [
-                    ['label' => 'Редактировать блок', 'url' => $this->permanentGroupUrl('style-lab')],
+                    ['label' => 'Открыть редактор с предпросмотром', 'url' => $this->moonshinePageUrl(StyleLabEditorPage::class)],
+                    ['label' => 'Таблица текстов', 'url' => $this->permanentGroupUrl('style-lab')],
                 ],
             ],
             [
@@ -724,6 +725,14 @@ class PageContentBuilderPage extends Page
     private function pageIndexUrl(): string
     {
         return $this->moonshineResourcePageUrl(PageResource::class, PageIndexPage::class);
+    }
+
+    /**
+     * @param class-string $pageClass
+     */
+    private function moonshinePageUrl(string $pageClass): string
+    {
+        return url('/' . trim((string) config('moonshine.prefix', 'admin'), '/') . '/page/' . (new UriKey($pageClass))->generate());
     }
 
     private function permanentGroupUrl(string $group): string

@@ -24,7 +24,7 @@
 
         const accept = (input.getAttribute('accept') || '').toLowerCase();
 
-        return ['image/', '.jpg', '.jpeg', '.png', '.webp', '.avif', '.gif', '.svg'].some((part) => accept.includes(part));
+        return ['image/', 'video/', '.jpg', '.jpeg', '.png', '.webp', '.avif', '.gif', '.svg', '.mp4', '.webm', '.mov'].some((part) => accept.includes(part));
     }
 
     function isGalleryTextarea(input) {
@@ -86,7 +86,7 @@
                 <header class="admin-image-gallery__header">
                     <div>
                         <p>Медиафайлы</p>
-                        <h2>Выберите изображение</h2>
+                        <h2>Выберите медиафайл</h2>
                     </div>
                     <button type="button" class="admin-image-gallery__close" data-gallery-close aria-label="Закрыть">×</button>
                 </header>
@@ -95,7 +95,7 @@
                     <div class="admin-image-gallery__directories" data-gallery-directories></div>
                 </div>
                 <div class="admin-image-gallery__body" data-gallery-body>
-                    <div class="admin-image-gallery__empty">Загрузка изображений...</div>
+                    <div class="admin-image-gallery__empty">Загрузка медиафайлов...</div>
                 </div>
             </section>
         `;
@@ -158,6 +158,23 @@
         return state.images;
     }
 
+    function activeAllowedTypes() {
+        const input = state.activeInput;
+
+        if (!(input instanceof HTMLInputElement)) {
+            return ['image', 'video'];
+        }
+
+        const accept = (input.getAttribute('accept') || '').toLowerCase();
+        const allowsImages = ['image/', '.jpg', '.jpeg', '.png', '.webp', '.avif', '.gif', '.svg'].some((part) => accept.includes(part));
+        const allowsVideos = ['video/', '.mp4', '.webm', '.mov'].some((part) => accept.includes(part));
+
+        if (allowsImages && allowsVideos) return ['image', 'video'];
+        if (allowsVideos) return ['video'];
+
+        return ['image'];
+    }
+
     function directories(images) {
         const result = Array.from(new Set(images.map((image) => image.directory || 'Без папки')));
         result.sort((a, b) => a.localeCompare(b, 'ru'));
@@ -167,15 +184,26 @@
 
     function filteredImages() {
         const images = Array.isArray(state.images) ? state.images : [];
+        const allowedTypes = activeAllowedTypes();
 
         return images.filter((image) => {
             const directory = image.directory || 'Без папки';
             const haystack = `${image.name || ''} ${directory} ${image.path || ''}`.toLowerCase();
+            const type = image.type === 'video' ? 'video' : 'image';
+            const typeMatches = allowedTypes.includes(type);
             const directoryMatches = state.directory === 'all' || directory === state.directory;
             const queryMatches = state.query === '' || haystack.includes(state.query);
 
-            return directoryMatches && queryMatches;
+            return typeMatches && directoryMatches && queryMatches;
         });
+    }
+
+    function mediaPreview(image) {
+        if (image.type === 'video') {
+            return `<span class="admin-image-gallery__thumb"><video src="${escapeAttr(image.url || '')}" muted preload="metadata"></video><em>Видео</em></span>`;
+        }
+
+        return `<span class="admin-image-gallery__thumb"><img src="${escapeAttr(image.url || '')}" alt=""><em>Фото</em></span>`;
     }
 
     function renderModal() {
@@ -202,7 +230,7 @@
         const images = filteredImages();
 
         if (images.length === 0) {
-            body.innerHTML = '<div class="admin-image-gallery__empty">Изображений не найдено.</div>';
+            body.innerHTML = '<div class="admin-image-gallery__empty">Медиафайлов не найдено.</div>';
             return;
         }
 
@@ -210,10 +238,10 @@
             <div class="admin-image-gallery__grid">
                 ${images.map((image, index) => `
                     <button type="button" class="admin-image-gallery__item" data-gallery-index="${index}">
-                        <span class="admin-image-gallery__thumb"><img src="${escapeAttr(image.url)}" alt=""></span>
+                        ${mediaPreview(image)}
                         <span class="admin-image-gallery__meta">
                             <strong>${escapeHtml(image.name || '')}</strong>
-                            <span>${escapeHtml(image.directory || 'Без папки')} · ${escapeHtml(formatSize(image.size))}</span>
+                            <span>${escapeHtml(image.directory || 'Без папки')} · ${escapeHtml(image.type === 'video' ? 'Видео' : 'Фото')} · ${escapeHtml(formatSize(image.size))}</span>
                         </span>
                     </button>
                 `).join('')}
@@ -283,7 +311,9 @@
         selected.innerHTML = `
             <input type="hidden" name="${escapeAttr(hiddenName)}" data-name="${escapeAttr(hiddenName)}" value="${escapeAttr(image.path || '')}">
             <div class="admin-gallery-selected__preview">
-                <img src="${escapeAttr(image.url || '')}" alt="">
+                ${image.type === 'video'
+                    ? `<video src="${escapeAttr(image.url || '')}" muted preload="metadata"></video>`
+                    : `<img src="${escapeAttr(image.url || '')}" alt="">`}
             </div>
             <div class="admin-gallery-selected__meta">
                 <strong>${escapeHtml(image.name || '')}</strong>

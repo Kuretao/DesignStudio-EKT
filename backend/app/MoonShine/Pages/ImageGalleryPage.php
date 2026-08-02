@@ -34,9 +34,9 @@ class ImageGalleryPage extends Page
 
     private function buildGalleryHtml(): string
     {
-        $images = ImageGallery::items();
-        $totalSize = (int) $images->sum('size');
-        $directories = $images
+        $media = ImageGallery::items();
+        $totalSize = (int) $media->sum('size');
+        $directories = $media
             ->pluck('directory')
             ->map(static fn (string $directory): string => $directory !== '' ? $directory : 'Корень')
             ->unique()
@@ -47,27 +47,35 @@ class ImageGalleryPage extends Page
             ? $directories->map(static fn (string $directory): string => '<span class="gallery-page__chip">' . e($directory) . '</span>')->implode('')
             : '<span class="gallery-page__chip">Папок пока нет</span>';
 
-        $cards = $images->isNotEmpty()
-            ? $images->map(fn (array $image): string => $this->imageCard($image))->implode('')
+        $cards = $media->isNotEmpty()
+            ? $media->map(fn (array $image): string => $this->imageCard($image))->implode('')
             : $this->emptyState();
 
-        $imagesCount = $images->count();
+        $imagesCount = $media->where('type', 'image')->count();
+        $videosCount = $media->where('type', 'video')->count();
         $directoriesCount = $directories->count();
         $formattedSize = $this->formatSize($totalSize);
+        $uploadUrl = e(route('admin.image-gallery.upload'));
+        $csrf = csrf_field();
+        $uploadFeedback = $this->uploadFeedback();
 
         return <<<HTML
         <section class="gallery-page">
             <div class="gallery-page__hero">
                 <div class="gallery-page__intro">
                     <p class="gallery-page__eyebrow">Медиафайлы</p>
-                    <h1>Галерея изображений</h1>
-                    <p>Все изображения из публичного хранилища, которые можно выбрать в формах услуг, новостей, акций и других разделов.</p>
+                    <h1>Галерея медиа</h1>
+                    <p>Изображения и видео из публичного хранилища. Фотографии можно выбирать в формах услуг, новостей, акций и других разделов; видео хранится здесь и доступно по пути.</p>
                 </div>
 
                 <div class="gallery-page__stats" aria-label="Статистика галереи">
                     <div class="gallery-page__stat">
                         <span>{$imagesCount}</span>
                         <strong>изображений</strong>
+                    </div>
+                    <div class="gallery-page__stat">
+                        <span>{$videosCount}</span>
+                        <strong>видео</strong>
                     </div>
                     <div class="gallery-page__stat">
                         <span>{$directoriesCount}</span>
@@ -79,6 +87,26 @@ class ImageGalleryPage extends Page
                     </div>
                 </div>
             </div>
+
+            <form class="gallery-page-upload" action="{$uploadUrl}" method="post" enctype="multipart/form-data">
+                {$csrf}
+                <div class="gallery-page-upload__main">
+                    <div>
+                        <strong>Загрузить фото или видео</strong>
+                        <span>Поддерживаются jpg, png, webp, avif, gif, svg, mp4, webm и mov. Можно выбрать несколько файлов сразу.</span>
+                    </div>
+                    <label>
+                        <span>Папка</span>
+                        <input type="text" name="directory" value="cms" placeholder="services или portfolio/hero">
+                    </label>
+                    <label>
+                        <span>Файлы</span>
+                        <input type="file" name="files[]" multiple accept="image/*,video/mp4,video/webm,video/quicktime,.webp,.avif,.svg,.mp4,.webm,.mov">
+                    </label>
+                    <button type="submit">Загрузить</button>
+                </div>
+                {$uploadFeedback}
+            </form>
 
             <div class="gallery-page__folders">
                 {$directoryChips}
@@ -99,25 +127,31 @@ class ImageGalleryPage extends Page
      *     directory: string,
      *     size: int,
      *     updatedAt: int,
-     *     updatedAtLabel: string
-     * } $image
+     *     updatedAtLabel: string,
+     *     type: string
+     * } $media
      */
-    private function imageCard(array $image): string
+    private function imageCard(array $media): string
     {
-        $name = e($image['name']);
-        $path = e($image['path']);
-        $url = e($image['url']);
-        $directory = e($image['directory'] !== '' ? $image['directory'] : 'Корень');
-        $meta = e($this->formatSize((int) $image['size']) . ' · ' . $image['updatedAtLabel']);
+        $name = e($media['name']);
+        $path = e($media['path']);
+        $url = e($media['url']);
+        $directory = e($media['directory'] !== '' ? $media['directory'] : 'Корень');
+        $meta = e($this->formatSize((int) $media['size']) . ' · ' . $media['updatedAtLabel']);
+        $type = ($media['type'] ?? 'image') === 'video' ? 'video' : 'image';
+        $typeLabel = $type === 'video' ? 'Видео' : 'Изображение';
+        $preview = $type === 'video'
+            ? '<video src="' . $url . '" muted preload="metadata"></video><span class="gallery-page-card__type">Видео</span>'
+            : '<img src="' . $url . '" alt="' . $name . '" loading="lazy"><span class="gallery-page-card__type">Фото</span>';
 
         return <<<HTML
         <article class="gallery-page-card">
             <a class="gallery-page-card__preview" href="{$url}" target="_blank" rel="noopener">
-                <img src="{$url}" alt="{$name}" loading="lazy">
+                {$preview}
             </a>
             <div class="gallery-page-card__body">
                 <strong title="{$name}">{$name}</strong>
-                <span>{$directory}</span>
+                <span>{$directory} · {$typeLabel}</span>
                 <code title="{$path}">{$path}</code>
                 <small>{$meta}</small>
             </div>
@@ -129,10 +163,27 @@ class ImageGalleryPage extends Page
     {
         return <<<HTML
         <div class="gallery-page__empty">
-            <strong>В галерее пока нет изображений</strong>
-            <span>Загрузите файл в любом поле изображения, и он появится здесь.</span>
+            <strong>В галерее пока нет медиафайлов</strong>
+            <span>Загрузите фото или видео через форму выше.</span>
         </div>
         HTML;
+    }
+
+    private function uploadFeedback(): string
+    {
+        if (session()->has('gallery_status')) {
+            return '<div class="gallery-page-upload__status">' . e((string) session('gallery_status')) . '</div>';
+        }
+
+        if ($errors = session('errors')) {
+            $messages = collect($errors->all())
+                ->map(static fn (string $message): string => '<span>' . e($message) . '</span>')
+                ->implode('');
+
+            return '<div class="gallery-page-upload__errors">' . $messages . '</div>';
+        }
+
+        return '';
     }
 
     private function formatSize(int $bytes): string

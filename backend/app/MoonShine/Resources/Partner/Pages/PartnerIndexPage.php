@@ -47,8 +47,9 @@ class PartnerIndexPage extends IndexPage
                     return '<div class="partner-card"><div class="partner-card__title">' . e((string) $item) . '</div></div>';
                 }
 
-                $name    = e($item->name ?? '');
-                $initial = mb_strtoupper(mb_substr($item->name ?? 'P', 0, 1));
+                $rawName = method_exists($item, 'fieldRu') ? ($item->fieldRu('name') ?? '') : ($item->name ?? '');
+                $name    = e($rawName);
+                $initial = mb_strtoupper(mb_substr($rawName ?: 'P', 0, 1));
 
                 $thumbSrc = $item->effective_logo ?? null;
                 $thumb = ! empty($thumbSrc)
@@ -66,7 +67,9 @@ class PartnerIndexPage extends IndexPage
             }),
 
             Preview::make('Описание', 'note', function (mixed $item): string {
-                $text = is_object($item) ? ($item->note ?? '') : (string) $item;
+                $text = is_object($item)
+                    ? (method_exists($item, 'fieldRu') ? ($item->fieldRu('note') ?? '') : ($item->note ?? ''))
+                    : (string) $item;
                 return ! empty($text)
                     ? '<div class="partner-note">' . e($text) . '</div>'
                     : '<span style="color:#cbd5e1;font-size:12px;">—</span>';

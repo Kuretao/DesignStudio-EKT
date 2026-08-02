@@ -434,39 +434,43 @@ final class DefaultUiTexts
         ];
 
         $styles = [
-            ['minimal', 'Современный', 'Modern', 'Спокойный интерьер с чистой геометрией и воздухом', 'A calm interior with clean geometry and air', 'минимализм, контемпорари, скрытое хранение', 'minimalism, contemporary, hidden storage'],
-            ['classic', 'Неоклассика', 'Neoclassical', 'Мягкая элегантность без перегруза и музейности', 'Soft elegance without overload or museum stiffness', 'симметрия, уют, благородные материалы', 'symmetry, comfort, noble materials'],
-            ['loft', 'Лофт', 'Loft', 'Фактурное пространство с сильным характером', 'A textured space with strong character', 'камень, металл, открытая планировка', 'stone, metal, open layout'],
-            ['eco', 'Эко', 'Eco', 'Светлый сценарий с природной палитрой и тактильностью', 'A bright scenario with natural palette and tactility', 'дерево, лен, зелень, естественный свет', 'wood, linen, greenery, natural light'],
+            ['minimal', 'Современный', 'Modern', 'Спокойный интерьер с чистой геометрией и воздухом', 'A calm interior with clean geometry and air', 'минимализм, контемпорари, скрытое хранение', 'minimalism, contemporary, hidden storage', '/images/cms/river-park-interior.webp', "#F5F2EC\n#9EA79A\n#2A2C27\n#D69A66"],
+            ['classic', 'Неоклассика', 'Neoclassical', 'Мягкая элегантность без перегруза и музейности', 'Soft elegance without overload or museum stiffness', 'симметрия, уют, благородные материалы', 'symmetry, comfort, noble materials', '/images/cms/country-house-interior.webp', "#E8DDCE\n#BFA98A\n#604D3B\n#F5F2EC"],
+            ['loft', 'Лофт', 'Loft', 'Фактурное пространство с сильным характером', 'A textured space with strong character', 'камень, металл, открытая планировка', 'stone, metal, open layout', '/images/cms/natural-living-room.webp', "#C2B8A5\n#6B6358\n#1E1D1B\n#9A6A43"],
+            ['eco', 'Эко', 'Eco', 'Светлый сценарий с природной палитрой и тактильностью', 'A bright scenario with natural palette and tactility', 'дерево, лен, зелень, естественный свет', 'wood, linen, greenery, natural light', '/images/cms/modern-living-room.webp', "#F2EBDD\n#A5A875\n#52634C\n#C7A987"],
         ];
 
-        foreach ($styles as [$id, $labelRu, $labelEn, $headlineRu, $headlineEn, $moodRu, $moodEn]) {
+        foreach ($styles as [$id, $labelRu, $labelEn, $headlineRu, $headlineEn, $moodRu, $moodEn, $image, $colors]) {
             $rows[] = self::row("styleLab.styles.{$id}.label", 'style-lab', "Стиль {$id}: название", $labelRu, $labelEn);
             $rows[] = self::row("styleLab.styles.{$id}.headline", 'style-lab', "Стиль {$id}: заголовок", $headlineRu, $headlineEn);
             $rows[] = self::row("styleLab.styles.{$id}.mood", 'style-lab', "Стиль {$id}: настроение", $moodRu, $moodEn);
+            $rows[] = self::row("styleLab.styles.{$id}.image", 'style-lab', "Стиль {$id}: изображение", $image, $image);
+            $rows[] = self::row("styleLab.styles.{$id}.colors", 'style-lab', "Стиль {$id}: палитра", $colors, $colors);
         }
 
         $materials = [
-            ['wood', 'Теплое дерево', 'Warm wood', 'лиственница / дуб', 'larch / oak'],
-            ['stone', 'Крупный камень', 'Large-format stone', 'травертин / кварц', 'travertine / quartz'],
-            ['textile', 'Мягкий текстиль', 'Soft textile', 'лен / букле', 'linen / boucle'],
-            ['metal', 'Темный металл', 'Dark metal', 'графит / бронза', 'graphite / bronze'],
+            ['wood', 'Теплое дерево', 'Warm wood', 'лиственница / дуб', 'larch / oak', '#B78352'],
+            ['stone', 'Крупный камень', 'Large-format stone', 'травертин / кварц', 'travertine / quartz', '#CFC3AD'],
+            ['textile', 'Мягкий текстиль', 'Soft textile', 'лен / букле', 'linen / boucle', '#E1D8C8'],
+            ['metal', 'Темный металл', 'Dark metal', 'графит / бронза', 'graphite / bronze', '#4C4841'],
         ];
 
-        foreach ($materials as [$id, $labelRu, $labelEn, $textureRu, $textureEn]) {
+        foreach ($materials as [$id, $labelRu, $labelEn, $textureRu, $textureEn, $accent]) {
             $rows[] = self::row("styleLab.materials.{$id}.label", 'style-lab', "Материал {$id}: название", $labelRu, $labelEn);
             $rows[] = self::row("styleLab.materials.{$id}.texture", 'style-lab', "Материал {$id}: текстура", $textureRu, $textureEn);
+            $rows[] = self::row("styleLab.materials.{$id}.accent", 'style-lab', "Материал {$id}: акцент", $accent, $accent);
         }
 
         $lights = [
-            ['morning', 'Утро', 'Morning', 'мягкий дневной свет', 'soft daylight'],
-            ['evening', 'Вечер', 'Evening', 'теплые акцентные группы', 'warm accent groups'],
-            ['gallery', 'Галерея', 'Gallery', 'контраст и точечные акценты', 'contrast and spot accents'],
+            ['morning', 'Утро', 'Morning', 'мягкий дневной свет', 'soft daylight', 'linear-gradient(120deg, rgba(245,242,236,.22), rgba(214,154,102,.08), rgba(5,5,5,.18))'],
+            ['evening', 'Вечер', 'Evening', 'теплые акцентные группы', 'warm accent groups', 'linear-gradient(120deg, rgba(214,154,102,.24), rgba(70,54,43,.12), rgba(5,5,5,.32))'],
+            ['gallery', 'Галерея', 'Gallery', 'контраст и точечные акценты', 'contrast and spot accents', 'linear-gradient(120deg, rgba(245,242,236,.1), rgba(126,139,116,.14), rgba(5,5,5,.24))'],
         ];
 
-        foreach ($lights as [$id, $labelRu, $labelEn, $noteRu, $noteEn]) {
+        foreach ($lights as [$id, $labelRu, $labelEn, $noteRu, $noteEn, $overlay]) {
             $rows[] = self::row("styleLab.lights.{$id}.label", 'style-lab', "Свет {$id}: название", $labelRu, $labelEn);
             $rows[] = self::row("styleLab.lights.{$id}.note", 'style-lab', "Свет {$id}: заметка", $noteRu, $noteEn);
+            $rows[] = self::row("styleLab.lights.{$id}.overlay", 'style-lab', "Свет {$id}: overlay", $overlay, $overlay);
         }
 
         return $rows;

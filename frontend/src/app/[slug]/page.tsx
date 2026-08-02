@@ -34,18 +34,20 @@ export async function generateMetadata({
   const { slug } = await params;
   const servicePage = servicePageItems.find((item) => item.id === slug);
   const seoLandingPage = seoLandingPageItems.find((item) => item.id === slug);
+  const cmsServicePage = await loadCmsService(slug, servicePage);
 
-  if (servicePage) {
-    const copy = getServiceLandingCopy(servicePage);
+  if (cmsServicePage || servicePage) {
+    const item = cmsServicePage ?? servicePage!;
+    const copy = getServiceLandingCopy(item);
 
     return {
-      title: `${copy.offerTitle} | 3D Smart Design Studio`,
+      title: `${item.title || copy.offerTitle} | 3D Smart Design Studio`,
       description: copy.seoDescription,
       keywords: copy.seoKeywords,
       openGraph: {
-        title: copy.offerTitle,
+        title: item.title || copy.offerTitle,
         description: copy.seoDescription,
-        images: [servicePage.image],
+        images: [item.image],
       },
     };
   }
@@ -90,6 +92,9 @@ export default async function Page({
   const { slug } = await params;
 
   const servicePage = servicePageItems.find((item) => item.id === slug);
+  const cmsServicePage = await loadCmsService(slug, servicePage);
+  if (cmsServicePage) return <ServiceDetailPage item={cmsServicePage} />;
+
   if (servicePage) return <ServiceDetailPage item={servicePage} />;
 
   const seoLandingPage = seoLandingPageItems.find((item) => item.id === slug);
@@ -102,6 +107,30 @@ export default async function Page({
   if (cmsPage) return <ContentPage page={cmsPage} />;
 
   notFound();
+}
+
+async function loadCmsService(
+  slug: string,
+  fallback?: (typeof servicePageItems)[number],
+) {
+  const cmsBaseUrl =
+    process.env.CMS_API_INTERNAL_URL || "http://localhost:8080/api/v1";
+
+  try {
+    const response = await fetch(
+      `${cmsBaseUrl}/services/${encodeURIComponent(slug)}`,
+      {
+        cache: "no-store",
+        headers: { Accept: "application/json" },
+      },
+    );
+
+    if (!response.ok) return null;
+
+    return normalizeCmsService(await response.json(), fallback);
+  } catch {
+    return null;
+  }
 }
 
 async function loadCmsPage(slug: string) {
@@ -140,6 +169,43 @@ async function loadCmsPage(slug: string) {
   } catch {
     return null;
   }
+}
+
+function normalizeCmsService(
+  service: any,
+  fallback?: (typeof servicePageItems)[number],
+) {
+  const images = normalizeImageList(
+    service?.images?.length ? service.images : service?.heroImages,
+  );
+  const image = images[0] ?? normalizeAsset(service?.image) ?? fallback?.image ?? "";
+
+  return {
+    ...(fallback ?? {}),
+    ...service,
+    id: service?.id ?? service?.slug ?? fallback?.id ?? "",
+    slug: service?.slug ?? service?.id ?? fallback?.id ?? "",
+    title: service?.title ?? fallback?.title ?? "",
+    eyebrow: service?.eyebrow ?? fallback?.eyebrow ?? "",
+    text: service?.text ?? fallback?.text ?? "",
+    image,
+    images,
+    price: service?.price ?? fallback?.price ?? "",
+    timeline: service?.timeline ?? fallback?.timeline ?? "",
+    deliverables:
+      Array.isArray(service?.deliverables) && service.deliverables.length
+        ? service.deliverables
+        : fallback?.deliverables ?? [],
+    benefits:
+      Array.isArray(service?.benefits) && service.benefits.length
+        ? service.benefits
+        : fallback?.benefits ?? [],
+    process:
+      Array.isArray(service?.process) && service.process.length
+        ? service.process
+        : fallback?.process ?? [],
+    deliverableImages: normalizeImageList(service?.deliverableImages),
+  };
 }
 
 function normalizeAsset(path?: string | null) {

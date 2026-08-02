@@ -28,6 +28,15 @@ type LightOption = {
   note: string;
 };
 
+function listFromText(value: string, fallback: string[]) {
+  const items = value
+    .split(/[\n,]+/u)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  return items.length ? items : fallback;
+}
+
 const styles: StyleOption[] = [
   {
     id: "minimal",
@@ -103,16 +112,23 @@ export default function StyleLab() {
     label: text(`styleLab.styles.${item.id}.label`, item.label),
     headline: text(`styleLab.styles.${item.id}.headline`, item.headline),
     mood: text(`styleLab.styles.${item.id}.mood`, item.mood),
+    image: text(`styleLab.styles.${item.id}.image`, item.image),
+    colors: listFromText(
+      text(`styleLab.styles.${item.id}.colors`, item.colors.join("\n")),
+      item.colors,
+    ),
   }));
   const localizedMaterials = materials.map((item) => ({
     ...item,
     label: text(`styleLab.materials.${item.id}.label`, item.label),
     texture: text(`styleLab.materials.${item.id}.texture`, item.texture),
+    accent: text(`styleLab.materials.${item.id}.accent`, item.accent),
   }));
   const localizedLights = lights.map((item) => ({
     ...item,
     label: text(`styleLab.lights.${item.id}.label`, item.label),
     note: text(`styleLab.lights.${item.id}.note`, item.note),
+    overlay: text(`styleLab.lights.${item.id}.overlay`, item.overlay),
   }));
 
   const activeStyle = useMemo(() => localizedStyles.find((item) => item.id === styleId) ?? localizedStyles[0], [localizedStyles, styleId]);

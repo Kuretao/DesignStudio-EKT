@@ -1011,8 +1011,10 @@ final class CmsFieldSets
     {
         $fields = [
             ID::make()->sortable(),
-            Text::make('Название', 'name')->required(),
-            Text::make('Описание', 'note'),
+            Text::make('Название RU', 'name_ru')->required(),
+            Text::make('Название EN', 'name_en'),
+            Text::make('Описание RU', 'note_ru'),
+            Text::make('Описание EN', 'note_en'),
             Number::make('Позиция', 'position')->sortable(),
             Switcher::make('Активно', 'is_active'),
         ];

@@ -370,10 +370,10 @@ function ServiceDetailPage({ item }: { item: ServicePageItem }) {
         <div className="relative z-10 mx-auto grid min-h-[calc(100vh-8rem)] max-w-7xl gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-end">
           <div>
             <p className="mb-5 max-w-3xl text-xs uppercase tracking-[0.22em] text-[#D69A66] [overflow-wrap:anywhere]">
-              {currentItem.title}
+              {currentItem.eyebrow || currentItem.title}
             </p>
-            <h1 className="max-w-4xl text-[clamp(2.75rem,5.4vw,5.6rem)] font-light leading-[0.98] tracking-normal [overflow-wrap:anywhere]">
-              {landingCopy.offerTitle}
+            <h1 className="max-w-4xl text-[clamp(2.15rem,4.25vw,4.65rem)] font-light leading-[1.04] tracking-normal [overflow-wrap:anywhere]">
+              {currentItem.title}
             </h1>
             <div
               className="cms-rich-text mt-7 max-w-2xl text-lg leading-relaxed text-[#D6D1CA] md:text-xl"

@@ -8,6 +8,12 @@ RUN apk add --no-cache bash curl icu-dev libzip-dev oniguruma-dev zip \
 	
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+RUN { \
+        echo 'upload_max_filesize=128M'; \
+        echo 'post_max_size=128M'; \
+        echo 'memory_limit=256M'; \
+    } > /usr/local/etc/php/conf.d/uploads.ini
+
 WORKDIR /var/www/html
 
 COPY composer.json composer.lock ./
