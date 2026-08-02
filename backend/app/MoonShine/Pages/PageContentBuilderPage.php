@@ -6,10 +6,26 @@ namespace App\MoonShine\Pages;
 
 use App\Models\Page as ContentPage;
 use App\Models\PageBlock;
+use App\MoonShine\Resources\Award\AwardResource;
+use App\MoonShine\Resources\Award\Pages\AwardIndexPage;
+use App\MoonShine\Resources\Faq\FaqResource;
+use App\MoonShine\Resources\Faq\Pages\FaqIndexPage;
 use App\MoonShine\Resources\Page\PageResource;
 use App\MoonShine\Resources\Page\Pages\PageFormPage;
+use App\MoonShine\Resources\Page\Pages\PageIndexPage;
 use App\MoonShine\Resources\PageBlock\PageBlockResource;
 use App\MoonShine\Resources\PageBlock\Pages\PageBlockFormPage;
+use App\MoonShine\Resources\PageBlock\Pages\PageBlockIndexPage;
+use App\MoonShine\Resources\Partner\PartnerResource;
+use App\MoonShine\Resources\Partner\Pages\PartnerIndexPage;
+use App\MoonShine\Resources\Project\Pages\ProjectIndexPage;
+use App\MoonShine\Resources\Project\ProjectResource;
+use App\MoonShine\Resources\Service\Pages\ServiceIndexPage;
+use App\MoonShine\Resources\Service\ServiceResource;
+use App\MoonShine\Resources\SiteSetting\Pages\SiteSettingIndexPage;
+use App\MoonShine\Resources\SiteSetting\SiteSettingResource;
+use App\MoonShine\Resources\UiText\Pages\UiTextIndexPage;
+use App\MoonShine\Resources\UiText\UiTextResource;
 use MoonShine\AssetManager\InlineCss;
 use MoonShine\Contracts\AssetManager\AssetElementContract;
 use MoonShine\Contracts\UI\ComponentContract;
@@ -127,11 +143,13 @@ class PageContentBuilderPage extends Page
         $title = e($page->fieldRu('title') ?: $page->title ?: 'Без названия');
         $path = $page->slug === 'home' ? 'Главная страница' : '/' . e(ltrim((string) $page->slug, '/'));
         $pageEditUrl = e($this->moonshineResourcePageUrl(PageResource::class, PageFormPage::class, $page->getKey()));
-        $createUrl = $this->moonshineResourcePageUrl(PageBlockResource::class, PageBlockFormPage::class) . '?page_id=' . $page->getKey();
+        $createUrl = $this->createBlockUrl($page, 'hero');
         $createUrlEscaped = e($createUrl);
+        $createButtons = $this->createBlockButtons($page);
         $blocks = $page->blocks->isNotEmpty()
             ? $page->blocks->map(fn (PageBlock $block): string => $this->blockCard($block))->implode('')
             : $this->noBlocksHtml($createUrl);
+        $homeSections = $page->slug === 'home' ? $this->homeSectionsHtml() : '';
 
         return <<<HTML
         <div class="page-builder-selected">
@@ -147,11 +165,177 @@ class PageContentBuilderPage extends Page
                 </div>
             </div>
 
+            <div class="page-builder-create">
+                <strong>Добавить блок по типу</strong>
+                <span>Форма откроется сразу с нужными полями, без лишних кнопок и медиа там, где их нет.</span>
+                <div>{$createButtons}</div>
+            </div>
+
             <div class="page-builder-blocks">
                 {$blocks}
             </div>
+
+            {$homeSections}
         </div>
         HTML;
+    }
+
+    private function createBlockButtons(ContentPage $page): string
+    {
+        return collect([
+            'hero' => 'Hero',
+            'text' => 'Текст',
+            'media' => 'Медиа',
+            'gallery' => 'Галерея',
+            'quote' => 'Цитата',
+            'cta' => 'CTA',
+        ])->map(fn (string $label, string $type): string => sprintf(
+            '<a href="%s">%s</a>',
+            e($this->createBlockUrl($page, $type)),
+            e($label),
+        ))->implode('');
+    }
+
+    private function createBlockUrl(ContentPage $page, string $type): string
+    {
+        return $this->moonshineResourcePageUrl(PageBlockResource::class, PageBlockFormPage::class)
+            . '?page_id=' . $page->getKey()
+            . '&type=' . urlencode($type);
+    }
+
+    private function homeSectionsHtml(): string
+    {
+        $cards = collect($this->homeSectionCards())
+            ->map(fn (array $section): string => $this->homeSectionCard($section))
+            ->implode('');
+
+        return <<<HTML
+        <section class="page-builder-home-map">
+            <div class="page-builder-home-map__head">
+                <p class="page-builder__eyebrow">Реальные секции главной</p>
+                <h3>Главная редактируется не только блоками</h3>
+                <span>Ниже все участки главной, которые сайт реально выводит: тексты, коллекции карточек, формы, контакты и списки.</span>
+            </div>
+            <div class="page-builder-home-map__grid">{$cards}</div>
+        </section>
+        HTML;
+    }
+
+    private function homeSectionCard(array $section): string
+    {
+        $title = e($section['title']);
+        $description = e($section['description']);
+        $kind = e($section['kind']);
+        $links = collect($section['links'])
+            ->map(fn (array $link): string => sprintf(
+                '<a href="%s">%s</a>',
+                e($link['url']),
+                e($link['label']),
+            ))
+            ->implode('');
+
+        return <<<HTML
+        <article class="page-builder-section-card">
+            <span>{$kind}</span>
+            <h4>{$title}</h4>
+            <p>{$description}</p>
+            <div>{$links}</div>
+        </article>
+        HTML;
+    }
+
+    private function homeSectionCards(): array
+    {
+        return [
+            [
+                'title' => 'Первый экран и философия',
+                'kind' => 'PageBlock',
+                'description' => 'Hero и большой текстовый экран. Здесь есть только те поля, которые использует конкретный тип блока.',
+                'links' => [
+                    ['label' => 'Все блоки страниц', 'url' => $this->moonshineResourcePageUrl(PageBlockResource::class, PageBlockIndexPage::class)],
+                ],
+            ],
+            [
+                'title' => 'Избранные проекты и портфолио',
+                'kind' => 'Проекты + UI',
+                'description' => 'Карточки проектов, фоновые изображения, категории, локации, годы и подписи фильтров портфолио.',
+                'links' => [
+                    ['label' => 'Проекты', 'url' => $this->moonshineResourcePageUrl(ProjectResource::class, ProjectIndexPage::class)],
+                    ['label' => 'Тексты портфолио', 'url' => $this->uiTextIndexUrl('portfolio-home')],
+                    ['label' => 'Подписи избранных', 'url' => $this->uiTextIndexUrl('home')],
+                ],
+            ],
+            [
+                'title' => 'Подбор стиля',
+                'kind' => 'UI',
+                'description' => 'Заголовок Style Lab, варианты стилей, материалов, света, кнопки и служебные подписи.',
+                'links' => [
+                    ['label' => 'Тексты Style Lab', 'url' => $this->uiTextIndexUrl('style-lab')],
+                ],
+            ],
+            [
+                'title' => 'О нас',
+                'kind' => 'UI + страница',
+                'description' => 'Текст секции, факты, принципы, подпись изображения и кнопки перехода/контакта.',
+                'links' => [
+                    ['label' => 'Тексты "О нас"', 'url' => $this->uiTextIndexUrl('about-home')],
+                    ['label' => 'Страницы', 'url' => $this->pageIndexUrl()],
+                ],
+            ],
+            [
+                'title' => 'Награды и дипломы',
+                'kind' => 'Награды + UI',
+                'description' => 'Заголовок секции и сами карточки наград с описаниями и изображениями.',
+                'links' => [
+                    ['label' => 'Награды', 'url' => $this->moonshineResourcePageUrl(AwardResource::class, AwardIndexPage::class)],
+                    ['label' => 'Тексты секции', 'url' => $this->uiTextIndexUrl('awards-home')],
+                ],
+            ],
+            [
+                'title' => 'Партнеры',
+                'kind' => 'Партнеры + UI',
+                'description' => 'Логотипы партнеров, названия, подписи и общий текст секции доверия.',
+                'links' => [
+                    ['label' => 'Партнеры', 'url' => $this->moonshineResourcePageUrl(PartnerResource::class, PartnerIndexPage::class)],
+                    ['label' => 'Тексты секции', 'url' => $this->uiTextIndexUrl('partners-home')],
+                ],
+            ],
+            [
+                'title' => 'Услуги, направления и этапы',
+                'kind' => 'Услуги + UI',
+                'description' => 'Карточки услуг, цены, посадочные страницы, заголовки секций и этапы работы.',
+                'links' => [
+                    ['label' => 'Услуги', 'url' => $this->moonshineResourcePageUrl(ServiceResource::class, ServiceIndexPage::class)],
+                    ['label' => 'Тексты услуг', 'url' => $this->uiTextIndexUrl('services-home')],
+                ],
+            ],
+            [
+                'title' => 'Квиз',
+                'kind' => 'UI',
+                'description' => 'Вопросы, варианты, кнопки, финальный шаг, подписи расчета и согласий.',
+                'links' => [
+                    ['label' => 'Тексты квиза', 'url' => $this->uiTextIndexUrl('quiz')],
+                ],
+            ],
+            [
+                'title' => 'FAQ',
+                'kind' => 'FAQ + UI',
+                'description' => 'Заголовок секции и список вопросов/ответов.',
+                'links' => [
+                    ['label' => 'Вопросы FAQ', 'url' => $this->moonshineResourcePageUrl(FaqResource::class, FaqIndexPage::class)],
+                    ['label' => 'Тексты секции', 'url' => $this->uiTextIndexUrl('faq-home')],
+                ],
+            ],
+            [
+                'title' => 'Контакты и форма',
+                'kind' => 'Настройки + UI',
+                'description' => 'Телефон, почта, адрес, карта, поля формы, кнопки и подписи контактов.',
+                'links' => [
+                    ['label' => 'Настройки сайта', 'url' => $this->moonshineResourcePageUrl(SiteSettingResource::class, SiteSettingIndexPage::class)],
+                    ['label' => 'Тексты контактов', 'url' => $this->uiTextIndexUrl('contact-home')],
+                ],
+            ],
+        ];
     }
 
     private function blockCard(PageBlock $block): string
@@ -162,10 +346,7 @@ class PageContentBuilderPage extends Page
         $status = $block->is_active ? 'Показывается' : 'Скрыт';
         $statusClass = $block->is_active ? 'page-builder-block__status--active' : 'page-builder-block__status--draft';
         $text = e($this->previewText($block));
-        $images = $this->blockImagesCount($block);
-        $motion = e($block->motion_preset ?: 'motion');
-        $variant = e($block->visual_variant ?: 'default');
-        $state = e($block->card_state ?: 'normal');
+        $chips = $this->blockChipsHtml($block);
         $editUrl = e($this->moonshineResourcePageUrl(PageBlockResource::class, PageBlockFormPage::class, $block->getKey()));
         $imageHtml = $this->blockPreviewImage($block);
 
@@ -180,11 +361,7 @@ class PageContentBuilderPage extends Page
                 <h3>{$title}</h3>
                 <p>{$text}</p>
                 <div class="page-builder-block__chips">
-                    <span>Позиция: {$position}</span>
-                    <span>Слайдов: {$images}</span>
-                    <span>Motion: {$motion}</span>
-                    <span>Вариант: {$variant}</span>
-                    <span>Состояние: {$state}</span>
+                    {$chips}
                 </div>
             </div>
             <div class="page-builder-block__actions">
@@ -192,6 +369,36 @@ class PageContentBuilderPage extends Page
             </div>
         </article>
         HTML;
+    }
+
+    private function blockChipsHtml(PageBlock $block): string
+    {
+        $type = (string) $block->type;
+        $pageSlug = (string) ($block->page?->slug ?? '');
+        $chips = ['Позиция: ' . (int) $block->position];
+
+        if (in_array($type, ['media', 'gallery'], true) || ($type === 'hero' && $pageSlug !== 'home')) {
+            $chips[] = 'Картинок: ' . $this->blockImagesCount($block);
+        }
+
+        if ($type === 'media') {
+            $chips[] = 'Motion: ' . ($block->motion_preset ?: 'motion');
+            $chips[] = 'Медиа: ' . ($block->media_position ?: 'auto');
+            $chips[] = 'Вариант: ' . ($block->visual_variant ?: 'default');
+            $chips[] = 'Состояние: ' . ($block->card_state ?: 'normal');
+        }
+
+        if ($type === 'hero' && $pageSlug !== 'home') {
+            $chips[] = 'Motion: ' . ($block->motion_preset ?: 'motion');
+        }
+
+        if (in_array($type, ['quote', 'cta'], true)) {
+            $chips[] = 'Состояние: ' . ($block->card_state ?: 'normal');
+        }
+
+        return collect($chips)
+            ->map(static fn (string $chip): string => '<span>' . e($chip) . '</span>')
+            ->implode('');
     }
 
     private function blockPreviewImage(PageBlock $block): string
@@ -202,7 +409,15 @@ class PageContentBuilderPage extends Page
             ->first();
 
         if (! $image) {
-            return '<span class="page-builder-block__placeholder">Нет медиа</span>';
+            $label = match ((string) $block->type) {
+                'hero' => $block->page?->slug === 'home' ? 'Видео-фон в верстке' : 'Hero без слайдов',
+                'text' => 'Текстовый блок',
+                'quote' => 'Цитата',
+                'cta' => 'CTA без медиа',
+                default => 'Нет медиа',
+            };
+
+            return '<span class="page-builder-block__placeholder">' . e($label) . '</span>';
         }
 
         $src = preg_match('/^(https?:)?\/\//i', $image) === 1 || str_starts_with($image, '/')
@@ -251,6 +466,17 @@ class PageContentBuilderPage extends Page
         }
 
         return route('moonshine.resource.page', $params);
+    }
+
+    private function pageIndexUrl(): string
+    {
+        return $this->moonshineResourcePageUrl(PageResource::class, PageIndexPage::class);
+    }
+
+    private function uiTextIndexUrl(string $group): string
+    {
+        return $this->moonshineResourcePageUrl(UiTextResource::class, UiTextIndexPage::class)
+            . '?search=' . urlencode($group);
     }
 
     private function previewText(PageBlock $block): string

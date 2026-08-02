@@ -228,6 +228,49 @@
     gap: 12px;
 }
 
+.page-builder-create {
+    display: grid;
+    gap: 8px;
+    padding: 16px;
+    border: 1px dashed rgba(13, 148, 136, .34);
+    border-radius: 14px;
+    background: rgba(13, 148, 136, .07);
+}
+
+.page-builder-create strong {
+    color: var(--builder-ink);
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.page-builder-create span {
+    color: var(--builder-muted);
+    font-size: 13px;
+}
+
+.page-builder-create div,
+.page-builder-section-card div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.page-builder-create a,
+.page-builder-section-card a {
+    display: inline-flex;
+    min-height: 34px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    border: 1px solid rgba(15, 23, 42, .12);
+    border-radius: 9px;
+    background: #fff;
+    color: var(--builder-ink);
+    font-size: 12px;
+    font-weight: 800;
+    text-decoration: none;
+}
+
 .page-builder-block {
     display: grid;
     grid-template-columns: 150px minmax(0, 1fr) max-content;
@@ -335,6 +378,85 @@
     padding: 28px;
 }
 
+.page-builder-home-map {
+    display: grid;
+    gap: 14px;
+    margin-top: 8px;
+}
+
+.page-builder-home-map__head {
+    padding: 22px;
+    border: 1px solid var(--builder-line);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .86);
+}
+
+.page-builder-home-map__head .page-builder__eyebrow {
+    color: #0f766e;
+}
+
+.page-builder-home-map__head h3 {
+    margin: 0;
+    color: var(--builder-ink);
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+.page-builder-home-map__head span {
+    display: block;
+    max-width: 76ch;
+    margin-top: 8px;
+    color: var(--builder-muted);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.page-builder-home-map__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.page-builder-section-card {
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid var(--builder-line);
+    border-radius: 14px;
+    background: #fff;
+}
+
+.page-builder-section-card > span {
+    width: max-content;
+    max-width: 100%;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: rgba(124, 58, 237, .1);
+    color: #6d28d9;
+    font-size: 11px;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.page-builder-section-card h4 {
+    margin: 0;
+    color: var(--builder-ink);
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.page-builder-section-card p {
+    margin: 0;
+    color: var(--builder-muted);
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
 .page-block-editor-tip {
     display: grid;
     gap: 8px;
@@ -361,6 +483,9 @@
 .dark .page-builder-block,
 .dark .page-builder-empty,
 .dark .page-builder-page,
+.dark .page-builder-create,
+.dark .page-builder-home-map__head,
+.dark .page-builder-section-card,
 .dark .page-block-editor-tip {
     border-color: rgba(148, 163, 184, .2);
     background: rgba(15, 23, 42, .56);
@@ -375,6 +500,9 @@
 .dark .page-builder-page,
 .dark .page-builder-page__title,
 .dark .page-builder-selected h2,
+.dark .page-builder-create strong,
+.dark .page-builder-home-map__head h3,
+.dark .page-builder-section-card h4,
 .dark .page-builder-block h3,
 .dark .page-builder-selected code {
     color: #f8fafc;
@@ -384,6 +512,9 @@
 .dark .page-builder-empty span,
 .dark .page-builder-page__meta,
 .dark .page-builder-block p,
+.dark .page-builder-create span,
+.dark .page-builder-home-map__head span,
+.dark .page-builder-section-card p,
 .dark .page-block-editor-tip span {
     color: rgba(226, 232, 240, .72);
 }
@@ -396,14 +527,23 @@
 }
 
 .dark .page-builder-selected__head .page-builder__eyebrow,
+.dark .page-builder-home-map__head .page-builder__eyebrow,
 .dark .page-block-editor-tip strong {
     color: #5eead4;
+}
+
+.dark .page-builder-create a,
+.dark .page-builder-section-card a {
+    border-color: rgba(148, 163, 184, .22);
+    background: rgba(15, 23, 42, .72);
+    color: #f8fafc;
 }
 
 @media (max-width: 1180px) {
     .page-builder__hero,
     .page-builder__layout,
-    .page-builder-block {
+    .page-builder-block,
+    .page-builder-home-map__grid {
         grid-template-columns: 1fr;
     }
 
