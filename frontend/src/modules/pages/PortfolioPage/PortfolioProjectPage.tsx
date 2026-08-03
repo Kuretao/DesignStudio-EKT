@@ -115,14 +115,27 @@ function getProjectCopy(project: Project, text: (key: string, fallback?: string)
   const copy = projectCaseCopy[project.category] ?? fallbackCaseCopy;
   const id = projectCaseId(project);
 
+  const chapters =
+    project.storyChapters && project.storyChapters.length > 0
+      ? project.storyChapters.map((chapter) => ({
+          title: chapter.title || chapter.title_ru || "Заголовок",
+          text: chapter.text || chapter.text_ru || "Текст",
+        }))
+      : copy.chapters.map((chapter, index) => ({
+          title: text(`portfolioCase.${id}.chapters.${index + 1}.title`, chapter.title),
+          text: text(`portfolioCase.${id}.chapters.${index + 1}.text`, chapter.text),
+        }));
+
+  const deliverables =
+    project.deliverables && project.deliverables.length > 0
+      ? project.deliverables
+      : copy.deliverables.map((item, index) => text(`portfolioCase.${id}.deliverables.${index + 1}`, item));
+
   return {
     focus: text(`portfolioCase.${id}.focus`, copy.focus),
     intro: text(`portfolioCase.${id}.intro`, copy.intro),
-    chapters: copy.chapters.map((chapter, index) => ({
-      title: text(`portfolioCase.${id}.chapters.${index + 1}.title`, chapter.title),
-      text: text(`portfolioCase.${id}.chapters.${index + 1}.text`, chapter.text),
-    })),
-    deliverables: copy.deliverables.map((item, index) => text(`portfolioCase.${id}.deliverables.${index + 1}`, item)),
+    chapters,
+    deliverables,
     process: copy.process.map((item, index) => text(`portfolioCase.${id}.process.${index + 1}`, item)),
     values: copy.values.map((item, index) => text(`portfolioCase.${id}.values.${index + 1}`, item)),
   };

@@ -47,10 +47,10 @@ class ServiceIndexPage extends IndexPage
                     return '<div class="svc-card"><div class="svc-card__title">'.e((string) $item).'</div></div>';
                 }
 
-                $rawTitle = $item->fieldRu('title') ?? '';
+                $rawTitle = $this->cmsText($item->fieldRu('title') ?? '');
                 $title = e($rawTitle);
                 $slug = e($item->slug ?? '');
-                $eyebrowValue = $item->fieldRu('eyebrow');
+                $eyebrowValue = $this->cmsText($item->fieldRu('eyebrow') ?? '');
                 $eyebrow = $eyebrowValue ? e($eyebrowValue) : null;
                 $initial = mb_strtoupper(mb_substr($rawTitle !== '' ? $rawTitle : 'S', 0, 1));
 
@@ -83,8 +83,8 @@ class ServiceIndexPage extends IndexPage
 
                 $parts = '';
 
-                $price = $item->fieldRu('price');
-                $timeline = $item->fieldRu('timeline');
+                $price = $this->cmsText($item->fieldRu('price') ?? '');
+                $timeline = $this->cmsText($item->fieldRu('timeline') ?? '');
 
                 if (! empty($price)) {
                     $parts .= sprintf(
@@ -228,5 +228,10 @@ class ServiceIndexPage extends IndexPage
             </section>
         </div>
         HTML;
+    }
+
+    private function cmsText(?string $value): string
+    {
+        return html_entity_decode((string) $value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
 }

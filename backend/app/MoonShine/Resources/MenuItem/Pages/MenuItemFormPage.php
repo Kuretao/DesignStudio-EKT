@@ -167,17 +167,17 @@ class MenuItemFormPage extends FormPage
     private function overviewHtml(): string
     {
         $item = $this->getResource()->getItem();
-        $label = e($item?->labelRu() ?: 'Новый пункт меню');
+        $label = e(html_entity_decode($item?->labelRu() ?: 'Новый пункт меню'));
         $updatedAt = $item?->updated_at?->format('d.m.Y, H:i') ?? 'еще не сохранялся';
         $target = 'Сначала выберите страницу или ссылку.';
-        $area = CmsFieldSets::menuAreaLabel($item?->menu_area);
+        $area = html_entity_decode(CmsFieldSets::menuAreaLabel($item?->menu_area));
         $level = $item?->parent_id === null
             ? 'Верхний раздел'
-            : 'Подпункт раздела: ' . e($item->parent?->labelRu() ?? 'родитель не найден');
+            : 'Подпункт раздела: ' . e(html_entity_decode($item->parent?->labelRu() ?? 'родитель не найден'));
 
         if ($item?->page_id !== null) {
-            $target = $item->page?->title
-                ? 'Привязан к странице: ' . e($item->page->title)
+            $target = $item->page?->fieldRu('title')
+                ? 'Привязан к странице: ' . e(html_entity_decode($item->page->fieldRu('title')))
                 : 'Страница больше не найдена.';
         } elseif (filled($item?->href)) {
             $target = 'Своя ссылка: ' . e($item->href);

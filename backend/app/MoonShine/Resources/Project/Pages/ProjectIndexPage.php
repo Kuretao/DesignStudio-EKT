@@ -47,15 +47,16 @@ class ProjectIndexPage extends IndexPage
                     return '<div class="proj-card"><div class="proj-card__title">'.e((string) $item).'</div></div>';
                 }
 
-                $rawTitle = $item->fieldRu('title') ?? '';
+                $rawTitle = $this->cmsText($item->fieldRu('title') ?? '');
                 $title = e($rawTitle);
                 $slug = e($item->slug ?? '');
                 $initial = mb_strtoupper(mb_substr($rawTitle !== '' ? $rawTitle : 'P', 0, 1));
+                $image = $item->effective_image ?? null;
 
-                $thumb = ! empty($item->image)
+                $thumb = ! empty($image)
                     ? sprintf(
                         '<div class="proj-card__thumb"><img src="%s" alt="" loading="lazy"></div>',
-                        e($item->image)
+                        e($image)
                     )
                     : sprintf('<div class="proj-card__thumb">%s</div>', $initial);
 
@@ -68,7 +69,7 @@ class ProjectIndexPage extends IndexPage
             }),
 
             Preview::make('Категория', 'category', function (mixed $item): string {
-                $cat = is_object($item) ? ($item->fieldRu('category') ?? '') : (string) $item;
+                $cat = is_object($item) ? $this->cmsText($item->fieldRu('category') ?? '') : (string) $item;
 
                 return ! empty($cat)
                     ? '<span class="proj-category">'.e($cat).'</span>'
@@ -81,7 +82,7 @@ class ProjectIndexPage extends IndexPage
                 }
 
                 $parts = '';
-                $location = $item->fieldRu('location');
+                $location = $this->cmsText($item->fieldRu('location') ?? '');
 
                 if (! empty($location)) {
                     $parts .= '<div class="proj-meta__item">📍 '.e($location).'</div>';
@@ -219,5 +220,10 @@ class ProjectIndexPage extends IndexPage
             </section>
         </div>
         HTML;
+    }
+
+    private function cmsText(?string $value): string
+    {
+        return html_entity_decode((string) $value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
 }

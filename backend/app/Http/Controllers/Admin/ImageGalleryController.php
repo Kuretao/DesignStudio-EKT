@@ -62,6 +62,28 @@ class ImageGalleryController extends Controller
         );
     }
 
+    public function destroy(Request $request): JsonResponse|RedirectResponse
+    {
+        $data = $request->validate([
+            'path' => ['required', 'string', 'max:2048'],
+        ]);
+
+        $path = $this->normalizePublicPath((string) $data['path']);
+        $disk = Storage::disk('public');
+
+        if ($path === null || ! in_array(Str::lower(pathinfo($path, PATHINFO_EXTENSION)), ImageGallery::MEDIA_EXTENSIONS, true)) {
+            return $this->deleteResponse($request, false, 'Нельзя удалить этот файл из галереи.');
+        }
+
+        if (! $disk->exists($path)) {
+            return $this->deleteResponse($request, false, 'Файл уже не найден в галерее.');
+        }
+
+        $disk->delete($path);
+
+        return $this->deleteResponse($request, true, 'Файл удален из галереи.');
+    }
+
     private function normalizeDirectory(string $directory): string
     {
         $segments = collect(preg_split('#[\\\\/]+#', $directory) ?: [])
@@ -71,6 +93,33 @@ class ImageGalleryController extends Controller
             ->values();
 
         return $segments->isNotEmpty() ? $segments->implode('/') : 'cms';
+    }
+
+    private function normalizePublicPath(string $path): ?string
+    {
+        $value = trim(str_replace('\\', '/', $path));
+        $value = preg_replace('#^https?://[^/]+/storage/#i', '', $value) ?? $value;
+        $value = preg_replace('#^/?storage/#i', '', $value) ?? $value;
+        $value = ltrim($value, '/');
+
+        if ($value === '' || str_contains($value, '..') || str_starts_with($value, '/')) {
+            return null;
+        }
+
+        return $value;
+    }
+
+    private function deleteResponse(Request $request, bool $ok, string $message): JsonResponse|RedirectResponse
+    {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => $ok,
+                'message' => $message,
+                'images' => ImageGallery::items(),
+            ], $ok ? 200 : 422);
+        }
+
+        return back()->with('gallery_status', $message);
     }
 
     private function filename(UploadedFile $file, string $extension): string

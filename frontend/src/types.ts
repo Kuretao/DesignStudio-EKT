@@ -22,4 +22,5 @@ export type Project = {
   featuredTitle?: string;
   featuredDescription?: string;
   featuredImage?: string;
+  featuredGalleryImages?: string[];
 };

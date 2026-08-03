@@ -196,10 +196,10 @@ class NewsArticleFormPage extends FormPage
     private function overviewHtml(): string
     {
         $item = $this->getResource()->getItem();
-        $title = e($item?->fieldRu('title') ?: 'Новая новость');
+        $title = e(html_entity_decode($item?->fieldRu('title') ?: 'Новая новость'));
         $slug = filled($item?->slug) ? '/novosti/'.e($item->slug) : 'slug появится после заполнения';
-        $category = e($item?->fieldRu('category') ?: 'категория не указана');
-        $date = e($item?->fieldRu('date') ?: $item?->date_iso?->format('d.m.Y') ?: 'дата не указана');
+        $category = e(html_entity_decode($item?->fieldRu('category') ?: 'категория не указана'));
+        $date = e(html_entity_decode($item?->fieldRu('date') ?: $item?->date_iso?->format('d.m.Y') ?: 'дата не указана'));
         $updatedAt = $item?->updated_at?->format('d.m.Y, H:i') ?? 'еще не сохранялась';
 
         return <<<HTML

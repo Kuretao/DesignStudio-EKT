@@ -430,12 +430,12 @@ class PageBlockFormPage extends FormPage
     {
         $item = $this->getResource()->getItem();
         $page = $item?->page;
-        $pageTitle = e($page?->fieldRu('title') ?: $page?->title ?: 'Страница еще не выбрана');
+        $pageTitle = e(html_entity_decode($page?->fieldRu('title') ?: $page?->title ?: 'Страница еще не выбрана'));
         $path = ! $page
             ? 'страница выбирается в форме'
             : ($page->slug === 'home' ? 'Главная страница сайта' : '/'.e(ltrim((string) $page->slug, '/')));
-        $type = e(CmsFieldSets::pageBlockTypeLabel($item?->type));
-        $title = e($item?->fieldRu('title') ?: $item?->title ?: 'Новый блок страницы');
+        $type = e(html_entity_decode(CmsFieldSets::pageBlockTypeLabel($item?->type)));
+        $title = e(html_entity_decode($item?->fieldRu('title') ?: $item?->title ?: 'Новый блок страницы'));
         $updatedAt = $item?->updated_at?->format('d.m.Y, H:i') ?? 'еще не сохранялся';
 
         return <<<HTML

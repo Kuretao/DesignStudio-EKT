@@ -161,7 +161,7 @@ class PageFormPage extends FormPage
     private function overviewHtml(): string
     {
         $item = $this->getResource()->getItem();
-        $title = e($item?->fieldRu('title') ?: $item?->title ?: 'Новая страница');
+        $title = e(html_entity_decode($item?->fieldRu('title') ?: $item?->title ?: 'Новая страница'));
         $path = filled($item?->slug) ? '/'.e(ltrim($item->slug, '/')) : 'адрес появится после заполнения';
         $updatedAt = $item?->updated_at?->format('d.m.Y, H:i') ?? 'еще не сохранялась';
         $menuState = $item?->menuItems()->exists() ? 'У страницы уже есть пункт меню.' : 'Пункт меню можно создать при сохранении.';

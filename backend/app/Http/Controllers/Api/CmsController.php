@@ -439,6 +439,7 @@ class CmsController extends Controller
             'featuredDescriptionRu' => $project->fieldRu('featured_description'),
             'featuredDescriptionEn' => $project->fieldEn('featured_description'),
             'featuredImage' => $project->effective_featured_image,
+            'featuredGalleryImages' => $this->imageList($project->featured_gallery_images),
         ];
     }
 

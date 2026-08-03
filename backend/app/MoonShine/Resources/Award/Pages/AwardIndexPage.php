@@ -47,9 +47,9 @@ class AwardIndexPage extends IndexPage
                     return '<div class="award-card"><div class="award-card__title">'.e((string) $item).'</div></div>';
                 }
 
-                $rawTitle = $item->fieldRu('title') ?? '';
+                $rawTitle = $this->cmsText($item->fieldRu('title') ?? '');
                 $title = e($rawTitle);
-                $issuerValue = $item->fieldRu('issuer');
+                $issuerValue = $this->cmsText($item->fieldRu('issuer') ?? '');
                 $issuer = $issuerValue ? e($issuerValue) : null;
                 $initial = mb_strtoupper(mb_substr($rawTitle !== '' ? $rawTitle : 'A', 0, 1));
 
@@ -74,7 +74,7 @@ class AwardIndexPage extends IndexPage
             }),
 
             Preview::make('Описание', 'description', function (mixed $item): string {
-                $text = is_object($item) ? ($item->fieldRu('description') ?? '') : (string) $item;
+                $text = is_object($item) ? $this->cmsText($item->fieldRu('description') ?? '') : (string) $item;
 
                 return ! empty($text)
                     ? '<div class="award-description">'.e($text).'</div>'
@@ -176,5 +176,10 @@ class AwardIndexPage extends IndexPage
             </section>
         </div>
         HTML;
+    }
+
+    private function cmsText(?string $value): string
+    {
+        return html_entity_decode((string) $value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
 }

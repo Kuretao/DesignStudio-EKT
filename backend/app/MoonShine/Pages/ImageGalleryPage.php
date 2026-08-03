@@ -47,8 +47,9 @@ class ImageGalleryPage extends Page
             ? $directories->map(static fn (string $directory): string => '<span class="gallery-page__chip">' . e($directory) . '</span>')->implode('')
             : '<span class="gallery-page__chip">Папок пока нет</span>';
 
+        $deleteUrl = e(route('admin.image-gallery.destroy'));
         $cards = $media->isNotEmpty()
-            ? $media->map(fn (array $image): string => $this->imageCard($image))->implode('')
+            ? $media->map(fn (array $image): string => $this->imageCard($image, $deleteUrl))->implode('')
             : $this->emptyState();
 
         $imagesCount = $media->where('type', 'image')->count();
@@ -58,6 +59,9 @@ class ImageGalleryPage extends Page
         $uploadUrl = e(route('admin.image-gallery.upload'));
         $csrf = csrf_field();
         $uploadFeedback = $this->uploadFeedback();
+
+        $csrf = csrf_field();
+        $method = method_field('DELETE');
 
         return <<<HTML
         <section class="gallery-page">
@@ -131,7 +135,7 @@ class ImageGalleryPage extends Page
      *     type: string
      * } $media
      */
-    private function imageCard(array $media): string
+    private function imageCard(array $media, string $deleteUrl): string
     {
         $name = e($media['name']);
         $path = e($media['path']);
@@ -154,6 +158,12 @@ class ImageGalleryPage extends Page
                 <span>{$directory} · {$typeLabel}</span>
                 <code title="{$path}">{$path}</code>
                 <small>{$meta}</small>
+                <form action="{$deleteUrl}" method="post" onsubmit="return confirm('Удалить этот файл из галереи?');">
+                    {$csrf}
+                    {$method}
+                    <input type="hidden" name="path" value="{$path}">
+                    <button type="submit" class="gallery-page-card__delete">Удалить</button>
+                </form>
             </div>
         </article>
         HTML;

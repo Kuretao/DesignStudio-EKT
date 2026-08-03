@@ -230,10 +230,10 @@ class ServiceFormPage extends FormPage
     private function overviewHtml(): string
     {
         $item = $this->getResource()->getItem();
-        $title = e($item?->fieldRu('title') ?: 'Новая услуга');
+        $title = e(html_entity_decode($item?->fieldRu('title') ?: 'Новая услуга'));
         $slug = filled($item?->slug) ? '/'.e($item->slug) : 'slug появится после заполнения';
-        $price = e($item?->fieldRu('price') ?: 'цена не указана');
-        $timeline = e($item?->fieldRu('timeline') ?: 'срок не указан');
+        $price = e(html_entity_decode($item?->fieldRu('price') ?: 'цена не указана'));
+        $timeline = e(html_entity_decode($item?->fieldRu('timeline') ?: 'срок не указан'));
         $updatedAt = $item?->updated_at?->format('d.m.Y, H:i') ?? 'еще не сохранялась';
 
         return <<<HTML

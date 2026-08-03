@@ -68,6 +68,25 @@ function normalizeImageList(value: unknown): string[] {
   return Array.from(new Set(normalizeStringList(value).map(normalizeAsset).filter(Boolean)));
 }
 
+function decodeCmsText(value: string) {
+  let decoded = value;
+
+  for (let index = 0; index < 5; index += 1) {
+    const next = decoded
+      .replace(/&quot;|&#34;/giu, '"')
+      .replace(/&#039;|&apos;/giu, "'")
+      .replace(/&laquo;/giu, "«")
+      .replace(/&raquo;/giu, "»")
+      .replace(/&nbsp;/giu, " ")
+      .replace(/&amp;/giu, "&");
+
+    if (next === decoded) break;
+    decoded = next;
+  }
+
+  return decoded;
+}
+
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const project = await resolveProject(slug);
@@ -78,10 +97,13 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
 }
 
 async function resolveProject(slug: string): Promise<Project | null> {
+  const cmsProject = await loadCmsProject(slug);
+  if (cmsProject) return cmsProject;
+
   const fallbackProject = projects.find((item) => item.slug === slug);
   if (fallbackProject) return fallbackProject;
 
-  return loadCmsProject(slug);
+  return null;
 }
 
 async function loadCmsProject(slug: string): Promise<Project | null> {
@@ -102,19 +124,25 @@ async function loadCmsProject(slug: string): Promise<Project | null> {
     return {
       id: Number(project.id ?? 0),
       slug: String(project.slug),
-      title: String(project.title),
+      title: decodeCmsText(String(project.title)),
       category: project.category || "Интерьеры",
-      location: project.location || "",
-      year: project.year || "",
-      description: project.description || "",
+      location: decodeCmsText(String(project.location || "")),
+      year: decodeCmsText(String(project.year || "")),
+      description: decodeCmsText(String(project.description || "")),
       image: project.image || projects[0]?.image || "",
       beforeImage: project.beforeImage || undefined,
       afterImage: project.afterImage || undefined,
-      galleryEyebrow: project.galleryEyebrow || undefined,
-      galleryTitle: project.galleryTitle || undefined,
-      galleryText: project.galleryText || undefined,
+      galleryEyebrow: project.galleryEyebrow ? decodeCmsText(String(project.galleryEyebrow)) : undefined,
+      galleryTitle: project.galleryTitle ? decodeCmsText(String(project.galleryTitle)) : undefined,
+      galleryText: project.galleryText ? decodeCmsText(String(project.galleryText)) : undefined,
       galleryImages: normalizeImageList(project.galleryImages),
-      galleryLabels: normalizeStringList(project.galleryLabels),
+      galleryLabels: normalizeStringList(project.galleryLabels).map(decodeCmsText),
+      isFeatured: Boolean(project.isFeatured),
+      featuredLabel: project.featuredLabel ? decodeCmsText(String(project.featuredLabel)) : undefined,
+      featuredTitle: project.featuredTitle ? decodeCmsText(String(project.featuredTitle)) : undefined,
+      featuredDescription: project.featuredDescription ? decodeCmsText(String(project.featuredDescription)) : undefined,
+      featuredImage: project.featuredImage || undefined,
+      featuredGalleryImages: normalizeImageList(project.featuredGalleryImages),
     } as Project;
   } catch {
     return null;

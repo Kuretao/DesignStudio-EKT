@@ -96,6 +96,15 @@ class ProjectFormPage extends FormPage
                         ]),
                     ])->icon('rectangle-stack')->customAttributes(['class' => 'proj-form-section']),
                 ])->icon('rectangle-stack'),
+                Tab::make('История и Состав', [
+                    Box::make('Контент страницы кейса', [
+                        $this->sectionNote('История проекта', 'Раздел "Что важно увидеть в этом кейсе". Если оставить пустым, будет показан текст по умолчанию для категории проекта.'),
+                        Grid::make([
+                            Column::make(array_slice($fields, 43, 1))->columnSpan(6),
+                            Column::make(array_slice($fields, 44, 2))->columnSpan(6),
+                        ]),
+                    ])->icon('chat-bubble-left-ellipsis')->customAttributes(['class' => 'proj-form-section']),
+                ])->icon('chat-bubble-left-ellipsis'),
                 Tab::make('Публикация', [
                     Box::make('Показ на сайте', [
                         Grid::make([
@@ -116,6 +125,9 @@ class ProjectFormPage extends FormPage
                         Grid::make([
                             Column::make(array_slice($fields, 20, 4))->columnSpan(6),
                             Column::make(array_slice($fields, 24, 4))->columnSpan(6),
+                        ]),
+                        Grid::make([
+                            Column::make(array_slice($fields, 37, 1))->columnSpan(12),
                         ]),
                     ])->icon('star')->customAttributes(['class' => 'proj-form-section']),
                 ])->icon('star'),
@@ -161,6 +173,10 @@ class ProjectFormPage extends FormPage
             'featured_description_ru' => ['nullable', 'string', 'max:10000'],
             'featured_description_en' => ['nullable', 'string', 'max:10000'],
             'featured_image' => ['nullable', 'string', 'max:2048'],
+            'featured_gallery_images' => ['nullable', 'string', 'max:20000'],
+            'story_chapters' => ['nullable', 'json'],
+            'deliverables_ru' => ['nullable', 'string', 'max:10000'],
+            'deliverables_en' => ['nullable', 'string', 'max:10000'],
             'position' => ['required', 'integer', 'min:0', 'max:9999'],
             'is_featured' => ['nullable', 'boolean'],
             'is_published' => ['nullable', 'boolean'],
@@ -199,8 +215,8 @@ class ProjectFormPage extends FormPage
     {
         return FlexibleRender::make(sprintf(
             '<div class="proj-form-note"><strong>%s</strong><span>%s</span></div>',
-            e($title),
-            e($text),
+            e(html_entity_decode($title)),
+            e(html_entity_decode($text)),
         ));
     }
 }

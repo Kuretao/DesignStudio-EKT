@@ -96,16 +96,12 @@ final class CmsFieldSets
                 Image::make('Логотип сайта', 'site_logo')
                     ->disk('public')
                     ->dir('site/branding')
-                    ->allowedExtensions(['svg', 'png', 'jpg', 'jpeg', 'webp'])
-                    ->disableDeleteFiles()
-                    ->removable()
+                    ->allowedExtensions(['svg', 'png', 'jpg', 'jpeg', 'webp'])->removable()
                     ->hint('Основной логотип для подвала сайта. Подойдут SVG, PNG, JPG или WEBP до 4 МБ.'),
                 Image::make('Компактный логотип', 'site_logo_small')
                     ->disk('public')
                     ->dir('site/branding')
-                    ->allowedExtensions(['svg', 'png', 'jpg', 'jpeg', 'webp'])
-                    ->disableDeleteFiles()
-                    ->removable()
+                    ->allowedExtensions(['svg', 'png', 'jpg', 'jpeg', 'webp'])->removable()
                     ->hint('Логотип для верхней панели. Если оставить пустым, будет использован основной логотип.'),
                 File::make('Фавикон', 'favicon')
                     ->disk('public')
@@ -116,9 +112,7 @@ final class CmsFieldSets
                 Image::make('Иконка для iPhone и iPad', 'apple_touch_icon')
                     ->disk('public')
                     ->dir('site/branding')
-                    ->allowedExtensions(['png', 'jpg', 'jpeg', 'webp'])
-                    ->disableDeleteFiles()
-                    ->removable()
+                    ->allowedExtensions(['png', 'jpg', 'jpeg', 'webp'])->removable()
                     ->hint('Квадратная картинка для сохранения сайта на экран устройства. Рекомендуется PNG 180x180.'),
             ],
             'animations' => [
@@ -185,9 +179,7 @@ final class CmsFieldSets
                 Image::make('Изображение для соцсетей', 'social_preview_image')
                     ->disk('public')
                     ->dir('site/branding')
-                    ->allowedExtensions(['png', 'jpg', 'jpeg', 'webp'])
-                    ->disableDeleteFiles()
-                    ->removable()
+                    ->allowedExtensions(['png', 'jpg', 'jpeg', 'webp'])->removable()
                     ->hint('Картинка для превью ссылки в соцсетях. Рекомендуется горизонтальный PNG или JPG.'),
             ],
             default => [],
@@ -697,9 +689,7 @@ final class CmsFieldSets
             Image::make('Загрузить главное изображение', 'image_file')
                 ->disk('public')
                 ->dir('projects')
-                ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])
-                ->disableDeleteFiles()
-                ->removable()
+                ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])->removable()
                 ->hint('Загрузите файл на сервер. Имеет приоритет над URL ниже.'),
             Textarea::make('Или URL главного изображения', 'image')
                 ->customAttributes(['data-gallery-lines' => '1'])
@@ -707,9 +697,7 @@ final class CmsFieldSets
             Image::make('Загрузить изображение «До»', 'before_image_file')
                 ->disk('public')
                 ->dir('projects')
-                ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])
-                ->disableDeleteFiles()
-                ->removable()
+                ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])->removable()
                 ->hint('Загрузите файл на сервер. Имеет приоритет над URL ниже.'),
             Textarea::make('Или URL изображения «До»', 'before_image')
                 ->customAttributes(['data-gallery-lines' => '1'])
@@ -717,20 +705,12 @@ final class CmsFieldSets
             Image::make('Загрузить изображение «После»', 'after_image_file')
                 ->disk('public')
                 ->dir('projects')
-                ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])
-                ->disableDeleteFiles()
-                ->removable()
+                ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])->removable()
                 ->hint('Загрузите файл на сервер. Имеет приоритет над URL ниже.'),
             Textarea::make('Или URL изображения «После»', 'after_image')
                 ->customAttributes(['data-gallery-lines' => '1'])
                 ->hint('Вставьте путь из галереи или внешнюю ссылку. Используется если файл выше не загружен.'),
             Switcher::make('Избранный', 'is_featured'),
-            Text::make('Избранный: подпись RU', 'featured_label_ru')
-                ->placeholder('Избранный проект 01')
-                ->hint('Показывается в большой секции избранного кейса на главной. Работает только если включен статус "Избранный".'),
-            Text::make('Избранный: подпись EN', 'featured_label_en')
-                ->placeholder('Featured project 01')
-                ->hint('Английская подпись большой секции избранного кейса.'),
             Text::make('Избранный: заголовок RU', 'featured_title_ru')
                 ->placeholder('Можно оставить пустым - будет обычный заголовок кейса')
                 ->hint('Отдельный заголовок для большой структуры избранного кейса.'),
@@ -744,9 +724,7 @@ final class CmsFieldSets
             Image::make('Избранный: загрузить фон', 'featured_image_file')
                 ->disk('public')
                 ->dir('projects/featured')
-                ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])
-                ->disableDeleteFiles()
-                ->removable()
+                ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])->removable()
                 ->hint('Отдельная картинка для fullscreen-блока избранного кейса. Если пусто, берется главное изображение.'),
             Textarea::make('Избранный: или URL фона', 'featured_image')
                 ->customAttributes(['data-gallery-lines' => '1'])
@@ -774,6 +752,45 @@ final class CmsFieldSets
             Textarea::make('Галерея кейса: подписи EN, по одной в строке', 'gallery_labels_en')
                 ->placeholder("Main angle\nFinal presentation\nSource scene\nMaterials")
                 ->hint('Английские подписи карточек галереи. Если пусто, EN-версия возьмет русский текст.'),
+            Image::make('Избранный: загрузить нижнюю картинку 01', 'featured_gallery_image_1_file')
+                ->disk('public')
+                ->dir('projects/featured')
+                ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])->removable()
+                ->hint('Загрузите файл для нижней картинки 01. Имеет приоритет над URL ниже.'),
+            Textarea::make('Избранный: или URL нижней картинки 01', 'featured_gallery_image_1')
+                ->customAttributes(['data-gallery-lines' => '1'])
+                ->hint('Вставьте путь из галереи или внешнюю ссылку. Используется если файл выше не загружен.'),
+            Image::make('Избранный: загрузить нижнюю картинку 02', 'featured_gallery_image_2_file')
+                ->disk('public')
+                ->dir('projects/featured')
+                ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])->removable()
+                ->hint('Загрузите файл для нижней картинки 02. Имеет приоритет над URL ниже.'),
+            Textarea::make('Избранный: или URL нижней картинки 02', 'featured_gallery_image_2')
+                ->customAttributes(['data-gallery-lines' => '1'])
+                ->hint('Вставьте путь из галереи или внешнюю ссылку. Используется если файл выше не загружен.'),
+            Image::make('Избранный: загрузить нижнюю картинку 03', 'featured_gallery_image_3_file')
+                ->disk('public')
+                ->dir('projects/featured')
+                ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])->removable()
+                ->hint('Загрузите файл для нижней картинки 03. Имеет приоритет над URL ниже.'),
+            Textarea::make('Избранный: или URL нижней картинки 03', 'featured_gallery_image_3')
+                ->customAttributes(['data-gallery-lines' => '1'])
+                ->hint('Вставьте путь из галереи или внешнюю ссылку. Используется если файл выше не загружен.'),
+            Json::make('История проекта (главы)', 'story_chapters')
+                ->fields([
+                    Text::make('Заголовок RU', 'title_ru')->required(),
+                    Text::make('Заголовок EN', 'title_en'),
+                    Textarea::make('Текст RU', 'text_ru')->required(),
+                    Textarea::make('Текст EN', 'text_en'),
+                ])
+                ->removable()
+                ->sortable()
+                ->hint('Блок "Что важно увидеть в этом кейсе". Если пусто, сайт покажет текст по умолчанию для категории проекта.'),
+            Textarea::make('Состав проекта RU (по одному в строке)', 'deliverables_ru')
+                ->hint('Блок "Что входит в проектную подачу". Если пусто, сайт покажет текст по умолчанию для категории проекта.'),
+            Textarea::make('Состав проекта EN (по одному в строке)', 'deliverables_en')
+                ->hint('Английская версия состава проекта.'),
+
         ];
     }
 
@@ -846,9 +863,7 @@ final class CmsFieldSets
                 Image::make('Главная обложка', 'image_file')
                     ->disk('public')
                     ->dir('services')
-                    ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])
-                    ->disableDeleteFiles()
-                    ->removable()
+                    ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])->removable()
                     ->hint('Файл для карточки и первого слайда. Имеет приоритет над URL ниже.'),
                 Textarea::make('Или URL главной обложки', 'image')
                     ->customAttributes(['data-gallery-lines' => '1'])
@@ -985,9 +1000,7 @@ final class CmsFieldSets
                 Image::make('Главная обложка', 'image_file')
                     ->disk('public')
                     ->dir('news')
-                    ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])
-                    ->disableDeleteFiles()
-                    ->removable()
+                    ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])->removable()
                     ->hint('Файл для карточки новости и первого слайда. Имеет приоритет над URL ниже.'),
                 Textarea::make('Или URL главной обложки', 'image')
                     ->customAttributes(['data-gallery-lines' => '1'])
@@ -1037,9 +1050,7 @@ final class CmsFieldSets
             Image::make('Загрузить изображение на сервер', 'image_file')
                 ->disk('public')
                 ->dir('promo')
-                ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])
-                ->disableDeleteFiles()
-                ->removable()
+                ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])->removable()
                 ->hint('Загрузите файл — он сохранится в хранилище. Если загружен файл, он имеет приоритет над URL ниже.'),
             Textarea::make('Или URL изображения', 'image')
                 ->customAttributes(['data-gallery-lines' => '1'])
@@ -1067,9 +1078,7 @@ final class CmsFieldSets
             Image::make('Загрузить изображение на сервер', 'image_file')
                 ->disk('public')
                 ->dir('awards')
-                ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])
-                ->disableDeleteFiles()
-                ->removable()
+                ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])->removable()
                 ->hint('Загрузите файл — он сохранится в хранилище. Если загружен файл, он имеет приоритет над URL ниже.'),
             Textarea::make('Или URL изображения', 'image')
                 ->customAttributes(['data-gallery-lines' => '1'])
@@ -1094,9 +1103,7 @@ final class CmsFieldSets
             Image::make('Загрузить логотип на сервер', 'logo_file')
                 ->disk('public')
                 ->dir('partners')
-                ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif', 'svg'])
-                ->disableDeleteFiles()
-                ->removable()
+                ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif', 'svg'])->removable()
                 ->hint('Загрузите файл — он сохранится в хранилище. Если загружен файл, он имеет приоритет над URL ниже.'),
             Textarea::make('Или URL логотипа', 'logo')
                 ->customAttributes(['data-gallery-lines' => '1'])

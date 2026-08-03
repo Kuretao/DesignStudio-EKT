@@ -232,6 +232,25 @@ function decodeCmsText(value: string) {
     .replace(/&amp;amp;/giu, "&");
 }
 
+function decodeCmsTextDeep(value: string) {
+  let decoded = value;
+
+  for (let index = 0; index < 5; index += 1) {
+    const next = decodeCmsText(decoded)
+      .replace(/&quot;|&#34;/giu, '"')
+      .replace(/&#039;|&apos;/giu, "'")
+      .replace(/&laquo;/giu, "«")
+      .replace(/&raquo;/giu, "»")
+      .replace(/&nbsp;/giu, " ")
+      .replace(/&amp;/giu, "&");
+
+    if (next === decoded) break;
+    decoded = next;
+  }
+
+  return decoded;
+}
+
 function localizeString(
   item: Record<string, any> | null | undefined,
   base: string,
@@ -239,15 +258,15 @@ function localizeString(
   fallback: string | null = "",
 ) {
   const localized = item?.[`${base}${localeSuffix(locale)}`];
-  if (hasText(localized)) return decodeCmsText(localized);
+  if (hasText(localized)) return decodeCmsTextDeep(localized);
 
   const ru = item?.[`${base}Ru`];
-  if (hasText(ru)) return decodeCmsText(ru);
+  if (hasText(ru)) return decodeCmsTextDeep(ru);
 
   const direct = item?.[base];
-  if (hasText(direct)) return decodeCmsText(direct);
+  if (hasText(direct)) return decodeCmsTextDeep(direct);
 
-  return typeof fallback === "string" ? decodeCmsText(fallback) : fallback;
+  return typeof fallback === "string" ? decodeCmsTextDeep(fallback) : fallback;
 }
 
 function localizeArray<T>(
@@ -259,19 +278,19 @@ function localizeArray<T>(
   const localized = item?.[`${base}${localeSuffix(locale)}`];
   if (Array.isArray(localized) && localized.length)
     return localized.map((value) =>
-      typeof value === "string" ? decodeCmsText(value) : value,
+      typeof value === "string" ? decodeCmsTextDeep(value) : value,
     ) as T[];
 
   const ru = item?.[`${base}Ru`];
   if (Array.isArray(ru) && ru.length)
     return ru.map((value) =>
-      typeof value === "string" ? decodeCmsText(value) : value,
+      typeof value === "string" ? decodeCmsTextDeep(value) : value,
     ) as T[];
 
   const direct = item?.[base];
   if (Array.isArray(direct) && direct.length)
     return direct.map((value) =>
-      typeof value === "string" ? decodeCmsText(value) : value,
+      typeof value === "string" ? decodeCmsTextDeep(value) : value,
     ) as T[];
 
   return fallback;
@@ -307,6 +326,7 @@ function normalizeBlock(block: any, locale: SiteLocale) {
 
 function localizeProject(project: any, locale: SiteLocale) {
   const galleryImages = normalizeImageList(project?.galleryImages);
+  const featuredGalleryImages = normalizeImageList(project?.featuredGalleryImages);
 
   return {
     ...project,
@@ -344,6 +364,7 @@ function localizeProject(project: any, locale: SiteLocale) {
         project?.featuredDescription ?? "",
       ) ?? "",
     featuredImage: optimizeImageUrl(project?.featuredImage, 1600, 76),
+    featuredGalleryImages,
     category:
       localizeString(project, "category", locale, project?.category ?? "") ??
       "",

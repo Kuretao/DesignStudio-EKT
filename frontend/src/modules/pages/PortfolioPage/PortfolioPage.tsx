@@ -196,7 +196,7 @@ export function PortfolioGrid({ onSelectProject }: PortfolioGridProps) {
         value.toLowerCase().includes(query),
       ),
     );
-  }, [activeDirection, searchQuery]);
+  }, [activeDirection, projects, searchQuery]);
 
   useEffect(() => {
     const cards = gridRef.current?.querySelectorAll(".grid-card");
@@ -322,7 +322,26 @@ export function ProjectShowcase({ project }: { project: Project }) {
   const fallbackImage = fallbackImages[0] || "";
   const fallbackAfterImage = project.afterImage || projects[1]?.image || projects[0]?.afterImage || fallbackImage;
   const fallbackBeforeImage = project.beforeImage || projects[2]?.image || projects[0]?.beforeImage || fallbackImage;
-  const gallery = Array.from(new Set([project.image || fallbackImage, fallbackAfterImage, fallbackBeforeImage].filter(Boolean)));
+  const featuredGallery = project.featuredGalleryImages?.length ? project.featuredGalleryImages : [];
+  const gallery = Array.from(
+    new Set([
+      ...featuredGallery,
+      project.image || fallbackImage,
+      fallbackAfterImage,
+      fallbackBeforeImage,
+    ].filter(Boolean)),
+  ).slice(0, 3);
+  const showcaseFrames = Array.from(
+    new Set([
+      project.featuredImage,
+      project.image,
+      ...featuredGallery,
+      project.afterImage,
+      project.beforeImage,
+      projects[(project.id + 1) % projects.length]?.image,
+      projects[(project.id + 3) % projects.length]?.image,
+    ].filter(Boolean)),
+  );
   const lightboxImage = lightboxIndex === null ? null : gallery[lightboxIndex];
   const currentLightboxIndex = lightboxIndex ?? 0;
 
@@ -352,13 +371,7 @@ export function ProjectShowcase({ project }: { project: Project }) {
           <div className="relative grid gap-0 lg:grid-cols-[1.08fr_0.92fr]">
             <div className="group relative min-h-[620px] overflow-hidden">
               <CinematicImage
-                frames={[
-                  project.image,
-                  project.afterImage,
-                  project.beforeImage,
-                  projects[(project.id + 1) % projects.length]?.image,
-                  projects[(project.id + 3) % projects.length]?.image,
-                ]}
+                frames={showcaseFrames}
                 alt={project.title}
                 fill
                 hint="tour"
