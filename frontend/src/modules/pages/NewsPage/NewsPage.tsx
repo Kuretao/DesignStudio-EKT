@@ -9,6 +9,23 @@ function NewsPage() {
   const { newsArticles } = useCms();
   const text = useCmsText();
   const [featured, ...rest] = newsArticles;
+  if (!featured) {
+    return (
+      <div className="page-in">
+        <section className="relative flex min-h-screen items-center px-5 pb-16 pt-28 md:px-10 lg:px-16">
+          <div className="mx-auto w-full max-w-7xl">
+            <p className="text-xs uppercase tracking-[0.38em] text-[#D69A66]">
+              {text("news.hero.label", "Журнал студии")}
+            </p>
+            <h1 className="mt-5 max-w-5xl text-[clamp(2.8rem,5vw,5.2rem)] font-light leading-[0.94] tracking-normal md:tracking-[-0.035em] text-white">
+              {text("news.emptyTitle", "Новости скоро появятся")}
+            </h1>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   const featuredImages = Array.isArray((featured as any).images)
     ? ((featured as any).images as string[])
     : [];
@@ -28,24 +45,34 @@ function NewsPage() {
 
   return (
     <div className="page-in">
-      <section className="relative min-h-screen overflow-hidden px-5 pb-16 pt-28 md:px-10 lg:px-16">
-        <HeroBackdropSlider slides={featuredSlides} />
+      <section className="relative min-h-screen overflow-hidden px-5 md:px-10 lg:px-16">
+        <HeroBackdropSlider slides={featuredSlides} controlsClassName="bottom-8" />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,5,.96)_0%,rgba(5,5,5,.70)_48%,rgba(5,5,5,.18)_100%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(0deg,#050505_0%,rgba(5,5,5,.35)_34%,transparent_76%)]" />
 
-        <div className="relative z-10 mx-auto grid min-h-[calc(100vh-7rem)] max-w-7xl gap-10 lg:grid-cols-[1fr_0.78fr] lg:items-end">
-          <div className="pb-8">
+        <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl items-end pb-28 pt-36">
+          <div className="max-w-4xl">
+            <div className="mb-8 flex flex-wrap items-center gap-3">
+              <span className="rounded-full border border-[#D69A66]/40 px-3 py-1 text-[10px] uppercase tracking-[0.28em] text-[#D69A66]">
+                {featured.category}
+              </span>
+              <span className="text-xs text-white/45">{featured.date}</span>
+              <span className="text-xs text-white/35">
+                {text("news.readingTimeSuffix", "{time} чтения").replace("{time}", featured.readingTime)}
+              </span>
+            </div>
             <p className="text-xs uppercase tracking-[0.38em] text-[#D69A66]">
               {text("news.hero.label", "Журнал студии")}
             </p>
-            <h1 className="mt-5 max-w-5xl text-[clamp(3rem,6.4vw,6.2rem)] font-light leading-[0.94] tracking-[-0.045em] text-white">
-              {text("news.hero.title", "Блог и новости")}
+            <h1 className="mt-5 max-w-5xl text-[clamp(2.8rem,5vw,5.2rem)] font-light leading-[0.94] tracking-normal md:tracking-[-0.035em] text-white">
+              {featured.title || text("news.hero.title", "Блог и новости")}
             </h1>
             <p className="mt-7 max-w-2xl text-lg leading-relaxed text-[#E8E0D8]/85 md:text-xl">
-              {text(
-                "news.hero.text",
-                "Пишем о проектах, решениях и деталях, которые делают интерьер дороже на вид, спокойнее в реализации и точнее для жизни.",
-              )}
+              {featured.preview ||
+                text(
+                  "news.hero.text",
+                  "Пишем о проектах, решениях и деталях, которые делают интерьер дороже на вид, спокойнее в реализации и точнее для жизни.",
+                )}
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <Link
@@ -59,30 +86,6 @@ function NewsPage() {
               </span>
             </div>
           </div>
-
-          <Link
-            href={`/novosti/${featured.slug}`}
-            className="group mb-8 overflow-hidden rounded-[2rem] border border-white/10 bg-[#050505]/42 p-6 backdrop-blur transition duration-500 hover:-translate-y-2 hover:border-[#D69A66]/60"
-          >
-            <div className="mb-5 flex flex-wrap items-center gap-3">
-              <span className="rounded-full border border-[#D69A66]/40 px-3 py-1 text-[10px] uppercase tracking-[0.28em] text-[#D69A66]">
-                {featured.category}
-              </span>
-              <span className="text-xs text-white/45">{featured.date}</span>
-              <span className="text-xs text-white/35">
-                {text("news.readingTimeSuffix", "{time} чтения").replace("{time}", featured.readingTime)}
-              </span>
-            </div>
-            <h2 className="text-3xl font-light leading-tight tracking-normal [overflow-wrap:anywhere] transition duration-500 group-hover:translate-x-1 md:text-5xl">
-              {featured.title}
-            </h2>
-            <p className="mt-5 text-base leading-relaxed text-[#D6D1CA]">
-              {featured.preview}
-            </p>
-            <div className="mt-8 inline-flex items-center gap-3 text-xs uppercase tracking-[0.22em] text-[#D69A66] transition duration-300 group-hover:gap-5">
-              {text("news.openArticle", "Открыть статью")} <span>→</span>
-            </div>
-          </Link>
         </div>
       </section>
 
@@ -92,7 +95,7 @@ function NewsPage() {
             {text("news.list.label", "Новости студии")}
           </p>
           <div className="mb-16 grid gap-8 md:grid-cols-[1fr_0.6fr] md:items-end">
-            <h2 className="text-5xl font-light leading-[0.92] tracking-[-0.055em] md:text-7xl">
+            <h2 className="text-[clamp(2.7rem,5vw,4.8rem)] font-light leading-[0.98] tracking-normal md:tracking-[-0.035em]">
               {text("news.list.title", "Все материалы")}
             </h2>
             <p className="text-lg leading-relaxed text-[#D6D1CA]">

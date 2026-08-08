@@ -39,6 +39,18 @@
         {!! nl2br(e($lead->message ?: 'Сообщение не указано')) !!}
     </div>
 
+    @php
+        $pdfUrl = data_get($lead->payload, 'pdfUrl');
+        $pdfTitle = data_get($lead->payload, 'pdfTitle') ?: 'PDF-бонус';
+    @endphp
+
+    @if (! empty($pdfUrl))
+        <h2 style="font-size: 18px; margin: 24px 0 8px;">PDF-бонус</h2>
+        <p>
+            <a href="{{ $pdfUrl }}" style="color: #b7791f;">{{ $pdfTitle }}</a>
+        </p>
+    @endif
+
     @if (! empty($lead->payload))
         <h2 style="font-size: 18px; margin: 24px 0 8px;">Дополнительные данные</h2>
         <pre style="padding: 12px; background: #f8fafc; border: 1px solid #e5e7eb; white-space: pre-wrap;">{{ json_encode($lead->payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) }}</pre>

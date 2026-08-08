@@ -27,6 +27,25 @@ class PartnerFormPage extends FormPage
 
     protected function rules(DataWrapperContract $item): array
     {
-        return [];
+        return [
+            'name_ru' => ['required', 'string', 'max:255'],
+            'name_en' => ['nullable', 'string', 'max:255'],
+            'note_ru' => ['nullable', 'string', 'max:1000'],
+            'note_en' => ['nullable', 'string', 'max:1000'],
+            'logo' => ['nullable', 'string', 'max:2048'],
+            'logo_file' => ['nullable'],
+            'position' => ['required', 'integer', 'min:0', 'max:9999'],
+            'is_active' => ['nullable', 'boolean'],
+        ];
+    }
+
+    public function validationMessages(): array
+    {
+        return [
+            'name_ru.required' => 'Укажите русское название партнёра.',
+            'position.required' => 'Укажите позицию партнёра в списке.',
+            'position.integer' => 'Позиция должна быть целым числом.',
+            '*.max' => 'Одно из полей партнёра превышает допустимую длину.',
+        ];
     }
 }

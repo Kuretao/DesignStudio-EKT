@@ -27,6 +27,32 @@ class ReviewFormPage extends FormPage
 
     protected function rules(DataWrapperContract $item): array
     {
-        return [];
+        return [
+            'name_ru' => ['required', 'string', 'max:255'],
+            'name_en' => ['nullable', 'string', 'max:255'],
+            'service_ru' => ['nullable', 'string', 'max:255'],
+            'service_en' => ['nullable', 'string', 'max:255'],
+            'title_ru' => ['nullable', 'string', 'max:255'],
+            'title_en' => ['nullable', 'string', 'max:255'],
+            'date_ru' => ['nullable', 'string', 'max:255'],
+            'date_en' => ['nullable', 'string', 'max:255'],
+            'text_ru' => ['nullable', 'string', 'max:10000'],
+            'text_en' => ['nullable', 'string', 'max:10000'],
+            'admin_reply_ru' => ['nullable', 'string', 'max:10000'],
+            'admin_reply_en' => ['nullable', 'string', 'max:10000'],
+            'image' => ['nullable', 'string', 'max:2048'],
+            'position' => ['required', 'integer', 'min:0', 'max:9999'],
+            'is_published' => ['nullable', 'boolean'],
+        ];
+    }
+
+    public function validationMessages(): array
+    {
+        return [
+            'name_ru.required' => 'Укажите имя автора отзыва.',
+            'position.required' => 'Укажите позицию отзыва в списке.',
+            'position.integer' => 'Позиция должна быть целым числом.',
+            '*.max' => 'Одно из полей отзыва превышает допустимую длину.',
+        ];
     }
 }

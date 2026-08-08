@@ -89,9 +89,9 @@ export default function Breadcrumbs() {
       aria-label={text("breadcrumbs.aria", "Хлебные крошки")}
       itemScope
       itemType="https://schema.org/BreadcrumbList"
-      className="fixed left-0 right-0 top-[72px] z-[45] border-b border-white/10 bg-[#050505]/58 px-5 text-white backdrop-blur-[10px] md:top-[76px] md:px-10 lg:px-12"
+      className="sticky left-0 right-0 top-[78px] z-[45] border-b border-white/10 bg-[#050505]/72 px-4 text-white md:top-[84px] md:px-10 lg:px-12"
     >
-      <ol className="mx-auto flex min-h-10 max-w-[1680px] items-center gap-2 overflow-x-auto py-2 text-[11px] leading-snug text-white/54 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <ol className="mx-auto flex h-10 max-w-[1680px] items-center gap-2 overflow-x-auto whitespace-nowrap text-[11px] leading-none text-white/54 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {crumbs.map((crumb, index) => {
           const isLast = index === crumbs.length - 1;
 
@@ -101,10 +101,10 @@ export default function Breadcrumbs() {
               itemProp="itemListElement"
               itemScope
               itemType="https://schema.org/ListItem"
-              className="flex items-center gap-2"
+              className="flex shrink-0 items-center gap-2"
             >
               {isLast ? (
-                <span itemProp="name" className="block max-w-[58vw] whitespace-normal break-words text-white/78 md:max-w-none md:whitespace-nowrap">
+                <span itemProp="name" className="block max-w-[46vw] truncate text-white/78 md:max-w-none">
                   {crumb.label}
                 </span>
               ) : (

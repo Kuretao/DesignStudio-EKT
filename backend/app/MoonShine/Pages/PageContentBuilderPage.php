@@ -11,6 +11,8 @@ use App\MoonShine\Resources\Award\AwardResource;
 use App\MoonShine\Resources\Award\Pages\AwardIndexPage;
 use App\MoonShine\Resources\Faq\FaqResource;
 use App\MoonShine\Resources\Faq\Pages\FaqIndexPage;
+use App\MoonShine\Resources\Lead\LeadResource;
+use App\MoonShine\Resources\Lead\Pages\LeadIndexPage;
 use App\MoonShine\Resources\NewsArticle\NewsArticleResource;
 use App\MoonShine\Resources\NewsArticle\Pages\NewsArticleIndexPage;
 use App\MoonShine\Resources\Page\PageResource;
@@ -452,6 +454,17 @@ class PageContentBuilderPage extends Page
                 ],
             ],
             [
+                'title' => 'Страница партнерам',
+                'kind' => 'Страница с блоками',
+                'badge' => 'Партнерам',
+                'description' => 'Первый экран, форматы сотрудничества, форма заявки, тексты кнопок и список партнеров/логотипов. Основные секции редактируются как блоки страницы.',
+                'links' => [
+                    ['label' => 'Открыть блоки страницы', 'url' => $this->pageBuilderPageUrl('partneram')],
+                    ['label' => 'Партнеры и логотипы', 'url' => $this->moonshineResourcePageUrl(PartnerResource::class, PartnerIndexPage::class)],
+                    ['label' => 'Заявки со страницы', 'url' => $this->moonshineResourcePageUrl(LeadResource::class, LeadIndexPage::class)],
+                ],
+            ],
+            [
                 'title' => 'Услуги и цены на главной',
                 'kind' => 'Постоянный блок',
                 'badge' => 'Услуги и цены',
@@ -462,6 +475,7 @@ class PageContentBuilderPage extends Page
                 ],
                 'description' => 'Блок как на главной: надзаголовок, заголовок, описание справа и 6 карточек услуг с названиями, ценами и текстами.',
                 'links' => [
+                    ['label' => 'Направления услуг: название, описание, картинка', 'url' => $this->moonshinePageUrl(ServiceDirectionsPage::class)],
                     ['label' => 'Карточки услуг: название, цена, описание', 'url' => $this->moonshineResourcePageUrl(ServiceResource::class, ServiceIndexPage::class)],
                     ['label' => 'Тексты блока: надзаголовок, заголовок, описание', 'url' => $this->permanentGroupUrl('services-home')],
                     ['label' => 'Общие блоки детальной услуги', 'url' => $this->permanentGroupUrl('service-detail')],
@@ -727,6 +741,11 @@ class PageContentBuilderPage extends Page
         return $this->moonshineResourcePageUrl(PageResource::class, PageIndexPage::class);
     }
 
+    private function pageBuilderPageUrl(string $slug): string
+    {
+        return request()->url() . '?page=' . urlencode($slug);
+    }
+
     /**
      * @param class-string $pageClass
      */
@@ -764,6 +783,8 @@ class PageContentBuilderPage extends Page
             'text' => 'Текст',
             'media' => 'Текст + медиа',
             'gallery' => 'Галерея',
+            'list' => 'Список карточек',
+            'form' => 'Форма заявки',
             'quote' => 'Цитата',
             'cta' => 'CTA',
             default => filled($type) ? (string) $type : 'Блок',

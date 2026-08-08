@@ -73,26 +73,58 @@ class ProjectFormPage extends FormPage
                         ]),
                     ])->icon('bars-3-bottom-left')->customAttributes(['class' => 'proj-form-section']),
                 ])->icon('bars-3-bottom-left'),
-                Tab::make('Медиа', [
-                    Box::make('Обложка и сравнение до/после', [
-                        $this->sectionNote('Изображения из галереи', 'Главное изображение идет в карточки и hero. До/После используются в портфолио и услугах, где есть сравнение.'),
+                Tab::make('Фильтры', [
+                    Box::make('Фильтры портфолио', [
+                        $this->sectionNote('Быстрая настройка фильтров', 'Направление берется из категории проекта. Здесь выберите площадь и тон, чтобы фильтры на главной и в портфолио показывали только подходящие проекты.'),
                         Grid::make([
-                            Column::make(array_slice($fields, 13, 2))->columnSpan(4),
-                            Column::make(array_slice($fields, 15, 2))->columnSpan(4),
-                            Column::make(array_slice($fields, 17, 2))->columnSpan(4),
+                            Column::make(array_slice($fields, 62, 1))->columnSpan(6),
+                            Column::make(array_slice($fields, 63, 1))->columnSpan(6),
+                        ]),
+                    ])->icon('adjustments-horizontal')->customAttributes(['class' => 'proj-form-section']),
+                ])->icon('adjustments-horizontal'),
+                Tab::make('Виртуальный 3D-тур', [
+                    Box::make('Интерактивный 360° просмотр проекта', [
+                        $this->sectionNote('Показывается только при включенном свитче', 'Добавьте панорамы в галерею, затем заполните сцены тура. Если сцены пустые, публичный блок тура не появится.'),
+                        Grid::make([
+                            Column::make(array_slice($fields, 64, 1))->columnSpan(12),
+                        ]),
+                        Grid::make([
+                            Column::make(array_slice($fields, 65, 4))->columnSpan(6),
+                            Column::make(array_slice($fields, 69, 4))->columnSpan(6),
+                        ]),
+                        Grid::make([
+                            Column::make(array_slice($fields, 73, 1))->columnSpan(12),
+                        ]),
+                    ])->icon('cube-transparent')->customAttributes(['class' => 'proj-form-section']),
+                ])->icon('cube-transparent'),
+                Tab::make('Медиа', [
+                    Box::make('Обложка и hero-слайдер проекта', [
+                        $this->sectionNote('Изображения первого экрана', 'Главное изображение идет в карточки проекта. Hero-слайдер страницы проекта заполняется отдельным списком изображений ниже.'),
+                        Grid::make([
+                            Column::make(array_slice($fields, 13, 2))->columnSpan(6),
+                            Column::make(array_slice($fields, 15, 1))->columnSpan(6),
                         ]),
                     ])->icon('photo')->customAttributes(['class' => 'proj-form-section']),
                 ])->icon('photo'),
+                Tab::make('До / После', [
+                    Box::make('Сравнение до/после', [
+                        $this->sectionNote('Отдельные картинки сравнения', 'Эти изображения используются только в блоках сравнения. Картинка "До" показывается слева, картинка "После" справа.'),
+                        Grid::make([
+                            Column::make(array_slice($fields, 16, 2))->columnSpan(6),
+                            Column::make(array_slice($fields, 18, 2))->columnSpan(6),
+                        ]),
+                    ])->icon('arrows-right-left')->customAttributes(['class' => 'proj-form-section']),
+                ])->icon('arrows-right-left'),
                 Tab::make('Галерея кейса', [
                     Box::make('Ракурсы и детали проекта', [
                         $this->sectionNote('Картинки и подписи карточек', 'Первая картинка показывается большой плашкой. Остальные идут маленькими карточками снизу. Подписи пишутся в том же порядке.'),
                         Grid::make([
-                            Column::make(array_slice($fields, 28, 3))->columnSpan(6),
-                            Column::make(array_slice($fields, 31, 3))->columnSpan(6),
+                            Column::make(array_slice($fields, 29, 4))->columnSpan(6),
+                            Column::make(array_slice($fields, 33, 2))->columnSpan(6),
                         ]),
                         Grid::make([
-                            Column::make(array_slice($fields, 34, 1))->columnSpan(6),
-                            Column::make(array_slice($fields, 35, 2))->columnSpan(6),
+                            Column::make(array_slice($fields, 35, 1))->columnSpan(6),
+                            Column::make(array_slice($fields, 36, 2))->columnSpan(6),
                         ]),
                     ])->icon('rectangle-stack')->customAttributes(['class' => 'proj-form-section']),
                 ])->icon('rectangle-stack'),
@@ -100,8 +132,8 @@ class ProjectFormPage extends FormPage
                     Box::make('Контент страницы кейса', [
                         $this->sectionNote('История проекта', 'Раздел "Что важно увидеть в этом кейсе". Если оставить пустым, будет показан текст по умолчанию для категории проекта.'),
                         Grid::make([
-                            Column::make(array_slice($fields, 43, 1))->columnSpan(6),
-                            Column::make(array_slice($fields, 44, 2))->columnSpan(6),
+                            Column::make(array_slice($fields, 44, 1))->columnSpan(6),
+                            Column::make(array_slice($fields, 45, 4))->columnSpan(6),
                         ]),
                     ])->icon('chat-bubble-left-ellipsis')->customAttributes(['class' => 'proj-form-section']),
                 ])->icon('chat-bubble-left-ellipsis'),
@@ -111,7 +143,8 @@ class ProjectFormPage extends FormPage
                             Column::make([
                                 $fields[6],
                                 $fields[7],
-                                $fields[19],
+                                $fields[20],
+                                $fields[49],
                             ])->columnSpan(5),
                             Column::make([
                                 FlexibleRender::make('<div class="proj-publish-guide"><strong>Проверьте перед сохранением:</strong><span>заголовок, категорию, локацию, год, обложку и изображения до/после, если они нужны.</span></div>'),
@@ -123,14 +156,29 @@ class ProjectFormPage extends FormPage
                     Box::make('Большая структура на главной', [
                         $this->sectionNote('Поля работают только для избранного', 'Включите статус "Избранный" во вкладке публикации. После этого проект попадет в fullscreen-секцию на главной и возьмет эти отдельные подписи, заголовок, описание и фон.'),
                         Grid::make([
-                            Column::make(array_slice($fields, 20, 4))->columnSpan(6),
-                            Column::make(array_slice($fields, 24, 4))->columnSpan(6),
+                            Column::make(array_slice($fields, 21, 4))->columnSpan(6),
+                            Column::make(array_slice($fields, 25, 4))->columnSpan(6),
                         ]),
                         Grid::make([
-                            Column::make(array_slice($fields, 37, 1))->columnSpan(12),
+                            Column::make(array_slice($fields, 38, 2))->columnSpan(4),
+                            Column::make(array_slice($fields, 40, 2))->columnSpan(4),
+                            Column::make(array_slice($fields, 42, 2))->columnSpan(4),
                         ]),
                     ])->icon('star')->customAttributes(['class' => 'proj-form-section']),
                 ])->icon('star'),
+                Tab::make('Выбранный проект', [
+                    Box::make('Блок "Выбранный проект" на главной', [
+                        $this->sectionNote('Только один проект', 'Включите статус "Выбранный проект на главной". При сохранении у остальных проектов этот статус выключится автоматически.'),
+                        Grid::make([
+                            Column::make(array_slice($fields, 49, 1))->columnSpan(12),
+                        ]),
+                        Grid::make([
+                            Column::make(array_slice($fields, 50, 4))->columnSpan(4),
+                            Column::make(array_slice($fields, 54, 4))->columnSpan(4),
+                            Column::make(array_slice($fields, 58, 4))->columnSpan(4),
+                        ]),
+                    ])->icon('sparkles')->customAttributes(['class' => 'proj-form-section']),
+                ])->icon('sparkles'),
             ])->vertical()->customAttributes(['class' => 'proj-form-tabs']),
         ];
     }
@@ -152,9 +200,12 @@ class ProjectFormPage extends FormPage
             'location_ru' => ['nullable', 'string', 'max:255'],
             'location_en' => ['nullable', 'string', 'max:255'],
             'year' => ['nullable', 'string', 'max:32'],
+            'filter_square' => ['nullable', 'string', Rule::in(['compact', 'medium', 'large'])],
+            'filter_tone' => ['nullable', 'string', Rule::in(['warm', 'neutral', 'dark'])],
             'description_ru' => ['nullable', 'string', 'max:10000'],
             'description_en' => ['nullable', 'string', 'max:10000'],
             'image' => ['nullable', 'string', 'max:2048'],
+            'hero_images' => ['nullable', 'string', 'max:20000'],
             'before_image' => ['nullable', 'string', 'max:2048'],
             'after_image' => ['nullable', 'string', 'max:2048'],
             'gallery_eyebrow_ru' => ['nullable', 'string', 'max:255'],
@@ -174,11 +225,39 @@ class ProjectFormPage extends FormPage
             'featured_description_en' => ['nullable', 'string', 'max:10000'],
             'featured_image' => ['nullable', 'string', 'max:2048'],
             'featured_gallery_images' => ['nullable', 'string', 'max:20000'],
-            'story_chapters' => ['nullable', 'json'],
+            'featured_gallery_image_1' => ['nullable', 'string', 'max:2048'],
+            'featured_gallery_image_2' => ['nullable', 'string', 'max:2048'],
+            'featured_gallery_image_3' => ['nullable', 'string', 'max:2048'],
+            'story_chapters' => ['nullable'],
             'deliverables_ru' => ['nullable', 'string', 'max:10000'],
             'deliverables_en' => ['nullable', 'string', 'max:10000'],
+            'case_intro_ru' => ['nullable', 'string', 'max:10000'],
+            'case_intro_en' => ['nullable', 'string', 'max:10000'],
+            'selected_task_title_ru' => ['nullable', 'string', 'max:255'],
+            'selected_task_title_en' => ['nullable', 'string', 'max:255'],
+            'selected_task_text_ru' => ['nullable', 'string', 'max:10000'],
+            'selected_task_text_en' => ['nullable', 'string', 'max:10000'],
+            'selected_result_title_ru' => ['nullable', 'string', 'max:255'],
+            'selected_result_title_en' => ['nullable', 'string', 'max:255'],
+            'selected_result_text_ru' => ['nullable', 'string', 'max:10000'],
+            'selected_result_text_en' => ['nullable', 'string', 'max:10000'],
+            'selected_format_title_ru' => ['nullable', 'string', 'max:255'],
+            'selected_format_title_en' => ['nullable', 'string', 'max:255'],
+            'selected_format_text_ru' => ['nullable', 'string', 'max:10000'],
+            'selected_format_text_en' => ['nullable', 'string', 'max:10000'],
             'position' => ['required', 'integer', 'min:0', 'max:9999'],
             'is_featured' => ['nullable', 'boolean'],
+            'is_selected' => ['nullable', 'boolean'],
+            'is_virtual_tour' => ['nullable', 'boolean'],
+            'virtual_tour_eyebrow_ru' => ['nullable', 'string', 'max:255'],
+            'virtual_tour_eyebrow_en' => ['nullable', 'string', 'max:255'],
+            'virtual_tour_title_ru' => ['nullable', 'string', 'max:255'],
+            'virtual_tour_title_en' => ['nullable', 'string', 'max:255'],
+            'virtual_tour_text_ru' => ['nullable', 'string', 'max:10000'],
+            'virtual_tour_text_en' => ['nullable', 'string', 'max:10000'],
+            'virtual_tour_button_ru' => ['nullable', 'string', 'max:255'],
+            'virtual_tour_button_en' => ['nullable', 'string', 'max:255'],
+            'virtual_tour_scenes' => ['nullable'],
             'is_published' => ['nullable', 'boolean'],
         ];
     }

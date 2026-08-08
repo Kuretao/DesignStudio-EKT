@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { createElement } from "react";
+import { ImageResponse } from "next/og";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,8 @@ function absoluteAssetUrl(value: string) {
 }
 
 export async function GET() {
+  let icon = fallbackIcon;
+
   try {
     const response = await fetch(getApiUrl(), {
       headers: { Accept: "application/json" },
@@ -36,14 +39,51 @@ export async function GET() {
     if (response.ok) {
       const payload = await response.json();
       const favicon = payload?.settings?.favicon;
+      const logoSmall = payload?.settings?.logoSmall;
+      const logo = payload?.settings?.logo;
+      const source = favicon || logoSmall || logo;
 
-      if (typeof favicon === "string" && favicon.trim()) {
-        return NextResponse.redirect(absoluteAssetUrl(favicon.trim()), 307);
+      if (typeof source === "string" && source.trim()) {
+        icon = source.trim();
       }
     }
   } catch {
     // Keep favicon requests resilient if the CMS API is temporarily unavailable.
   }
 
-  return NextResponse.redirect(absoluteAssetUrl(fallbackIcon), 307);
+  const image = absoluteAssetUrl(icon);
+
+  return new ImageResponse(
+    createElement(
+      "div",
+      {
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          height: "100%",
+          padding: "10px",
+          background: "#0c0b09",
+        },
+      },
+      createElement("img", {
+        src: image,
+        alt: "",
+        style: {
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+        },
+      }),
+    ),
+    {
+      width: 64,
+      height: 64,
+      headers: {
+        "Content-Type": "image/png",
+        "Cache-Control": "public, max-age=0, s-maxage=3600",
+      },
+    },
+  );
 }

@@ -60,9 +60,6 @@ class ImageGalleryPage extends Page
         $csrf = csrf_field();
         $uploadFeedback = $this->uploadFeedback();
 
-        $csrf = csrf_field();
-        $method = method_field('DELETE');
-
         return <<<HTML
         <section class="gallery-page">
             <div class="gallery-page__hero">
@@ -140,13 +137,17 @@ class ImageGalleryPage extends Page
         $name = e($media['name']);
         $path = e($media['path']);
         $url = e($media['url']);
+        $thumbUrl = e($media['thumbUrl'] ?? $media['url']);
         $directory = e($media['directory'] !== '' ? $media['directory'] : 'Корень');
         $meta = e($this->formatSize((int) $media['size']) . ' · ' . $media['updatedAtLabel']);
         $type = ($media['type'] ?? 'image') === 'video' ? 'video' : 'image';
         $typeLabel = $type === 'video' ? 'Видео' : 'Изображение';
         $preview = $type === 'video'
             ? '<video src="' . $url . '" muted preload="metadata"></video><span class="gallery-page-card__type">Видео</span>'
-            : '<img src="' . $url . '" alt="' . $name . '" loading="lazy"><span class="gallery-page-card__type">Фото</span>';
+            : '<img src="' . $thumbUrl . '" alt="' . $name . '" loading="lazy"><span class="gallery-page-card__type">Фото</span>';
+
+        $csrf = csrf_field();
+        $method = method_field('DELETE');
 
         return <<<HTML
         <article class="gallery-page-card">

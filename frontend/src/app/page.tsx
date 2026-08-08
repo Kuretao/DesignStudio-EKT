@@ -6,16 +6,20 @@ import HomePage from "@/src/modules/pages/HomePage";
 
 export default function Page() {
   const { projects } = useCms();
-  const [activeProject, setActiveProject] = useState(projects[0]);
+  const selectedProject = projects.find((project) => project.isSelected) ?? projects[0];
+  const [activeProject, setActiveProject] = useState(selectedProject);
 
   useEffect(() => {
-    if (!projects[0]) return;
+    const selected = projects.find((project) => project.isSelected) ?? projects[0];
+    if (!selected) return;
 
     setActiveProject((current) => {
-      if (!current) return projects[0];
-      return (
-        projects.find((project) => project.slug === current.slug) ?? projects[0]
-      );
+      if (!current) return selected;
+      const currentProject = projects.find((project) => project.slug === current.slug);
+
+      if (!currentProject) return selected;
+
+      return currentProject;
     });
   }, [projects]);
 

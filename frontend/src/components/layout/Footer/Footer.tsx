@@ -140,7 +140,9 @@ export default function Footer() {
     ...item,
     label: localize(item, "label", item.label),
   }));
-  const localizedServiceNavigationGroups = serviceNavigationGroups.map((group) => ({
+  const localizedServiceNavigationGroups = serviceNavigationGroups
+    .filter((group) => group.items.length > 0)
+    .map((group) => ({
     ...group,
     title: localize(group, "title", group.title),
     description: localize(group, "description", group.description),
@@ -154,6 +156,7 @@ export default function Footer() {
     menuByHref.get("/o-nas") ?? { href: "/o-nas", label: text("menu.about", "О нас") },
     menuByHref.get("/portfolio") ?? { href: "/portfolio", label: text("menu.portfolio", "Портфолио") },
     menuByHref.get("/services") ?? { href: "/services", label: text("header.servicesRoot", "Услуги") },
+    menuByHref.get("/akcii-i-skidki") ?? { href: "/akcii-i-skidki", label: text("menu.promos", "Акции") },
     menuByHref.get("/blog") ?? { href: "/blog", label: text("menu.blog", "Блог") },
     menuByHref.get("/kontakty") ?? { href: "/kontakty", label: text("menu.contacts", "Контакты") },
     { href: "/karera", label: text("footer.career", "Карьера") },
@@ -261,7 +264,7 @@ export default function Footer() {
                       →
                     </span>
                   </Link>
-                  <ul className="mt-3 space-y-2.5">
+                  <ul className={`mt-3 space-y-2.5 ${group.items.length > 15 ? "direction-scroll max-h-[360px] overflow-y-auto pr-2" : ""}`}>
                     {group.items.map((child) => {
                       const serviceTitle = child.label;
 

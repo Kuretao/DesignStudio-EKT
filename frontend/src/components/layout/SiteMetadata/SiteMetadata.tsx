@@ -54,14 +54,14 @@ export default function SiteMetadata() {
       });
     }
 
-    if (siteSettings.favicon) {
-      upsertLink("icon", siteSettings.favicon);
-      upsertLink("shortcut icon", siteSettings.favicon);
-    }
+    const iconVersion = encodeURIComponent(
+      String(siteSettings.updatedAt || siteSettings.favicon || siteSettings.logo || "favicon"),
+    );
+    const favicon = `/site-icon.png?v=${iconVersion}`;
+    upsertLink("icon", favicon);
+    upsertLink("shortcut icon", favicon);
 
-    if (siteSettings.appleTouchIcon) {
-      upsertLink("apple-touch-icon", siteSettings.appleTouchIcon);
-    }
+    upsertLink("apple-touch-icon", `/site-icon.png?apple=1&v=${iconVersion}`);
   }, [siteSettings]);
 
   return null;

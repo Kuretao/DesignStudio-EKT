@@ -54,7 +54,7 @@ function cmsApiUrl() {
   return `${siteUrl}${apiBase.startsWith("/") ? apiBase : `/${apiBase}`}/all`;
 }
 
-export async function loadSiteMetadataSettings(): Promise<CmsSettings | null> {
+export async function loadCmsPayload(): Promise<Record<string, any> | null> {
   try {
     const response = await fetch(cmsApiUrl(), {
       headers: { Accept: "application/json" },
@@ -63,21 +63,21 @@ export async function loadSiteMetadataSettings(): Promise<CmsSettings | null> {
 
     if (!response.ok) return null;
 
-    const payload = await response.json();
-    return payload?.settings ?? null;
+    return await response.json();
   } catch {
     return null;
   }
 }
 
+export async function loadSiteMetadataSettings(): Promise<CmsSettings | null> {
+  const payload = await loadCmsPayload();
+
+  return payload?.settings ?? null;
+}
+
 function socialPreviewUrl(settings?: CmsSettings | null) {
   const source = settings?.socialPreviewImage || settings?.logo;
-
-  if (!source) {
-    return absoluteSiteUrl("/logo.png");
-  }
-
-  const version = encodeURIComponent(String(settings?.updatedAt || source));
+  const version = encodeURIComponent(String(settings?.updatedAt || source || "default-preview"));
   return `${siteUrl}/social-preview-image?v=${version}`;
 }
 
@@ -87,8 +87,11 @@ export async function getSiteMetadata(): Promise<Metadata> {
   const description = settings?.seoDescription?.trim() || defaultDescription;
   const siteName = settings?.siteName?.trim() || "3D Smart Design Studio";
   const previewImage = socialPreviewUrl(settings);
-  const favicon = absoluteSiteUrl(settings?.favicon) ?? "/favicon.ico";
-  const appleIcon = absoluteSiteUrl(settings?.appleTouchIcon);
+  const iconVersion = encodeURIComponent(
+    String(settings?.updatedAt || settings?.favicon || settings?.logo || "favicon"),
+  );
+  const favicon = `/site-icon.png?v=${iconVersion}`;
+  const appleIcon = `/site-icon.png?apple=1&v=${iconVersion}`;
 
   return {
     metadataBase: new URL(siteUrl),
@@ -108,8 +111,8 @@ export async function getSiteMetadata(): Promise<Metadata> {
       yandex: process.env.YANDEX_SITE_VERIFICATION,
     },
     icons: {
-      icon: favicon,
-      shortcut: favicon,
+      icon: [{ url: favicon, sizes: "64x64", type: "image/png" }],
+      shortcut: [{ url: favicon, sizes: "64x64", type: "image/png" }],
       apple: appleIcon,
     },
     openGraph: {

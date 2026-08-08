@@ -50,7 +50,12 @@ class ImageGalleryController extends Controller
                 ]);
             }
 
-            Storage::disk('public')->putFileAs($directory, $file, $this->filename($file, $extension));
+            $storedPath = $this->storeMediaFile($directory, $file, $extension);
+
+            if ($storedPath !== null) {
+                ImageGallery::ensureThumbnail($storedPath);
+            }
+
             $uploaded++;
         }
 
@@ -80,6 +85,7 @@ class ImageGalleryController extends Controller
         }
 
         $disk->delete($path);
+        $disk->delete(ImageGallery::thumbnailPath($path));
 
         return $this->deleteResponse($request, true, 'Файл удален из галереи.');
     }
@@ -107,6 +113,83 @@ class ImageGalleryController extends Controller
         }
 
         return $value;
+    }
+
+    private function storeMediaFile(string $directory, UploadedFile $file, string $extension): ?string
+    {
+        if (in_array($extension, ['jpg', 'jpeg', 'png', 'webp', 'avif'], true) && function_exists('imagewebp')) {
+            $compressedPath = $this->storeCompressedImage($directory, $file);
+
+            if ($compressedPath !== null) {
+                return $compressedPath;
+            }
+        }
+
+        return Storage::disk('public')->putFileAs($directory, $file, $this->filename($file, $extension));
+    }
+
+    private function storeCompressedImage(string $directory, UploadedFile $file): ?string
+    {
+        $source = @imagecreatefromstring((string) file_get_contents($file->getRealPath()));
+
+        if (! $source) {
+            return null;
+        }
+
+        $width = imagesx($source);
+        $height = imagesy($source);
+
+        if ($width <= 0 || $height <= 0) {
+            imagedestroy($source);
+
+            return null;
+        }
+
+        $maxSide = 1920;
+        $scale = min(1, $maxSide / max($width, $height));
+        $targetWidth = max(1, (int) round($width * $scale));
+        $targetHeight = max(1, (int) round($height * $scale));
+        $target = imagecreatetruecolor($targetWidth, $targetHeight);
+
+        imagealphablending($target, false);
+        imagesavealpha($target, true);
+        $transparent = imagecolorallocatealpha($target, 0, 0, 0, 127);
+        imagefill($target, 0, 0, $transparent);
+        imagecopyresampled($target, $source, 0, 0, 0, 0, $targetWidth, $targetHeight, $width, $height);
+
+        $temp = tmpfile();
+        $meta = $temp ? stream_get_meta_data($temp) : null;
+        $tempPath = $meta['uri'] ?? null;
+
+        if (! $tempPath || ! imagewebp($target, $tempPath, 78)) {
+            imagedestroy($source);
+            imagedestroy($target);
+
+            if ($temp) {
+                fclose($temp);
+            }
+
+            return null;
+        }
+
+        $path = $directory . '/' . $this->filename($file, 'webp');
+        $contents = file_get_contents($tempPath);
+
+        if ($contents === false) {
+            imagedestroy($source);
+            imagedestroy($target);
+            fclose($temp);
+
+            return null;
+        }
+
+        Storage::disk('public')->put($path, $contents);
+
+        imagedestroy($source);
+        imagedestroy($target);
+        fclose($temp);
+
+        return $path;
     }
 
     private function deleteResponse(Request $request, bool $ok, string $message): JsonResponse|RedirectResponse

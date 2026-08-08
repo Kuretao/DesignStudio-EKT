@@ -23,6 +23,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class CmsController extends Controller
@@ -172,13 +173,14 @@ class CmsController extends Controller
             'appleTouchIcon' => $this->storageAsset($settings?->apple_touch_icon),
             'socialPreviewImage' => $this->storageAsset($settings?->social_preview_image),
             'updatedAt' => $settings?->updated_at?->timestamp,
+            'maintenanceEnabled' => $settings?->maintenance_enabled ?? true,
             'phone' => $settings?->phone,
             'phoneHref' => $settings?->phone_href,
             'emails' => $this->lines($settings?->emails),
             'leadNotificationEmail' => $settings?->lead_notification_email,
             'schedule' => $settings?->schedule,
             'address' => $settings?->address,
-            'mapSrc' => $settings?->map_src,
+            'mapSrc' => $this->decodeHtmlEntities($settings?->map_src),
             'seoTitle' => $settings?->seo_title,
             'seoDescription' => $settings?->seo_description,
             'compareEyebrow' => $settings?->compare_eyebrow,
@@ -240,7 +242,14 @@ class CmsController extends Controller
 
     private function serviceNavigationGroups(): array
     {
-        return MenuItem::query()
+        $publishedServiceHrefs = Service::query()
+            ->where('is_published', true)
+            ->pluck('slug')
+            ->filter(static fn (mixed $slug): bool => filled($slug))
+            ->map(static fn (string $slug): string => '/' . ltrim($slug, '/'))
+            ->all();
+
+        $groups = MenuItem::query()
             ->with(['children' => fn ($query) => $query
                 ->where('menu_area', MenuItem::AREA_SERVICES)
                 ->where('is_active', true)
@@ -250,18 +259,16 @@ class CmsController extends Controller
             ->where('is_active', true)
             ->orderBy('position')
             ->get()
-            ->map(function (MenuItem $group): ?array {
-                $href = $group->siteHref();
-
-                if ($href === null) {
-                    return null;
-                }
-
+            ->map(function (MenuItem $group) use ($publishedServiceHrefs): ?array {
                 $items = $group->children
-                    ->map(function (MenuItem $item): ?array {
+                    ->map(function (MenuItem $item) use ($publishedServiceHrefs): ?array {
                         $href = $item->siteHref();
 
                         if ($href === null) {
+                            return null;
+                        }
+
+                        if (! in_array('/' . ltrim($href, '/'), $publishedServiceHrefs, true)) {
                             return null;
                         }
 
@@ -273,6 +280,13 @@ class CmsController extends Controller
                     ->filter()
                     ->values()
                     ->all();
+                $href = $items[0]['href'] ?? $group->siteHref();
+
+                if ($href === null || empty($items)) {
+                    return null;
+                }
+
+                $image = $this->assetUrl($group->effective_image);
 
                 return [
                     'id' => 'service-nav-' . $group->id,
@@ -283,12 +297,18 @@ class CmsController extends Controller
                     'description' => $group->descriptionRu() ?? '',
                     'descriptionRu' => $group->descriptionRu(),
                     'descriptionEn' => $group->descriptionEn(),
+                    'image' => $image,
+                    'imageAlt' => $group->image_alt_ru,
+                    'imageAltRu' => $group->image_alt_ru,
+                    'imageAltEn' => $group->image_alt_en,
                     'items' => $items,
                 ];
             })
             ->filter()
             ->values()
             ->all();
+
+        return $groups;
     }
 
     private function menuLabelPayload(MenuItem $item): array
@@ -376,6 +396,15 @@ class CmsController extends Controller
             'employment' => $vacancy->fieldRu('employment'),
             'employmentRu' => $vacancy->fieldRu('employment'),
             'employmentEn' => $vacancy->fieldEn('employment'),
+            'department' => $vacancy->fieldRu('department'),
+            'departmentRu' => $vacancy->fieldRu('department'),
+            'departmentEn' => $vacancy->fieldEn('department'),
+            'format' => $vacancy->fieldRu('format'),
+            'formatRu' => $vacancy->fieldRu('format'),
+            'formatEn' => $vacancy->fieldEn('format'),
+            'experience' => $vacancy->fieldRu('experience'),
+            'experienceRu' => $vacancy->fieldRu('experience'),
+            'experienceEn' => $vacancy->fieldEn('experience'),
             'location' => $vacancy->fieldRu('location'),
             'locationRu' => $vacancy->fieldRu('location'),
             'locationEn' => $vacancy->fieldEn('location'),
@@ -391,6 +420,10 @@ class CmsController extends Controller
             'responsibilities' => $this->lines($vacancy->fieldRu('responsibilities')),
             'responsibilitiesRu' => $this->lines($vacancy->fieldRu('responsibilities')),
             'responsibilitiesEn' => $this->lines($vacancy->fieldEn('responsibilities')),
+            'perks' => $this->lines($vacancy->fieldRu('perks')),
+            'perksRu' => $this->lines($vacancy->fieldRu('perks')),
+            'perksEn' => $this->lines($vacancy->fieldEn('perks')),
+            'image' => $this->assetUrl($vacancy->effective_image),
         ];
     }
 
@@ -409,12 +442,18 @@ class CmsController extends Controller
             'locationRu' => $project->fieldRu('location'),
             'locationEn' => $project->fieldEn('location'),
             'year' => $project->year,
+            'filterSquare' => $project->filter_square,
+            'filterTone' => $project->filter_tone,
             'description' => $project->fieldRu('description'),
             'descriptionRu' => $project->fieldRu('description'),
             'descriptionEn' => $project->fieldEn('description'),
-            'image' => $project->effective_image,
-            'beforeImage' => $project->effective_before_image,
-            'afterImage' => $project->effective_after_image,
+            'image' => $this->assetUrl($project->effective_image),
+            'heroImages' => $this->projectHeroImages($project),
+            'beforeImage' => $this->assetUrl($project->effective_before_image),
+            'afterImage' => $this->assetUrl($project->effective_after_image),
+            'caseIntro' => $project->case_intro_ru,
+            'caseIntroRu' => $project->case_intro_ru,
+            'caseIntroEn' => $project->case_intro_en,
             'galleryEyebrow' => $project->fieldRu('gallery_eyebrow'),
             'galleryEyebrowRu' => $project->fieldRu('gallery_eyebrow'),
             'galleryEyebrowEn' => $project->fieldEn('gallery_eyebrow'),
@@ -429,6 +468,24 @@ class CmsController extends Controller
             'galleryLabelsRu' => $this->lines($project->fieldRu('gallery_labels')),
             'galleryLabelsEn' => $this->lines($project->fieldEn('gallery_labels')),
             'isFeatured' => $project->is_featured,
+            'isSelected' => $project->is_selected,
+            'isVirtualTour' => $project->is_virtual_tour,
+            'virtualTour' => [
+                'eyebrow' => $project->virtual_tour_eyebrow_ru,
+                'eyebrowRu' => $project->virtual_tour_eyebrow_ru,
+                'eyebrowEn' => $project->virtual_tour_eyebrow_en,
+                'title' => $project->virtual_tour_title_ru,
+                'titleRu' => $project->virtual_tour_title_ru,
+                'titleEn' => $project->virtual_tour_title_en,
+                'text' => $project->virtual_tour_text_ru,
+                'textRu' => $project->virtual_tour_text_ru,
+                'textEn' => $project->virtual_tour_text_en,
+                'buttonLabel' => $project->virtual_tour_button_ru,
+                'buttonLabelRu' => $project->virtual_tour_button_ru,
+                'buttonLabelEn' => $project->virtual_tour_button_en,
+                'scenes' => $this->virtualTourScenes($project->virtual_tour_scenes),
+            ],
+            'selectedCards' => $this->selectedProjectCards($project),
             'featuredLabel' => $project->fieldRu('featured_label'),
             'featuredLabelRu' => $project->fieldRu('featured_label'),
             'featuredLabelEn' => $project->fieldEn('featured_label'),
@@ -438,8 +495,16 @@ class CmsController extends Controller
             'featuredDescription' => $project->fieldRu('featured_description'),
             'featuredDescriptionRu' => $project->fieldRu('featured_description'),
             'featuredDescriptionEn' => $project->fieldEn('featured_description'),
-            'featuredImage' => $project->effective_featured_image,
-            'featuredGalleryImages' => $this->imageList($project->featured_gallery_images),
+            'featuredImage' => $this->assetUrl($project->effective_featured_image),
+            'featuredGalleryImages' => collect([
+                ...$project->effective_featured_gallery_images,
+                ...$this->imageList($project->featured_gallery_images),
+            ])->map(fn (string $image) => $this->assetUrl($image))
+                ->filter()->unique()->values()->all(),
+            'storyChapters' => $this->storyChapters($project->story_chapters),
+            'deliverables' => $this->lines($project->deliverables_ru),
+            'deliverablesRu' => $this->lines($project->deliverables_ru),
+            'deliverablesEn' => $this->lines($project->deliverables_en),
         ];
     }
 
@@ -459,13 +524,24 @@ class CmsController extends Controller
             'text' => $service->fieldRu('text'),
             'textRu' => $service->fieldRu('text'),
             'textEn' => $service->fieldEn('text'),
-            'image' => $images[0] ?? $service->effective_image,
+            'image' => $images[0] ?? null,
             'images' => $images,
             'heroImages' => $images,
             'pdfUrl' => $service->effective_pdf,
             'pdfTitle' => $service->fieldRu('pdf_title'),
             'pdfTitleRu' => $service->fieldRu('pdf_title'),
             'pdfTitleEn' => $service->fieldEn('pdf_title'),
+            'compareEyebrow' => $service->fieldRu('compare_eyebrow'),
+            'compareEyebrowRu' => $service->fieldRu('compare_eyebrow'),
+            'compareEyebrowEn' => $service->fieldEn('compare_eyebrow'),
+            'compareTitle' => $service->fieldRu('compare_title'),
+            'compareTitleRu' => $service->fieldRu('compare_title'),
+            'compareTitleEn' => $service->fieldEn('compare_title'),
+            'compareText' => $service->fieldRu('compare_text'),
+            'compareTextRu' => $service->fieldRu('compare_text'),
+            'compareTextEn' => $service->fieldEn('compare_text'),
+            'compareBeforeImage' => $this->assetUrl($service->effective_compare_before_image),
+            'compareAfterImage' => $this->assetUrl($service->effective_compare_after_image),
             'price' => $service->fieldRu('price'),
             'priceRu' => $service->fieldRu('price'),
             'priceEn' => $service->fieldEn('price'),
@@ -476,7 +552,7 @@ class CmsController extends Controller
             'deliverables' => $this->lines($service->fieldRu('deliverables')),
             'deliverablesRu' => $this->lines($service->fieldRu('deliverables')),
             'deliverablesEn' => $this->lines($service->fieldEn('deliverables')),
-            'deliverableImages' => $this->lines($service->deliverable_images),
+            'deliverableImages' => $this->imageList($service->deliverable_images),
             'benefits' => $this->lines($service->fieldRu('benefits')),
             'benefitsRu' => $this->lines($service->fieldRu('benefits')),
             'benefitsEn' => $this->lines($service->fieldEn('benefits')),
@@ -505,7 +581,7 @@ class CmsController extends Controller
             'preview' => $article->fieldRu('preview'),
             'previewRu' => $article->fieldRu('preview'),
             'previewEn' => $article->fieldEn('preview'),
-            'image' => $images[0] ?? $article->effective_image,
+            'image' => $images[0] ?? null,
             'images' => $images,
             'heroImages' => $images,
             'readingTime' => $article->fieldRu('reading_time'),
@@ -549,7 +625,7 @@ class CmsController extends Controller
             'conditions' => $this->lines($promo->fieldRu('conditions')),
             'conditionsRu' => $this->lines($promo->fieldRu('conditions')),
             'conditionsEn' => $this->lines($promo->fieldEn('conditions')),
-            'image' => $promo->effective_image,
+            'image' => $this->assetUrl($promo->effective_image),
         ];
     }
 
@@ -566,7 +642,7 @@ class CmsController extends Controller
             'description' => $award->fieldRu('description'),
             'descriptionRu' => $award->fieldRu('description'),
             'descriptionEn' => $award->fieldEn('description'),
-            'image' => $award->effective_image,
+            'image' => $this->assetUrl($award->effective_image),
         ];
     }
 
@@ -579,7 +655,7 @@ class CmsController extends Controller
             'note' => $partner->fieldRu('note'),
             'noteRu' => $partner->fieldRu('note'),
             'noteEn' => $partner->fieldEn('note'),
-            'logo' => $partner->effective_logo,
+            'logo' => $this->assetUrl($partner->effective_logo),
         ];
     }
 
@@ -604,7 +680,7 @@ class CmsController extends Controller
             'adminReply' => $review->fieldRu('admin_reply'),
             'adminReplyRu' => $review->fieldRu('admin_reply'),
             'adminReplyEn' => $review->fieldEn('admin_reply'),
-            'image' => $review->image,
+            'image' => $this->assetUrl($review->image),
         ];
     }
 
@@ -615,6 +691,166 @@ class CmsController extends Controller
             ->filter()
             ->values()
             ->all();
+    }
+
+    private function decodeHtmlEntities(?string $value): ?string
+    {
+        if (blank($value)) {
+            return $value;
+        }
+
+        $decoded = $value;
+
+        for ($attempt = 0; $attempt < 8; $attempt++) {
+            $next = html_entity_decode($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+            if ($next === $decoded) {
+                break;
+            }
+
+            $decoded = $next;
+        }
+
+        return $decoded;
+    }
+
+    private function storyChapters(mixed $value): array
+    {
+        $items = is_array($value) ? $value : [];
+
+        return collect($items)
+            ->filter(fn (mixed $item): bool => is_array($item))
+            ->map(fn (array $item): array => [
+                'title' => $item['title_ru'] ?? $item['title'] ?? '',
+                'titleRu' => $item['title_ru'] ?? $item['title'] ?? '',
+                'titleEn' => $item['title_en'] ?? null,
+                'text' => $item['text_ru'] ?? $item['text'] ?? '',
+                'textRu' => $item['text_ru'] ?? $item['text'] ?? '',
+                'textEn' => $item['text_en'] ?? null,
+            ])
+            ->filter(fn (array $item): bool => filled($item['title']) || filled($item['text']))
+            ->values()
+            ->all();
+    }
+
+    private function selectedProjectCards(Project $project): array
+    {
+        return collect([
+            [
+                'title' => $project->selected_task_title_ru,
+                'titleRu' => $project->selected_task_title_ru,
+                'titleEn' => $project->selected_task_title_en,
+                'text' => $project->selected_task_text_ru,
+                'textRu' => $project->selected_task_text_ru,
+                'textEn' => $project->selected_task_text_en,
+            ],
+            [
+                'title' => $project->selected_result_title_ru,
+                'titleRu' => $project->selected_result_title_ru,
+                'titleEn' => $project->selected_result_title_en,
+                'text' => $project->selected_result_text_ru,
+                'textRu' => $project->selected_result_text_ru,
+                'textEn' => $project->selected_result_text_en,
+            ],
+            [
+                'title' => $project->selected_format_title_ru,
+                'titleRu' => $project->selected_format_title_ru,
+                'titleEn' => $project->selected_format_title_en,
+                'text' => $project->selected_format_text_ru,
+                'textRu' => $project->selected_format_text_ru,
+                'textEn' => $project->selected_format_text_en,
+            ],
+        ])
+            ->filter(fn (array $item): bool => filled($item['title']) || filled($item['text']))
+            ->values()
+            ->all();
+    }
+
+    private function virtualTourScenes(mixed $value): array
+    {
+        $items = is_array($value) ? $value : [];
+
+        return collect($items)
+            ->filter(fn (mixed $item): bool => is_array($item))
+            ->map(function (array $item, int $index): array {
+                $id = trim((string) ($item['id'] ?? 'scene-' . ($index + 1)));
+                $panorama = $this->assetUrl($item['panorama'] ?? null);
+                $plan = is_array($item['plan'] ?? null) ? $item['plan'] : [];
+
+                return [
+                    'id' => $id !== '' ? $id : 'scene-' . ($index + 1),
+                    'title' => trim((string) ($item['title_ru'] ?? $item['title'] ?? '')),
+                    'titleRu' => trim((string) ($item['title_ru'] ?? $item['title'] ?? '')),
+                    'titleEn' => trim((string) ($item['title_en'] ?? '')),
+                    'label' => trim((string) ($item['label'] ?? sprintf('%02d / 360', $index + 1))),
+                    'panorama' => $panorama,
+                    'yaw' => (float) ($item['yaw'] ?? 0),
+                    'pitch' => (float) ($item['pitch'] ?? 0),
+                    'plan' => [
+                        'x' => $this->percent($item['plan_x'] ?? $plan['x'] ?? 50),
+                        'y' => $this->percent($item['plan_y'] ?? $plan['y'] ?? 50),
+                        'width' => $this->percent($item['plan_width'] ?? $plan['width'] ?? 34),
+                        'height' => $this->percent($item['plan_height'] ?? $plan['height'] ?? 30),
+                    ],
+                    'next' => $this->virtualTourLinks($item['next'] ?? []),
+                ];
+            })
+            ->filter(fn (array $item): bool => filled($item['panorama']))
+            ->values()
+            ->all();
+    }
+
+    private function virtualTourLinks(mixed $value): array
+    {
+        if (is_string($value)) {
+            return collect(preg_split('/\R/u', $value) ?: [])
+                ->map(fn (string $line): array => array_map('trim', explode('|', $line)))
+                ->filter(fn (array $parts): bool => filled($parts[0] ?? null))
+                ->map(fn (array $parts): array => [
+                    'id' => $parts[0],
+                    'text' => $parts[1] ?? '',
+                    'textRu' => $parts[1] ?? '',
+                    'textEn' => null,
+                    'yaw' => (float) ($parts[2] ?? 0),
+                    'pitch' => (float) ($parts[3] ?? 0),
+                    'targetYaw' => isset($parts[4]) && $parts[4] !== '' ? (float) $parts[4] : null,
+                ])
+                ->values()
+                ->all();
+        }
+
+        $items = is_array($value) ? $value : [];
+
+        return collect($items)
+            ->filter(fn (mixed $item): bool => is_array($item) && filled($item['id'] ?? null))
+            ->map(fn (array $item): array => [
+                'id' => trim((string) $item['id']),
+                'text' => trim((string) ($item['text_ru'] ?? $item['text'] ?? '')),
+                'textRu' => trim((string) ($item['text_ru'] ?? $item['text'] ?? '')),
+                'textEn' => trim((string) ($item['text_en'] ?? '')),
+                'yaw' => (float) ($item['yaw'] ?? 0),
+                'pitch' => (float) ($item['pitch'] ?? 0),
+                'targetYaw' => isset($item['target_yaw']) ? (float) $item['target_yaw'] : null,
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function percent(mixed $value): float
+    {
+        return max(0, min(100, (float) $value));
+    }
+
+    private function projectHeroImages(Project $project): array
+    {
+        $heroImages = $this->imageList($project->hero_images);
+
+        return ! empty($heroImages)
+            ? $heroImages
+            : collect([$this->assetUrl($project->effective_image)])
+                ->filter()
+                ->values()
+                ->all();
     }
 
     private function imageList(?string $value): array
@@ -640,7 +876,34 @@ class CmsController extends Controller
 
     private function storageAsset(?string $path): ?string
     {
-        return $this->assetUrl($path);
+        if (blank($path)) {
+            return null;
+        }
+
+        $path = trim($path);
+
+        if (
+            preg_match('/^(https?:)?\/\//i', $path) === 1
+            || str_starts_with($path, 'data:')
+        ) {
+            return $path;
+        }
+
+        if (str_starts_with($path, '/storage/')) {
+            $relativePath = ltrim(substr($path, strlen('/storage/')), '/');
+
+            return Storage::disk('public')->exists($relativePath) ? $path : null;
+        }
+
+        if (str_starts_with($path, '/')) {
+            return $path;
+        }
+
+        $relativePath = ltrim($path, '/');
+
+        return Storage::disk('public')->exists($relativePath)
+            ? '/storage/' . $relativePath
+            : null;
     }
 
     private function assetUrl(?string $path): ?string
@@ -654,11 +917,24 @@ class CmsController extends Controller
         if (
             preg_match('/^(https?:)?\/\//i', $path) === 1
             || str_starts_with($path, 'data:')
-            || str_starts_with($path, '/')
         ) {
             return $path;
         }
 
-        return '/storage/' . ltrim($path, '/');
+        if (str_starts_with($path, '/storage/')) {
+            $relativePath = ltrim(substr($path, strlen('/storage/')), '/');
+
+            return Storage::disk('public')->exists($relativePath) ? $path : null;
+        }
+
+        if (str_starts_with($path, '/')) {
+            return $path;
+        }
+
+        $relativePath = ltrim($path, '/');
+
+        return Storage::disk('public')->exists($relativePath)
+            ? '/storage/' . $relativePath
+            : null;
     }
 }

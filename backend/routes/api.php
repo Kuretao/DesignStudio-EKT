@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function (): void {
     Route::get('bootstrap', [CmsController::class, 'bootstrap']);
     Route::get('all', [CmsController::class, 'all']);
-    Route::get('pages/{slug}', [CmsController::class, 'page']);
+    Route::get('pages/{slug}', [CmsController::class, 'page'])->where('slug', '.*');
     Route::get('projects', [CmsController::class, 'projects']);
     Route::get('projects/{slug}', [CmsController::class, 'project']);
     Route::get('services', [CmsController::class, 'services']);

@@ -15,6 +15,7 @@ use MoonShine\UI\Components\FlexibleRender;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Number;
 use MoonShine\UI\Fields\Preview;
+use MoonShine\UI\Fields\Switcher;
 
 /**
  * @extends IndexPage<ProjectResource>
@@ -99,6 +100,7 @@ class ProjectIndexPage extends IndexPage
             Preview::make('Статус', 'is_published', function (mixed $item): string {
                 $published = is_object($item) ? (bool) ($item->is_published ?? false) : (bool) $item;
                 $featured = is_object($item) ? (bool) ($item->is_featured ?? false) : false;
+                $selected = is_object($item) ? (bool) ($item->is_selected ?? false) : false;
 
                 $pubBadge = $published
                     ? '<span class="proj-badge proj-badge--published">Опубликован</span>'
@@ -107,9 +109,16 @@ class ProjectIndexPage extends IndexPage
                 $featBadge = $featured
                     ? '<span class="proj-badge proj-badge--featured">★ Избранный</span>'
                     : '';
+                $selectedBadge = $selected
+                    ? '<span class="proj-badge proj-badge--featured">Выбранный на главной</span>'
+                    : '';
 
-                return '<div class="proj-badges">'.$pubBadge.$featBadge.'</div>';
+                return '<div class="proj-badges">'.$pubBadge.$featBadge.$selectedBadge.'</div>';
             }),
+
+            Switcher::make('Выбранный', 'is_selected')
+                ->sortable()
+                ->hint('Только один проект может быть выбранным на главной. После сохранения остальные выключатся автоматически.'),
 
             Number::make('Поз.', 'position')->sortable(),
         ];

@@ -65,7 +65,7 @@ class PageBlockFormPage extends FormPage
             $tabs[] = $this->mediaTab($type);
         }
 
-        if (in_array($type, ['hero', 'media', 'cta'], true)) {
+        if (in_array($type, ['hero', 'media', 'cta', 'form'], true)) {
             $tabs[] = $this->actionTab($type);
         }
 
@@ -189,7 +189,7 @@ class PageBlockFormPage extends FormPage
                 Column::make(array_slice($fields, 0, 4))->columnSpan(6),
                 Column::make(array_slice($fields, 4, 2))->columnSpan(6),
             ],
-            'text', 'media', 'gallery' => [
+            'text', 'media', 'gallery', 'list', 'form' => [
                 Column::make(array_slice($fields, 0, 4))->columnSpan(6),
                 Column::make(array_slice($fields, 4))->columnSpan(6),
             ],
@@ -215,6 +215,8 @@ class PageBlockFormPage extends FormPage
         return match ($type) {
             'media' => [$fields[0], $fields[1], $fields[2], $fields[3]],
             'hero' => [$fields[2]],
+            'list' => [$fields[3]],
+            'form' => [$fields[3], $fields[4]],
             'quote', 'cta' => [$fields[3]],
             default => [],
         };
@@ -225,7 +227,7 @@ class PageBlockFormPage extends FormPage
         $item = $this->getResource()->getItem();
         $type = (string) ($item?->type ?: request()->query('type', 'hero'));
 
-        return in_array($type, ['hero', 'text', 'media', 'gallery', 'quote', 'cta'], true) ? $type : 'hero';
+        return in_array($type, ['hero', 'text', 'media', 'gallery', 'list', 'form', 'quote', 'cta'], true) ? $type : 'hero';
     }
 
     private function currentPageSlug(): ?string
@@ -267,6 +269,8 @@ class PageBlockFormPage extends FormPage
             'text' => 'Текстовый блок без медиа и без кнопки: только текстовая часть, порядок и показ.',
             'media' => 'Блок "текст + медиа": здесь есть текст, изображения, положение медиа, motion и кнопка.',
             'gallery' => 'Галерея/слайдер: редактируются заголовок секции и список картинок. Кнопки тут нет.',
+            'list' => 'Список карточек: заголовок секции и пункты в поле дополнительного текста, по одному пункту в строке.',
+            'form' => 'Форма заявки: заголовок, описание и текст кнопки. Поля формы фиксированные, чтобы заявки стабильно попадали в CMS.',
             'quote' => 'Цитата: редактируются подпись, текст цитаты и автор/заголовок. Медиа и кнопок у этого блока нет.',
             'cta' => 'CTA: призыв к действию с текстом и кнопкой. Медиа у этого блока нет.',
             default => 'Форма показывает только поля, которые относятся к выбранному типу блока.',
@@ -279,6 +283,8 @@ class PageBlockFormPage extends FormPage
             'hero' => 'Текст первого экрана',
             'quote' => 'Текст цитаты',
             'cta' => 'Текст призыва к действию',
+            'form' => 'Текст формы заявки',
+            'list' => 'Заголовок и пункты списка',
             default => 'Текст секции',
         };
     }
@@ -288,6 +294,8 @@ class PageBlockFormPage extends FormPage
         return match ($type) {
             'quote' => 'Цитата не имеет картинки и кнопки',
             'gallery' => 'Текст только подписывает галерею',
+            'list' => 'Пункты списка заполняются строками',
+            'form' => 'Форма использует текст и кнопку',
             default => 'Поля соответствуют видимой части блока',
         };
     }
@@ -298,6 +306,8 @@ class PageBlockFormPage extends FormPage
             'hero' => 'Заполните подпись, большой заголовок и короткое описание. Дополнительный длинный текст для hero не показывается, поэтому его тут нет.',
             'quote' => 'Основной текст цитаты заполняется в поле "Дополнительный текст". Заголовок можно использовать как автора или короткую подпись.',
             'gallery' => 'Заголовок и описание появляются над изображениями. Сами картинки редактируются во вкладке "Галерея".',
+            'list' => 'Каждая строка в поле "Дополнительный текст" станет отдельной карточкой с номером.',
+            'form' => 'Заголовок и описание показываются рядом с формой. Текст кнопки задается во вкладке "Кнопка".',
             'cta' => 'Короткий заголовок, описание и кнопка. Дополнительный длинный текст для CTA не нужен.',
             default => 'Редактируйте только текст, который реально может быть показан у этого типа блока.',
         };
@@ -308,6 +318,8 @@ class PageBlockFormPage extends FormPage
         return match ($type) {
             'media' => 'Media-блок реально использует вариант, положение картинки, motion и состояние карточки.',
             'hero' => 'Hero использует только motion-подпись для набора слайдов.',
+            'list' => 'Список использует состояние карточки: обычное, выделенное или приглушенное.',
+            'form' => 'Форма использует состояние карточки и JSON-настройки плейсхолдеров/текста после отправки.',
             'quote' => 'Цитата использует состояние карточки, например выделение.',
             'cta' => 'CTA использует состояние карточки, например приглушенный режим.',
             default => 'У этого типа нет дополнительных визуальных настроек.',
@@ -318,7 +330,7 @@ class PageBlockFormPage extends FormPage
     {
         return [
             'page_id' => ['required', 'integer', 'exists:pages,id'],
-            'type' => ['required', Rule::in(['hero', 'text', 'media', 'gallery', 'quote', 'cta'])],
+            'type' => ['required', Rule::in(['hero', 'text', 'media', 'gallery', 'list', 'form', 'quote', 'cta'])],
             'visual_variant' => ['nullable', Rule::in(['default', 'wide', 'accent', 'compact', 'split'])],
             'media_position' => ['nullable', Rule::in(['', 'right', 'left', 'top', 'background'])],
             'motion_preset' => ['nullable', Rule::in(['none', 'motion', 'slides', 'story', 'read', 'preview'])],

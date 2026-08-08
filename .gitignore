@@ -18,6 +18,8 @@ dist-ssr
 .vscode
 .idea
 .claude
+.playwright-cli/
+.tmp-pre-container*/
 .DS_Store
 *.suo
 *.ntvs*

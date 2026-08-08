@@ -6,6 +6,7 @@ namespace App\MoonShine\Resources\UiText\Pages;
 
 use App\MoonShine\Resources\UiText\UiTextResource;
 use App\MoonShine\Support\CmsFieldSets;
+use Illuminate\Validation\Rule;
 use MoonShine\Contracts\Core\TypeCasts\DataWrapperContract;
 use MoonShine\Contracts\UI\ComponentContract;
 use MoonShine\Contracts\UI\FieldContract;
@@ -28,7 +29,7 @@ class UiTextFormPage extends FormPage
     protected function rules(DataWrapperContract $item): array
     {
         return [
-            'key' => ['required', 'string', 'max:255'],
+            'key' => ['required', 'string', 'max:255', Rule::unique('ui_texts', 'key')->ignore($item->getKey())],
             'group' => ['nullable', 'string', 'max:255'],
             'label' => ['required', 'string', 'max:255'],
             'value_ru' => ['nullable', 'string'],
@@ -36,6 +37,17 @@ class UiTextFormPage extends FormPage
             'description' => ['nullable', 'string'],
             'position' => ['required', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
+        ];
+    }
+
+    public function validationMessages(): array
+    {
+        return [
+            'key.required' => 'Укажите системный ключ текста.',
+            'key.unique' => 'Такой ключ уже существует. Откройте существующую запись вместо создания дубля.',
+            'label.required' => 'Укажите понятное название текста для редактора.',
+            'position.required' => 'Укажите позицию текста в списке.',
+            'position.integer' => 'Позиция должна быть целым числом.',
         ];
     }
 }

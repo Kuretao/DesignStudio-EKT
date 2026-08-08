@@ -469,8 +469,14 @@ export default function ProjectQuiz({
   pdfUrl?: string;
   pdfTitle?: string;
 }) {
-  const { messengerLinks } = useCms();
+  const { messengerLinks, servicePageItems } = useCms();
   const text = useCmsText();
+  const fallbackPdfService = servicePageItems.find((service) =>
+    Boolean((service as { pdfUrl?: string }).pdfUrl),
+  ) as ({ pdfUrl?: string; pdfTitle?: string } & (typeof servicePageItems)[number]) | undefined;
+  const effectivePdfUrl = pdfUrl || fallbackPdfService?.pdfUrl || "";
+  const effectivePdfTitle =
+    pdfTitle || fallbackPdfService?.pdfTitle || text("quiz.pdfDownloadButton", "Скачать PDF-бонус");
   const questions = useMemo(
     () =>
       quizQuestionSets[kind].map((question) => {
@@ -538,8 +544,8 @@ export default function ProjectQuiz({
       source: "project-cost-quiz",
       channel,
       service: serviceTitle ?? kind,
-      pdfUrl,
-      pdfTitle,
+      pdfUrl: effectivePdfUrl,
+      pdfTitle: effectivePdfTitle,
       name: name.trim(),
       contact: contact.trim(),
       answers: Object.fromEntries(
@@ -578,7 +584,7 @@ export default function ProjectQuiz({
 
         <div className="mb-12 grid gap-8 md:grid-cols-[1fr_0.8fr] md:items-end">
           <div>
-            <h2 className="max-w-5xl text-5xl font-light tracking-[-0.055em] md:text-7xl">
+            <h2 className="max-w-5xl text-[clamp(2.6rem,5vw,4.8rem)] font-light leading-tight tracking-normal md:tracking-[-0.035em]">
               {text("quiz.titlePrefix", "Рассчитайте стоимость и сроки")}
               {serviceTitle ? `: ${serviceTitle}` : text("quiz.titleDefaultProject", " вашего проекта")}{" "}
               {text("quiz.titleSuffix", "за 1 минуту")}
@@ -586,7 +592,7 @@ export default function ProjectQuiz({
             <p className="mt-6 max-w-3xl text-lg leading-relaxed text-[#D6D1CA]">
               {text(
                 "quiz.intro",
-                "Ответьте на 5 вопросов, и мы подготовим персональное предложение. Бонусом откроем PDF по выбранной услуге, если он загружен в CMS.",
+                "Ответьте на 5 вопросов, и мы подготовим персональное предложение. Бонусом откроем PDF по выбранной услуге, если он доступен.",
               )}
             </p>
           </div>
@@ -833,14 +839,14 @@ export default function ProjectQuiz({
                             "Заявка сохранена. Мы свяжемся с вами в выбранном канале: {channel}.",
                           ).replace("{channel}", submittedTo)}
                         </p>
-                        {pdfUrl ? (
+                        {effectivePdfUrl ? (
                           <a
-                            href={pdfUrl}
+                            href={effectivePdfUrl}
                             target="_blank"
                             rel="noreferrer"
                             className="mt-3 inline-flex rounded-full border border-[#D69A66]/45 px-4 py-2 text-xs uppercase tracking-[0.18em] text-[#D69A66] transition hover:bg-[#D69A66] hover:text-[#050505]"
                           >
-                            {pdfTitle || text("quiz.pdfDownloadButton", "Скачать PDF-бонус")}
+                            {effectivePdfTitle}
                           </a>
                         ) : null}
                       </div>

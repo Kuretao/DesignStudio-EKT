@@ -5,6 +5,7 @@ import { useCms, useCmsText } from "@/src/cms";
 import CinematicImage from "@/src/components/common/CinematicImage";
 import HeroBackdropSlider from "@/src/components/common/HeroBackdropSlider";
 import ContactModal from "@/src/modals/ContactModal";
+import { imageFrames } from "@/src/utils/images";
 
 const badgeColors: Record<string, string> = {
   Интерьер: "border-[#D69A66]/40 text-[#D69A66]",
@@ -25,7 +26,7 @@ const glowColors: Record<string, string> = {
 };
 
 export default function PromosPage() {
-  const { projects, promos } = useCms();
+  const { promos } = useCms();
   const text = useCmsText();
   const [modalOpen, setModalOpen] = useState(false);
   const [activePromo, setActivePromo] = useState<string | undefined>();
@@ -35,17 +36,17 @@ export default function PromosPage() {
     setModalOpen(true);
   };
 
+  const heroSlides = promos
+    .map((promo) => ({ image: promo.image, alt: promo.title }))
+    .filter((slide) => slide.image);
+
   return (
     <>
       <div className="page-in">
         {/* Hero */}
         <section className="relative min-h-[72vh] overflow-hidden px-5 pb-24 pt-20 md:px-10 lg:px-16">
           <HeroBackdropSlider
-            slides={[
-              { image: promos[0]?.image, alt: promos[0]?.title },
-              { image: promos[1]?.image, alt: promos[1]?.title },
-              { image: projects[2].image, alt: text("promos.hero.fallbackAlt", "Ландшафтный проект") },
-            ]}
+            slides={heroSlides}
             controlsClassName="bottom-6"
           />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,5,.94)_0%,rgba(5,5,5,.72)_52%,rgba(5,5,5,.26)_100%)]" />
@@ -72,7 +73,7 @@ export default function PromosPage() {
         {/* Promo cards */}
         <section className="px-5 py-12 md:px-10 lg:px-16">
           <div className="mx-auto max-w-7xl space-y-5">
-            {promos.map((promo, idx) => (
+            {promos.length ? promos.map((promo, idx) => (
               <div
                 key={promo.id}
                 className={`group relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.025] transition duration-500 hover:-translate-y-1 hover:border-white/20 ${glowColors[promo.badge]}`}
@@ -137,11 +138,7 @@ export default function PromosPage() {
                   {/* Image */}
                   <div className="relative hidden min-h-[400px] overflow-hidden lg:block">
                     <CinematicImage
-                      frames={[
-                        promo.image,
-                        projects[(idx + 1) % projects.length]?.image,
-                        projects[(idx + 3) % projects.length]?.image,
-                      ]}
+                      frames={imageFrames([promo.image])}
                       alt={promo.title}
                       fill
                       hint="motion"
@@ -151,7 +148,11 @@ export default function PromosPage() {
                   </div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="rounded-[2rem] border border-white/10 bg-white/[0.025] p-8 text-[#D6D1CA] md:p-12">
+                {text("promos.empty", "Акции скоро появятся.")}
+              </div>
+            )}
           </div>
         </section>
 

@@ -27,6 +27,28 @@ class AwardFormPage extends FormPage
 
     protected function rules(DataWrapperContract $item): array
     {
-        return [];
+        return [
+            'title_ru' => ['required', 'string', 'max:255'],
+            'title_en' => ['nullable', 'string', 'max:255'],
+            'issuer_ru' => ['nullable', 'string', 'max:255'],
+            'issuer_en' => ['nullable', 'string', 'max:255'],
+            'year' => ['nullable', 'string', 'max:32'],
+            'description_ru' => ['nullable', 'string', 'max:5000'],
+            'description_en' => ['nullable', 'string', 'max:5000'],
+            'image' => ['nullable', 'string', 'max:2048'],
+            'image_file' => ['nullable'],
+            'position' => ['required', 'integer', 'min:0', 'max:9999'],
+            'is_active' => ['nullable', 'boolean'],
+        ];
+    }
+
+    public function validationMessages(): array
+    {
+        return [
+            'title_ru.required' => 'Укажите русский заголовок награды.',
+            'position.required' => 'Укажите позицию награды в списке.',
+            'position.integer' => 'Позиция должна быть целым числом.',
+            '*.max' => 'Одно из полей награды превышает допустимую длину.',
+        ];
     }
 }

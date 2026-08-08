@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Vacancy extends Model
 {
@@ -14,11 +15,15 @@ class Vacancy extends Model
             foreach ([
                 'title',
                 'employment',
+                'department',
+                'format',
+                'experience',
                 'location',
                 'salary',
                 'description',
                 'requirements',
                 'responsibilities',
+                'perks',
             ] as $field) {
                 $ruField = $field . '_ru';
 
@@ -57,5 +62,12 @@ class Vacancy extends Model
     public function fieldEn(string $field): ?string
     {
         return filled($this->{$field . '_en'}) ? $this->{$field . '_en'} : null;
+    }
+
+    public function getEffectiveImageAttribute(): ?string
+    {
+        return filled($this->image_file)
+            ? Storage::disk('public')->url($this->image_file)
+            : ($this->image ?: null);
     }
 }

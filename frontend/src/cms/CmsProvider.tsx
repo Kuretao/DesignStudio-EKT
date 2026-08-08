@@ -31,6 +31,8 @@ type SiteSettings = {
   favicon: string | null;
   appleTouchIcon: string | null;
   socialPreviewImage: string | null;
+  maintenanceEnabled: boolean;
+  updatedAt?: number | string | null;
   socialLinks: {
     vk: string | null;
     linkedin: string | null;
@@ -50,6 +52,7 @@ type HomeHero = {
   text: string;
   linkLabel: string;
   linkHref: string;
+  images: string[];
 };
 
 type HomeStory = {
@@ -113,6 +116,8 @@ const fallbackData: CmsData = {
     favicon: null,
     appleTouchIcon: null,
     socialPreviewImage: null,
+    maintenanceEnabled: true,
+    updatedAt: null,
     socialLinks: {
       vk: "https://vk.com/3dsmartdesign",
       linkedin: "https://www.linkedin.com/in/3dsmartdesignstudio",
@@ -131,6 +136,7 @@ const fallbackData: CmsData = {
     text: "Создаем интерьеры, архитектуру, 3D-визуализацию и ландшафтные проекты: от концепции до рабочей документации, комплектации и сопровождения.",
     linkLabel: "Обсудить проект",
     linkHref: "/kontakty",
+    images: ["/background112233.mp4"],
   },
   homeStory: {
     eyebrow: "Философия проекта",
@@ -326,14 +332,50 @@ function normalizeBlock(block: any, locale: SiteLocale) {
 
 function localizeProject(project: any, locale: SiteLocale) {
   const galleryImages = normalizeImageList(project?.galleryImages);
+  const heroImages = normalizeImageList(project?.heroImages);
   const featuredGalleryImages = normalizeImageList(project?.featuredGalleryImages);
+  const storyChapters = Array.isArray(project?.storyChapters)
+    ? project.storyChapters
+        .map((chapter: any) => ({
+          title: localizeString(chapter, "title", locale, chapter?.title ?? "") ?? "",
+          text: localizeString(chapter, "text", locale, chapter?.text ?? "") ?? "",
+        }))
+        .filter((chapter: { title: string; text: string }) => chapter.title || chapter.text)
+    : [];
+  const selectedCards = Array.isArray(project?.selectedCards)
+    ? project.selectedCards
+        .map((card: any) => ({
+          title: localizeString(card, "title", locale, card?.title ?? "") ?? "",
+          text: localizeString(card, "text", locale, card?.text ?? "") ?? "",
+        }))
+        .filter((card: { title: string; text: string }) => card.title || card.text)
+    : [];
+  const virtualTourScenes = Array.isArray(project?.virtualTour?.scenes)
+    ? project.virtualTour.scenes
+        .map((scene: any) => ({
+          ...scene,
+          title: localizeString(scene, "title", locale, scene?.title ?? "") ?? "",
+          panorama: optimizeImageUrl(scene?.panorama, 4096, 82),
+          next: Array.isArray(scene?.next)
+            ? scene.next.map((link: any) => ({
+                ...link,
+                text: localizeString(link, "text", locale, link?.text ?? "") ?? "",
+              }))
+            : [],
+        }))
+        .filter((scene: any) => scene.id && scene.panorama)
+    : [];
 
   return {
     ...project,
     title: localizeString(project, "title", locale, project?.title ?? "") ?? "",
     image: optimizeImageUrl(project?.image, 1600, 76),
+    heroImages: heroImages.map((image) => optimizeImageUrl(image, 1800, 76)),
     beforeImage: optimizeImageUrl(project?.beforeImage, 1200, 74),
     afterImage: optimizeImageUrl(project?.afterImage, 1200, 74),
+    caseIntro:
+      localizeString(project, "caseIntro", locale, project?.caseIntro ?? "") ??
+      "",
     galleryEyebrow:
       localizeString(project, "galleryEyebrow", locale, project?.galleryEyebrow ?? "") ??
       "",
@@ -350,6 +392,21 @@ function localizeProject(project: any, locale: SiteLocale) {
       locale,
       project?.galleryLabels ?? [],
     ),
+    isSelected: Boolean(project?.isSelected),
+    isVirtualTour: Boolean(project?.isVirtualTour),
+    virtualTour: {
+      ...(project?.virtualTour ?? {}),
+      eyebrow:
+        localizeString(project?.virtualTour, "eyebrow", locale, project?.virtualTour?.eyebrow ?? "") ?? "",
+      title:
+        localizeString(project?.virtualTour, "title", locale, project?.virtualTour?.title ?? "") ?? "",
+      text:
+        localizeString(project?.virtualTour, "text", locale, project?.virtualTour?.text ?? "") ?? "",
+      buttonLabel:
+        localizeString(project?.virtualTour, "buttonLabel", locale, project?.virtualTour?.buttonLabel ?? "") ?? "",
+      scenes: virtualTourScenes,
+    },
+    selectedCards,
     featuredLabel:
       localizeString(project, "featuredLabel", locale, project?.featuredLabel ?? "") ??
       "",
@@ -365,6 +422,13 @@ function localizeProject(project: any, locale: SiteLocale) {
       ) ?? "",
     featuredImage: optimizeImageUrl(project?.featuredImage, 1600, 76),
     featuredGalleryImages,
+    storyChapters,
+    deliverables: localizeArray<string>(
+      project,
+      "deliverables",
+      locale,
+      project?.deliverables ?? [],
+    ),
     category:
       localizeString(project, "category", locale, project?.category ?? "") ??
       "",
@@ -404,6 +468,29 @@ function localizeService(service: any, locale: SiteLocale) {
     pdfTitle:
       localizeString(service, "pdfTitle", locale, service?.pdfTitle ?? "") ??
       "",
+    compareEyebrow:
+      localizeString(
+        service,
+        "compareEyebrow",
+        locale,
+        service?.compareEyebrow ?? "",
+      ) ?? "",
+    compareTitle:
+      localizeString(
+        service,
+        "compareTitle",
+        locale,
+        service?.compareTitle ?? "",
+      ) ?? "",
+    compareText:
+      localizeString(
+        service,
+        "compareText",
+        locale,
+        service?.compareText ?? "",
+      ) ?? "",
+    compareBeforeImage: optimizeImageUrl(service?.compareBeforeImage, 1600, 78),
+    compareAfterImage: optimizeImageUrl(service?.compareAfterImage, 1600, 78),
     deliverables: localizeArray<string>(
       service,
       "deliverables",
@@ -510,6 +597,27 @@ function localizeVacancy(vacancy: any, locale: SiteLocale) {
         locale,
         vacancy?.employment ?? "",
       ) ?? "",
+    department:
+      localizeString(
+        vacancy,
+        "department",
+        locale,
+        vacancy?.department ?? vacancy?.employment ?? "",
+      ) ?? "",
+    format:
+      localizeString(
+        vacancy,
+        "format",
+        locale,
+        vacancy?.format ?? vacancy?.employment ?? "",
+      ) ?? "",
+    experience:
+      localizeString(
+        vacancy,
+        "experience",
+        locale,
+        vacancy?.experience ?? "",
+      ) ?? "",
     location:
       localizeString(vacancy, "location", locale, vacancy?.location ?? "") ??
       "",
@@ -533,6 +641,12 @@ function localizeVacancy(vacancy: any, locale: SiteLocale) {
       "responsibilities",
       locale,
       vacancy?.responsibilities ?? [],
+    ),
+    perks: localizeArray<string>(
+      vacancy,
+      "perks",
+      locale,
+      vacancy?.perks ?? [],
     ),
   };
 }
@@ -558,56 +672,48 @@ function localizeAward(award: any, locale: SiteLocale) {
 }
 
 function mergeServiceItems(payloadServices: any[]) {
-  const byId = new Map(
-    payloadServices
-      .map((service: any) => ({ ...service, id: service.id ?? service.slug }))
-      .filter((service: any) => service.id)
-      .map((service: any) => [service.id, service]),
-  );
-
-  const merged = fallbackServicePageItems.map((fallback) => {
-    const service = byId.get(fallback.id);
-
-    if (!service) return fallback;
-
-    byId.delete(fallback.id);
-
-    return {
-      ...fallback,
+  return payloadServices
+    .map((service: any) => ({
       ...service,
+      id: service.id ?? service.slug,
       deliverables:
         Array.isArray(service.deliverables) && service.deliverables.length
           ? service.deliverables
-          : fallback.deliverables,
+          : [],
       benefits:
         Array.isArray(service.benefits) && service.benefits.length
           ? service.benefits
-          : fallback.benefits,
+          : [],
       process:
         Array.isArray(service.process) && service.process.length
           ? service.process
-          : fallback.process,
+          : [],
       deliverableImages:
         Array.isArray(service.deliverableImages) &&
         service.deliverableImages.length
           ? service.deliverableImages
           : [],
-      image: service.image || fallback.image,
-      price: service.price || fallback.price,
-      timeline: service.timeline || fallback.timeline,
+      image: service.image || "",
+      price: service.price || "",
+      timeline: service.timeline || "",
       isHomeItem: Boolean(service.isHomeItem),
-      eyebrow: service.eyebrow || fallback.eyebrow,
-      text: service.text || fallback.text,
-    };
-  });
-
-  return [...merged, ...Array.from(byId.values())];
+      eyebrow: service.eyebrow || "",
+      text: service.text || "",
+    }))
+    .filter((service: any) => service.id && service.title);
 }
 
 function normalizeServiceNavigationGroups(
   payloadGroups: any[],
   locale: SiteLocale,
+  payloadServices: any[] = [],
 ) {
+  const validServiceHrefs = new Set(
+    payloadServices
+      .map((service: any) => service?.id ?? service?.slug)
+      .filter((slug: unknown): slug is string => typeof slug === "string" && slug.trim().length > 0)
+      .map((slug) => `/${slug.replace(/^\/+/, "")}`),
+  );
   const groups = payloadGroups
     .map((group: any, index: number) => {
       const href = typeof group?.href === "string" ? group.href : "";
@@ -628,7 +734,16 @@ function normalizeServiceNavigationGroups(
               href: typeof item?.href === "string" ? item.href : "",
             }))
             .filter((item: any) => item.label && item.href)
+            .filter((item: any) => {
+              if (!validServiceHrefs.size) return true;
+
+              return validServiceHrefs.has(`/${String(item.href).replace(/^\/+/, "")}`);
+            })
         : [];
+
+      if (!items.length) {
+        return null;
+      }
 
       return {
         id: String(group.id ?? href ?? `service-group-${index}`),
@@ -645,6 +760,17 @@ function normalizeServiceNavigationGroups(
               : "",
         descriptionEn:
           typeof group?.descriptionEn === "string" ? group.descriptionEn : null,
+        image:
+          typeof group?.image === "string" && group.image.trim()
+            ? group.image
+            : null,
+        imageAlt:
+          localizeString(group, "imageAlt", locale, group?.imageAlt ?? "") ??
+          null,
+        imageAltRu:
+          typeof group?.imageAltRu === "string" ? group.imageAltRu : null,
+        imageAltEn:
+          typeof group?.imageAltEn === "string" ? group.imageAltEn : null,
         items,
       };
     })
@@ -655,14 +781,16 @@ function normalizeServiceNavigationGroups(
 
 function normalizePayload(payload: any, locale: SiteLocale): CmsData {
   const settings = payload?.settings ?? {};
-  const payloadServices = Array.isArray(payload?.services)
+  const hasPayloadServices = Array.isArray(payload?.services);
+  const hasPayloadPages = Array.isArray(payload?.pages);
+  const payloadServices = hasPayloadServices
     ? payload.services.map((service: any) => localizeService(service, locale))
     : [];
-  const apiServices = payloadServices.length
+  const apiServices = hasPayloadServices
     ? mergeServiceItems(payloadServices)
     : fallbackServicePageItems;
   const apiProjects = (
-    Array.isArray(payload?.projects) && payload.projects.length
+    Array.isArray(payload?.projects)
       ? payload.projects
       : projects
   ).map((project: any) => {
@@ -673,7 +801,7 @@ function normalizePayload(payload: any, locale: SiteLocale): CmsData {
       slug: makeProjectSlug(localized),
     };
   });
-  const payloadPages = Array.isArray(payload?.pages)
+  const payloadPages = hasPayloadPages
     ? payload.pages.map((page: any) => ({
         ...page,
         title: localizeString(page, "title", locale, page?.title ?? "") ?? "",
@@ -713,7 +841,7 @@ function normalizePayload(payload: any, locale: SiteLocale): CmsData {
   const contentPayloadPages = payloadPages.filter(
     (page: any) => page.slug !== "home" && page.id !== "home",
   );
-  const apiPages = contentPayloadPages.length
+  const apiPages = hasPayloadPages
     ? contentPayloadPages.map((page: any) => {
         const blocks = Array.isArray(page.blocks) ? page.blocks : [];
         const hero = blocks.find((block: any) => block.type === "hero") ?? {};
@@ -726,7 +854,7 @@ function normalizePayload(payload: any, locale: SiteLocale): CmsData {
           body: page.body,
           eyebrow: hero.eyebrow ?? "3D Smart Design Studio",
           text: hero.text ?? hero.subtitle ?? page.seoDescription ?? "",
-          image: hero.image ?? apiProjects[0]?.image,
+          image: hero.image ?? null,
           images: hero.images ?? [],
           blocks,
         };
@@ -744,6 +872,8 @@ function normalizePayload(payload: any, locale: SiteLocale): CmsData {
       favicon: settings.favicon ?? null,
       appleTouchIcon: settings.appleTouchIcon ?? null,
       socialPreviewImage: settings.socialPreviewImage ?? null,
+      maintenanceEnabled: settings.maintenanceEnabled ?? true,
+      updatedAt: settings.updatedAt ?? null,
       socialLinks: {
         vk: settings.socials?.vk ?? fallbackData.siteSettings.socialLinks.vk,
         linkedin:
@@ -774,20 +904,26 @@ function normalizePayload(payload: any, locale: SiteLocale): CmsData {
           text: homeBlock.subtitle ?? homeBlock.text ?? "",
           linkLabel: homeBlock.linkLabel ?? "",
           linkHref: homeBlock.linkHref ?? "",
+          images: normalizeImageList(homeBlock.images ?? homeBlock.image),
         }
-      : fallbackData.homeHero,
+      : hasPayloadPages
+        ? { eyebrow: "", title: "", text: "", linkLabel: "", linkHref: "", images: [] }
+        : fallbackData.homeHero,
     homeStory: homeStoryBlock
       ? {
           eyebrow: homeStoryBlock.eyebrow ?? fallbackData.homeStory.eyebrow,
           text: homeStoryBlock.text ?? fallbackData.homeStory.text,
         }
-      : fallbackData.homeStory,
+      : hasPayloadPages
+        ? { eyebrow: "", text: "" }
+        : fallbackData.homeStory,
     projects: apiProjects,
     servicePageItems: apiServices,
     serviceNavigationGroups: Array.isArray(payload?.serviceNavigationGroups)
       ? normalizeServiceNavigationGroups(
           payload.serviceNavigationGroups,
           locale,
+          apiServices,
         )
       : fallbackServiceNavigationGroups,
     services: apiServices.map((item: any) => ({
@@ -795,29 +931,23 @@ function normalizePayload(payload: any, locale: SiteLocale): CmsData {
       price: item.price,
       text: item.text,
     })),
-    newsArticles:
-      Array.isArray(payload?.news) && payload.news.length
-        ? payload.news.map((article: any) =>
-            localizeNewsArticle(article, locale),
-          )
-        : newsArticles,
-    promos:
-      Array.isArray(payload?.promos) && payload.promos.length
-        ? payload.promos.map((promo: any) => localizePromo(promo, locale))
-        : promos,
-    testimonials:
-      Array.isArray(payload?.reviews) && payload.reviews.length
-        ? payload.reviews.map((review: any) => localizeReview(review, locale))
-        : testimonials,
-    faq:
-      Array.isArray(payload?.faqs) && payload.faqs.length
-        ? payload.faqs.map((item: any) => localizeFaq(item, locale))
-        : faq,
+    newsArticles: Array.isArray(payload?.news)
+      ? payload.news.map((article: any) => localizeNewsArticle(article, locale))
+      : newsArticles,
+    promos: Array.isArray(payload?.promos)
+      ? payload.promos.map((promo: any) => localizePromo(promo, locale))
+      : promos,
+    testimonials: Array.isArray(payload?.reviews)
+      ? payload.reviews.map((review: any) => localizeReview(review, locale))
+      : testimonials,
+    faq: Array.isArray(payload?.faqs)
+      ? payload.faqs.map((item: any) => localizeFaq(item, locale))
+      : faq,
     contactInfo: {
       ...contactInfo,
       phone: settings.phone ?? contactInfo.phone,
       phoneHref: settings.phoneHref ?? contactInfo.phoneHref,
-      emails: settings.emails?.length ? settings.emails : contactInfo.emails,
+      emails: Array.isArray(settings.emails) ? settings.emails : contactInfo.emails,
       schedule: settings.schedule ?? contactInfo.schedule,
       address: settings.address ?? contactInfo.address,
       mapSrc: settings.mapSrc ?? contactInfo.mapSrc,
@@ -846,18 +976,13 @@ function normalizePayload(payload: any, locale: SiteLocale): CmsData {
         )
       : careerVacancies,
     reviewStats,
-    awards:
-      Array.isArray(payload?.awards) && payload.awards.length
-        ? payload.awards.map((award: any) => localizeAward(award, locale))
-        : awards,
-    partners:
-      Array.isArray(payload?.partners) && payload.partners.length
-        ? payload.partners.map((partner: any) =>
-            localizeNamedItem(partner, locale),
-          )
-        : partners,
-    menuItems:
-      Array.isArray(payload?.menuItems) && payload.menuItems.length
+    awards: Array.isArray(payload?.awards)
+      ? payload.awards.map((award: any) => localizeAward(award, locale))
+      : awards,
+    partners: Array.isArray(payload?.partners)
+      ? payload.partners.map((partner: any) => localizeNamedItem(partner, locale))
+      : partners,
+    menuItems: Array.isArray(payload?.menuItems)
         ? payload.menuItems.map((item: any) => ({
             ...item,
             label:
@@ -868,17 +993,21 @@ function normalizePayload(payload: any, locale: SiteLocale): CmsData {
   };
 }
 
-const POLL_INTERVAL = 30_000;
-
-export function CmsProvider({ children }: { children: React.ReactNode }) {
-  const [payload, setPayload] = useState<any | null>(null);
+export function CmsProvider({
+  children,
+  initialPayload = null,
+}: {
+  children: React.ReactNode;
+  initialPayload?: any | null;
+}) {
+  const [payload, setPayload] = useState<any | null>(initialPayload);
   const { i18n } = useTranslation();
   const locale: SiteLocale = i18n.language?.startsWith("en") ? "en" : "ru";
 
   useEffect(() => {
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1";
-    let cmsAvailable = true;
+    if (initialPayload) return;
 
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1";
     const load = (signal: AbortSignal) =>
       fetch(`${baseUrl}/all`, {
         signal,
@@ -891,13 +1020,10 @@ export function CmsProvider({ children }: { children: React.ReactNode }) {
           return response.json();
         })
         .then((payload) => {
-          cmsAvailable = true;
           setPayload(payload);
         })
         .catch((error) => {
           if (error.name !== "AbortError") {
-            cmsAvailable = false;
-
             if (process.env.NODE_ENV !== "production") {
               console.warn("CMS fallback data is active", error);
             }
@@ -907,18 +1033,10 @@ export function CmsProvider({ children }: { children: React.ReactNode }) {
     const controller = new AbortController();
     load(controller.signal);
 
-    const timer = setInterval(() => {
-      if (!cmsAvailable) return;
-
-      const c = new AbortController();
-      load(c.signal);
-    }, POLL_INTERVAL);
-
     return () => {
       controller.abort();
-      clearInterval(timer);
     };
-  }, []);
+  }, [initialPayload]);
 
   const value = useMemo(
     () => (payload ? normalizePayload(payload, locale) : fallbackData),

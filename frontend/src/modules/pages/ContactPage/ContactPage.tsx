@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { submitLead, useCms, useCmsText } from "@/src/cms";
 import HeroBackdropSlider from "@/src/components/common/HeroBackdropSlider";
 import SectionLabel from "@/src/components/common/SectionLabel";
+import { imageFrames, projectImageAt } from "@/src/utils/images";
 import CustomSelect from "@/src/components/forms/CustomSelect";
 
 /* ─── icons ─────────────────────────────────────────────────── */
@@ -139,9 +140,9 @@ function ContactHero() {
     <section className="relative min-h-screen overflow-hidden px-5 pb-16 pt-28 md:px-10 lg:px-16">
       <HeroBackdropSlider
         slides={[
-          { image: projects[3].image, alt: "Студия 3D Smart Design Studio" },
-          { image: projects[0].image, alt: "Интерьерный проект" },
-          { image: projects[4].image, alt: "Архитектурная визуализация" },
+          { image: projectImageAt(projects, 3), alt: "Студия 3D Smart Design Studio" },
+          { image: projectImageAt(projects, 0), alt: "Интерьерный проект" },
+          { image: projectImageAt(projects, 4), alt: "Архитектурная визуализация" },
         ]}
       />
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,5,.96)_0%,rgba(5,5,5,.72)_48%,rgba(5,5,5,.2)_100%)]" />
@@ -150,7 +151,7 @@ function ContactHero() {
       <div className="relative z-10 mx-auto flex min-h-[calc(100vh-7rem)] max-w-7xl items-end pb-24">
         <div className="max-w-6xl">
           <p className="mb-5 text-xs uppercase tracking-[0.38em] text-[#D69A66]">Контакты / 3D Smart Design Studio</p>
-          <h1 className="max-w-5xl text-6xl font-light leading-[0.9] tracking-[-0.065em] text-white md:text-8xl lg:text-9xl">
+          <h1 className="max-w-5xl text-[clamp(3rem,6vw,6rem)] font-light leading-[0.94] tracking-normal text-white md:tracking-[-0.04em]">
             {text("contact.titleLine1", "Свяжитесь")} {text("contact.titleLine2", "с нами")}
           </h1>
           <p className="mt-7 max-w-2xl text-lg leading-relaxed text-[#E8E0D8]/85 md:text-xl">
@@ -261,7 +262,7 @@ export function ContactSection({ showIntro = true, compactTop = false }: Contact
               <SectionLabel>{text("contact.label", "Контакты")}</SectionLabel>
             </FadeUp>
             <FadeUp delay={80}>
-              <h1 className="text-6xl font-light leading-[0.9] tracking-[-0.065em] md:text-8xl lg:text-[10rem]">
+              <h1 className="text-[clamp(3rem,6vw,6rem)] font-light leading-[0.94] tracking-normal md:tracking-[-0.04em]">
                 {text("contact.titleLine1", "Свяжитесь")}<br />
                 <span className="text-[#D69A66]">{text("contact.titleLine2", "с нами")}</span>
               </h1>

@@ -29,3 +29,50 @@ export function optimizeImageList<T extends string | null | undefined>(
 ) {
   return images.map((image) => optimizeImageUrl(image, width, quality)) as T[];
 }
+
+const fallbackImages = [
+  "/images/cms/country-house-interior.webp",
+  "/images/cms/river-park-interior.webp",
+  "/images/cms/office-space.webp",
+  "/images/cms/greenwood-house.webp",
+  "/images/cms/landscape-garden.webp",
+  "/images/cms/villa-exterior.webp",
+];
+
+type ImageLike = {
+  image?: string | null;
+  beforeImage?: string | null;
+  afterImage?: string | null;
+};
+
+export function fallbackImage(index = 0) {
+  return fallbackImages[Math.abs(index) % fallbackImages.length];
+}
+
+export function projectImageAt(
+  projects: ImageLike[] | undefined,
+  index = 0,
+  field: keyof ImageLike = "image",
+) {
+  const project = projects?.[index];
+  const fieldImage = project?.[field];
+  const directImage = project?.image;
+  const firstAvailable = projects?.find((item) => item?.[field] || item?.image);
+
+  return (
+    fieldImage ||
+    directImage ||
+    firstAvailable?.[field] ||
+    firstAvailable?.image ||
+    fallbackImage(index)
+  );
+}
+
+export function imageFrames(
+  images: Array<string | null | undefined>,
+  fallbackIndex = 0,
+) {
+  const frames = images.filter((image): image is string => Boolean(image));
+
+  return frames.length ? frames : [fallbackImage(fallbackIndex)];
+}

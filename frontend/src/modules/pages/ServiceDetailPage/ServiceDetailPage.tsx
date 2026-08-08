@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   getServiceLandingCopy,
@@ -44,13 +44,40 @@ function ServiceCompareBlock({
   item: ServicePageItem;
   projects: Project[];
 }) {
-  const text = useCmsText();
+  const cmsText = useCmsText();
   const [compare, setCompare] = useState(52);
   const category = getPortfolioCategory(item);
   const project =
     projects.find((entry) => entry.category === category) ?? projects[0];
-  const beforeImage = project?.beforeImage ?? projects[2]?.image ?? item.image;
-  const afterImage = project?.afterImage ?? item.image;
+  const serviceCompare = item as ServicePageItem & {
+    compareEyebrow?: string;
+    compareTitle?: string;
+    compareText?: string;
+    compareBeforeImage?: string;
+    compareAfterImage?: string;
+  };
+  const beforeImage =
+    serviceCompare.compareBeforeImage ||
+    project?.beforeImage ||
+    projects[2]?.image ||
+    item.image;
+  const afterImage =
+    serviceCompare.compareAfterImage || project?.afterImage || item.image;
+  const text = (key: string, fallback: string) => {
+    if (key === "serviceDetail.compare.label") {
+      return serviceCompare.compareEyebrow || cmsText(key, fallback);
+    }
+
+    if (key === "serviceDetail.compare.title") {
+      return serviceCompare.compareTitle || cmsText(key, fallback);
+    }
+
+    if (key === "serviceDetail.compare.text") {
+      return serviceCompare.compareText || cmsText(key, fallback);
+    }
+
+    return cmsText(key, fallback);
+  };
 
   return (
     <section className="border-t border-white/10 px-5 py-24 md:px-10 lg:px-16">
@@ -142,7 +169,7 @@ function ServicePortfolioBlock({
           <p className="text-lg leading-relaxed text-[#D6D1CA]">
             {text(
               "serviceDetail.portfolio.text",
-              "Карточки ведут на индивидуальные страницы проектов с уникальным URL. После наполнения CMS здесь останутся только релевантные кейсы.",
+              "Карточки ведут на индивидуальные страницы проектов с уникальным URL. Здесь собраны релевантные кейсы по выбранному направлению.",
             )}
           </p>
         </div>
@@ -191,17 +218,45 @@ function ServiceDocumentsBlock({
   const text = useCmsText();
   const [activeIndex, setActiveIndex] = useState(0);
   const [zoomImage, setZoomImage] = useState<string | null>(null);
-  const documentImages = Array.isArray((item as any).deliverableImages)
-    ? ((item as any).deliverableImages as string[]).filter(Boolean)
-    : [];
-  const docs = item.deliverables.map((title, index) => ({
-    title,
-    image:
-      documentImages[index] ??
-      projects[(index + 2) % projects.length]?.image ??
-      item.image,
-  }));
+  const documentImages = useMemo(
+    () =>
+      Array.isArray((item as any).deliverableImages)
+        ? ((item as any).deliverableImages as string[]).filter(Boolean)
+        : [],
+    [item],
+  );
+  const docs = useMemo(
+    () =>
+      item.deliverables.map((title, index) => ({
+        title,
+        image:
+          documentImages[index] ??
+          projects[(index + 2) % projects.length]?.image ??
+          item.image,
+      })),
+    [documentImages, item.deliverables, item.image, projects],
+  );
   const activeDoc = docs[activeIndex] ?? docs[0];
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [item.id]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    docs.forEach((doc) => {
+      if (!doc.image) {
+        return;
+      }
+
+      const image = new window.Image();
+      image.src = doc.image;
+      image.decode?.().catch(() => undefined);
+    });
+  }, [docs]);
 
   return (
     <section className="border-t border-white/10 px-5 py-24 md:px-10 lg:px-16">
@@ -249,6 +304,9 @@ function ServiceDocumentsBlock({
               <img
                 src={activeDoc.image}
                 alt={activeDoc.title}
+                loading="eager"
+                decoding="sync"
+                fetchPriority="high"
                 className="absolute inset-0 h-full w-full object-cover opacity-62 grayscale transition duration-700 group-hover:scale-[1.03] group-hover:opacity-78"
               />
               <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(5,5,5,.88),rgba(5,5,5,.42)),linear-gradient(rgba(245,242,236,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(245,242,236,.08)_1px,transparent_1px)] bg-[length:auto,42px_42px,42px_42px]" />
@@ -267,6 +325,17 @@ function ServiceDocumentsBlock({
               </div>
             </button>
           )}
+        </div>
+        <div aria-hidden="true" className="hidden">
+          {docs.map((doc) => (
+            <img
+              key={`preload-${doc.image}`}
+              src={doc.image}
+              alt=""
+              loading="eager"
+              decoding="async"
+            />
+          ))}
         </div>
       </div>
 
@@ -344,12 +413,20 @@ function ServiceDetailPage({ item }: { item: ServicePageItem }) {
     const serviceImages = Array.isArray((currentItem as any).images)
       ? ((currentItem as any).images as string[])
       : [];
+    const category = getPortfolioCategory(currentItem);
+    const relatedProjectImages = projects
+      .filter((project) => project.category === category)
+      .flatMap((project) => [
+        project.image,
+        ...(project.heroImages ?? []),
+        ...(project.galleryImages ?? []),
+      ]);
     const fallbackImages = [
       currentItem.image,
-      projects[1]?.image,
-      projects[2]?.image,
+      ...relatedProjectImages,
+      ...projects.flatMap((project) => [project.image, ...(project.heroImages ?? [])]),
     ].filter(Boolean);
-    const images = serviceImages.length ? serviceImages : fallbackImages;
+    const images = Array.from(new Set(serviceImages.length > 1 ? serviceImages : fallbackImages)).slice(0, 9);
 
     return images.map((image, index) => ({
       image,
@@ -359,10 +436,20 @@ function ServiceDetailPage({ item }: { item: ServicePageItem }) {
           : `${currentItem.title} - слайд ${index + 1}`,
     }));
   }, [currentItem, projects]);
+  const processGridClass =
+    currentItem.process.length <= 1
+      ? "md:grid-cols-1"
+      : currentItem.process.length === 2
+        ? "md:grid-cols-2"
+        : currentItem.process.length === 3
+          ? "md:grid-cols-3"
+          : currentItem.process.length === 4
+            ? "md:grid-cols-4"
+            : "md:grid-cols-5";
 
   return (
     <div className="page-in">
-      <section className="relative min-h-screen overflow-hidden px-5 pb-20 pt-28 md:px-10 lg:px-16">
+      <section className="relative min-h-screen overflow-hidden px-5 pb-20 pt-36 md:px-10 md:pt-32 lg:px-16">
         <HeroBackdropSlider slides={heroSlides} />
         <div className="absolute inset-0 bg-[#050505]/45" />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,5,.98),rgba(5,5,5,.70),rgba(5,5,5,.28)),radial-gradient(circle_at_72%_18%,rgba(214,154,102,.22),transparent_34%)]" />
@@ -473,7 +560,7 @@ function ServiceDetailPage({ item }: { item: ServicePageItem }) {
               )}
             </p>
           </div>
-          <div className="grid gap-px overflow-hidden rounded-[2rem] border border-white/10 bg-white/10 shadow-[0_24px_90px_rgba(0,0,0,0.24)] md:grid-cols-5">
+          <div className={`grid gap-px overflow-hidden rounded-[2rem] border border-white/10 bg-white/10 shadow-[0_24px_90px_rgba(0,0,0,0.24)] ${processGridClass}`}>
             {currentItem.process.map((step, index) => (
               <GlassPanel key={step} className="p-6">
                 <span className="mb-12 block text-sm text-[#D69A66]">

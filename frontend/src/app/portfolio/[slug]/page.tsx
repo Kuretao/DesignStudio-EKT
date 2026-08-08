@@ -100,7 +100,9 @@ async function resolveProject(slug: string): Promise<Project | null> {
   const cmsProject = await loadCmsProject(slug);
   if (cmsProject) return cmsProject;
 
-  const fallbackProject = projects.find((item) => item.slug === slug);
+  const fallbackProject = process.env.NODE_ENV !== "production"
+    ? projects.find((item) => item.slug === slug)
+    : null;
   if (fallbackProject) return fallbackProject;
 
   return null;
@@ -125,26 +127,114 @@ async function loadCmsProject(slug: string): Promise<Project | null> {
       id: Number(project.id ?? 0),
       slug: String(project.slug),
       title: decodeCmsText(String(project.title)),
-      category: project.category || "Интерьеры",
+      category: decodeCmsText(String(project.category || "Интерьеры")),
       location: decodeCmsText(String(project.location || "")),
       year: decodeCmsText(String(project.year || "")),
+      filterSquare: project.filterSquare ? decodeCmsText(String(project.filterSquare)) : null,
+      filterTone: project.filterTone ? decodeCmsText(String(project.filterTone)) : null,
       description: decodeCmsText(String(project.description || "")),
-      image: project.image || projects[0]?.image || "",
-      beforeImage: project.beforeImage || undefined,
-      afterImage: project.afterImage || undefined,
+      image: normalizeAsset(project.image),
+      heroImages: normalizeImageList(project.heroImages),
+      beforeImage: normalizeAsset(project.beforeImage) || undefined,
+      afterImage: normalizeAsset(project.afterImage) || undefined,
+      caseIntro: project.caseIntro ? decodeCmsText(String(project.caseIntro)) : undefined,
       galleryEyebrow: project.galleryEyebrow ? decodeCmsText(String(project.galleryEyebrow)) : undefined,
       galleryTitle: project.galleryTitle ? decodeCmsText(String(project.galleryTitle)) : undefined,
       galleryText: project.galleryText ? decodeCmsText(String(project.galleryText)) : undefined,
       galleryImages: normalizeImageList(project.galleryImages),
       galleryLabels: normalizeStringList(project.galleryLabels).map(decodeCmsText),
       isFeatured: Boolean(project.isFeatured),
+      isSelected: Boolean(project.isSelected),
+      isVirtualTour: Boolean(project.isVirtualTour),
+      virtualTour: normalizeVirtualTour(project.virtualTour),
+      selectedCards: Array.isArray(project.selectedCards)
+        ? project.selectedCards.map((card: any) => ({
+            title: card.title ? decodeCmsText(String(card.title)) : undefined,
+            titleRu: card.titleRu ? decodeCmsText(String(card.titleRu)) : undefined,
+            titleEn: card.titleEn ? decodeCmsText(String(card.titleEn)) : undefined,
+            text: card.text ? decodeCmsText(String(card.text)) : undefined,
+            textRu: card.textRu ? decodeCmsText(String(card.textRu)) : undefined,
+            textEn: card.textEn ? decodeCmsText(String(card.textEn)) : undefined,
+          }))
+        : [],
       featuredLabel: project.featuredLabel ? decodeCmsText(String(project.featuredLabel)) : undefined,
       featuredTitle: project.featuredTitle ? decodeCmsText(String(project.featuredTitle)) : undefined,
       featuredDescription: project.featuredDescription ? decodeCmsText(String(project.featuredDescription)) : undefined,
-      featuredImage: project.featuredImage || undefined,
+      featuredImage: normalizeAsset(project.featuredImage) || undefined,
       featuredGalleryImages: normalizeImageList(project.featuredGalleryImages),
+      storyChapters: Array.isArray(project.storyChapters)
+        ? project.storyChapters.map((chapter: any) => ({
+            title: chapter.title ? decodeCmsText(String(chapter.title)) : undefined,
+            titleRu: chapter.titleRu ? decodeCmsText(String(chapter.titleRu)) : undefined,
+            titleEn: chapter.titleEn ? decodeCmsText(String(chapter.titleEn)) : undefined,
+            text: chapter.text ? decodeCmsText(String(chapter.text)) : undefined,
+            textRu: chapter.textRu ? decodeCmsText(String(chapter.textRu)) : undefined,
+            textEn: chapter.textEn ? decodeCmsText(String(chapter.textEn)) : undefined,
+          }))
+        : [],
+      deliverables: normalizeStringList(project.deliverables).map(decodeCmsText),
     } as Project;
   } catch {
     return null;
   }
+}
+
+function normalizeVirtualTour(value: unknown): Project["virtualTour"] {
+  if (!value || typeof value !== "object") return undefined;
+
+  const tour = value as Record<string, any>;
+  const scenes = Array.isArray(tour.scenes)
+    ? tour.scenes
+        .map((scene: any, index: number) => {
+          const panorama = normalizeAsset(scene?.panorama);
+          if (!panorama) return null;
+
+          return {
+            ...scene,
+            id: String(scene?.id || `scene-${index + 1}`),
+            title: scene?.title ? decodeCmsText(String(scene.title)) : null,
+            titleRu: scene?.titleRu ? decodeCmsText(String(scene.titleRu)) : null,
+            titleEn: scene?.titleEn ? decodeCmsText(String(scene.titleEn)) : null,
+            label: scene?.label ? decodeCmsText(String(scene.label)) : null,
+            panorama,
+            yaw: Number(scene?.yaw || 0),
+            pitch: Number(scene?.pitch || 0),
+            plan: scene?.plan && typeof scene.plan === "object"
+              ? {
+                  x: Number(scene.plan.x ?? 50),
+                  y: Number(scene.plan.y ?? 50),
+                  width: Number(scene.plan.width ?? 34),
+                  height: Number(scene.plan.height ?? 30),
+                }
+              : undefined,
+            next: Array.isArray(scene?.next)
+              ? scene.next.map((link: any) => ({
+                  ...link,
+                  id: String(link?.id || ""),
+                  text: link?.text ? decodeCmsText(String(link.text)) : null,
+                  textRu: link?.textRu ? decodeCmsText(String(link.textRu)) : null,
+                  textEn: link?.textEn ? decodeCmsText(String(link.textEn)) : null,
+                })).filter((link: any) => link.id)
+              : [],
+          };
+        })
+        .filter((scene: any): scene is NonNullable<typeof scene> => Boolean(scene))
+    : [];
+
+  return {
+    ...tour,
+    eyebrow: tour.eyebrow ? decodeCmsText(String(tour.eyebrow)) : null,
+    eyebrowRu: tour.eyebrowRu ? decodeCmsText(String(tour.eyebrowRu)) : null,
+    eyebrowEn: tour.eyebrowEn ? decodeCmsText(String(tour.eyebrowEn)) : null,
+    title: tour.title ? decodeCmsText(String(tour.title)) : null,
+    titleRu: tour.titleRu ? decodeCmsText(String(tour.titleRu)) : null,
+    titleEn: tour.titleEn ? decodeCmsText(String(tour.titleEn)) : null,
+    text: tour.text ? decodeCmsText(String(tour.text)) : null,
+    textRu: tour.textRu ? decodeCmsText(String(tour.textRu)) : null,
+    textEn: tour.textEn ? decodeCmsText(String(tour.textEn)) : null,
+    buttonLabel: tour.buttonLabel ? decodeCmsText(String(tour.buttonLabel)) : null,
+    buttonLabelRu: tour.buttonLabelRu ? decodeCmsText(String(tour.buttonLabelRu)) : null,
+    buttonLabelEn: tour.buttonLabelEn ? decodeCmsText(String(tour.buttonLabelEn)) : null,
+    scenes,
+  };
 }

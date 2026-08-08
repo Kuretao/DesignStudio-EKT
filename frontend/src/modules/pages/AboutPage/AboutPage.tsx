@@ -5,6 +5,7 @@ import { useCms, useCmsText } from "@/src/cms";
 import CinematicImage from "@/src/components/common/CinematicImage";
 import { GlassPanel } from "@/src/ui";
 import SectionLabel from "@/src/components/common/SectionLabel";
+import { imageFrames, projectImageAt } from "@/src/utils/images";
 
 function AboutPage() {
   const { projects } = useCms();
@@ -26,7 +27,7 @@ function AboutPage() {
       <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
         <div>
           <SectionLabel>{text("about.label", "О нас")}</SectionLabel>
-          <h2 className="max-w-4xl text-5xl font-light leading-[0.95] tracking-[-0.055em] md:text-7xl">
+          <h2 className="max-w-4xl text-[clamp(2.6rem,5vw,4.8rem)] font-light leading-[0.98] tracking-normal md:tracking-[-0.035em]">
             {text("about.title", "Студия, которая собирает проект как систему")}
           </h2>
           <p className="mt-7 max-w-2xl text-lg leading-relaxed text-[#D6D1CA]">
@@ -73,7 +74,7 @@ function AboutPage() {
 
           <div className="group relative min-h-[620px] overflow-hidden rounded-[2.5rem] border border-white/10">
             <CinematicImage
-              frames={[projects[0].image, projects[1].image, projects[4].image]}
+              frames={[projectImageAt(projects, 0), projectImageAt(projects, 1), projectImageAt(projects, 4)]}
               alt={text("about.imageAlt", "Интерьерный проект 3D Smart Design Studio")}
               fill
               hint="studio"

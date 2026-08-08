@@ -15,6 +15,7 @@ use MoonShine\Contracts\ColorManager\ColorManagerContract;
 use MoonShine\Contracts\ColorManager\PaletteContract;
 use App\MoonShine\Pages\ImageGalleryPage;
 use App\MoonShine\Pages\PageContentBuilderPage;
+use App\MoonShine\Pages\ServiceDirectionsPage;
 use App\MoonShine\Pages\StyleLabEditorPage;
 use App\MoonShine\Resources\SiteSetting\SiteSettingResource;
 use App\MoonShine\Resources\SiteSetting\Pages\SocialLinksFormPage;
@@ -69,6 +70,7 @@ final class MoonShineLayout extends AppLayout
                 MenuItem::make(PageContentBuilderPage::class, 'Конструктор страниц')->icon('rectangle-stack'),
                 MenuItem::make(fn (): string => url('/' . trim((string) config('moonshine.prefix', 'admin'), '/') . '/style-lab-editor'), 'Редактор Style Lab')->icon('swatch'),
                 MenuItem::make(MenuItemResource::class, 'Меню сайта')->icon('bars-3'),
+                MenuItem::make(ServiceDirectionsPage::class, 'Направления услуг')->icon('squares-2x2'),
                 MenuItem::make(PageResource::class, 'Страницы')->icon('document-text'),
             ], 'globe-alt'),
             MenuGroup::make('Контент', [

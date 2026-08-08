@@ -9,9 +9,10 @@ import CinematicImage from "@/src/components/common/CinematicImage";
 import CustomSelect from "@/src/components/forms/CustomSelect";
 import SectionLabel from "@/src/components/common/SectionLabel";
 import { GlassPanel } from "@/src/ui";
+import { fallbackImage } from "@/src/utils/images";
 
 type PortfolioProps = {
-  activeProject: Project;
+  activeProject?: Project;
   setActiveProject: (project: Project) => void;
 };
 
@@ -29,7 +30,7 @@ function scrollToProjectShowcase() {
 }
 
 function PortfolioHeroSlider({ onSelectProject }: PortfolioGridProps) {
-  const { projects } = useCms();
+  const { projects, ready } = useCms();
   const text = useCmsText();
   const heroSlides = projects.slice(0, 4).map((project, index) => ({
     project,
@@ -46,14 +47,18 @@ function PortfolioHeroSlider({ onSelectProject }: PortfolioGridProps) {
   const slide = heroSlides[activeSlide];
 
   useEffect(() => {
+    if (!ready || heroSlides.length === 0) return;
+
     const interval = window.setInterval(() => {
       setActiveSlide((current) => (current + 1) % heroSlides.length);
     }, 5600);
 
     return () => window.clearInterval(interval);
-  }, []);
+  }, [heroSlides.length, ready]);
 
   useEffect(() => {
+    if (!ready || heroSlides.length === 0) return;
+
     const scope = heroRef.current;
     if (!scope) return;
 
@@ -68,11 +73,26 @@ function PortfolioHeroSlider({ onSelectProject }: PortfolioGridProps) {
       { scale: 1.08, filter: "brightness(0.58) saturate(0.82)" },
       { scale: 1, filter: "brightness(0.82) saturate(1.08)", duration: 1.2, ease: "expo.out" },
     );
-  }, [activeSlide]);
+  }, [activeSlide, heroSlides.length, ready]);
 
   const moveSlide = (direction: number) => {
+    if (heroSlides.length === 0) return;
+
     setActiveSlide((current) => (current + direction + heroSlides.length) % heroSlides.length);
   };
+
+  if (!ready || !slide) {
+    return (
+      <section className="relative flex min-h-screen items-center px-5 md:px-10 lg:px-16">
+        <div className="mx-auto w-full max-w-7xl">
+          <SectionLabel>{text("portfolio.loadingLabel", "Портфолио")}</SectionLabel>
+          <h1 className="mt-5 max-w-4xl text-[clamp(2.8rem,5vw,5.2rem)] font-light leading-[0.94] text-white">
+            {text("portfolio.loadingTitle", "Загружаем проекты")}
+          </h1>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section ref={heroRef} className="relative min-h-screen overflow-hidden px-5 md:px-10 lg:px-16">
@@ -84,10 +104,13 @@ function PortfolioHeroSlider({ onSelectProject }: PortfolioGridProps) {
           }`}
           aria-hidden={activeSlide !== index}
         >
-          <img
-            src={project.image}
+          <CinematicImage
+            frames={[project.image, project.afterImage, project.beforeImage]}
             alt=""
-            className={`h-full w-full object-cover ${activeSlide === index ? "hero-image-active" : ""}`}
+            fill
+            className={activeSlide === index ? "hero-image-active" : ""}
+            showHint={false}
+            priority={activeSlide === index}
           />
         </div>
       ))}
@@ -103,7 +126,7 @@ function PortfolioHeroSlider({ onSelectProject }: PortfolioGridProps) {
       <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl items-end pb-24 pt-36 md:items-center md:pb-0">
         <div className="hero-copy max-w-4xl">
           <p className="text-xs uppercase tracking-[0.32em] text-[#D69A66]">{slide.kicker}</p>
-          <h1 className="mt-5 max-w-4xl text-[clamp(3rem,6.4vw,6.2rem)] font-light leading-[0.94] tracking-[-0.045em] text-white">
+          <h1 className="mt-5 max-w-4xl text-[clamp(2.8rem,5vw,5.2rem)] font-light leading-[0.94] tracking-normal md:tracking-[-0.035em] text-white">
             {slide.project.title}
           </h1>
           <p className="mt-7 max-w-2xl text-base leading-relaxed text-[#E8E0D8]/82 md:text-xl">{slide.project.description}</p>
@@ -165,7 +188,7 @@ function PortfolioHeroSlider({ onSelectProject }: PortfolioGridProps) {
 }
 
 export function PortfolioGrid({ onSelectProject }: PortfolioGridProps) {
-  const { projects } = useCms();
+  const { projects, ready } = useCms();
   const text = useCmsText();
   const squareOptions = [
     { value: "compact", label: text("portfolio.filters.square.compact", "до 100 м²") },
@@ -183,22 +206,52 @@ export function PortfolioGrid({ onSelectProject }: PortfolioGridProps) {
   const [activeDirection, setActiveDirection] = useState("");
   const [activeSquare, setActiveSquare] = useState("");
   const [activeTone, setActiveTone] = useState("");
+  const [pageSize, setPageSize] = useState("12");
+  const [currentPage, setCurrentPage] = useState(1);
   const gridRef = useRef<HTMLDivElement | null>(null);
+  const pageSizeOptions = [
+    { value: "12", label: text("portfolio.pagination.12", "12 проектов") },
+    { value: "24", label: text("portfolio.pagination.24", "24 проекта") },
+  ];
 
   const filteredProjects = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     const byDirection = activeDirection ? projects.filter((project) => project.category === activeDirection) : projects;
+    const bySquare = activeSquare ? byDirection.filter((project) => project.filterSquare === activeSquare) : byDirection;
+    const byTone = activeTone ? bySquare.filter((project) => project.filterTone === activeTone) : bySquare;
 
-    if (!query) return byDirection;
+    if (!query) return byTone;
 
-    return byDirection.filter((project) =>
+    return byTone.filter((project) =>
       [project.title, project.category, project.location, project.year, project.description].some((value) =>
-        value.toLowerCase().includes(query),
+        String(value ?? "").toLowerCase().includes(query),
       ),
     );
-  }, [activeDirection, projects, searchQuery]);
+  }, [activeDirection, activeSquare, activeTone, projects, searchQuery]);
+
+  const pageSizeNumber = Number(pageSize) || 12;
+  const totalPages = Math.max(1, Math.ceil(filteredProjects.length / pageSizeNumber));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const paginatedProjects = useMemo(
+    () => filteredProjects.slice((safeCurrentPage - 1) * pageSizeNumber, safeCurrentPage * pageSizeNumber),
+    [filteredProjects, pageSizeNumber, safeCurrentPage],
+  );
+  const showPageSizeControl = filteredProjects.length > 12;
+  const showPagination = totalPages > 1;
 
   useEffect(() => {
+    setCurrentPage(1);
+  }, [activeDirection, activeSquare, activeTone, pageSize, searchQuery]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  useEffect(() => {
+    if (!ready) return;
+
     const cards = gridRef.current?.querySelectorAll(".grid-card");
     if (!cards?.length) return;
 
@@ -215,7 +268,20 @@ export function PortfolioGrid({ onSelectProject }: PortfolioGridProps) {
         clearProps: "transform,opacity,visibility",
       },
     );
-  }, [filteredProjects]);
+  }, [paginatedProjects, ready]);
+
+  if (!ready) {
+    return (
+      <div id="portfolio" className="relative mx-auto w-full max-w-7xl">
+        <GlassPanel className="rounded-[2rem] p-8">
+          <SectionLabel>{text("portfolio.loadingLabel", "Портфолио")}</SectionLabel>
+          <p className="mt-4 text-lg text-[#D6D1CA]">
+            {text("portfolio.loadingText", "Подтягиваем актуальные проекты.")}
+          </p>
+        </GlassPanel>
+      </div>
+    );
+  }
 
   return (
     <div id="portfolio" className="relative mx-auto w-full max-w-7xl">
@@ -268,14 +334,17 @@ export function PortfolioGrid({ onSelectProject }: PortfolioGridProps) {
       </GlassPanel>
 
       <div ref={gridRef} className="relative z-0 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-        {filteredProjects.map((project, index) => (
-          <button
-            type="button"
+        {filteredProjects.length === 0 ? (
+          <GlassPanel className="rounded-[2rem] p-8 md:col-span-2 lg:col-span-3">
+            <p className="text-lg text-[#D6D1CA]">
+              {text("portfolio.emptyProjects", "По выбранным фильтрам проектов не найдено.")}
+            </p>
+          </GlassPanel>
+        ) : null}
+        {paginatedProjects.map((project, index) => (
+          <Link
             key={project.id}
-            onClick={() => {
-              onSelectProject(project);
-              scrollToProjectShowcase();
-            }}
+            href={`/portfolio/${project.slug}`}
             className="grid-card group overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] text-left transition duration-300 will-change-transform hover:-translate-y-2 hover:border-[#D69A66]/60"
           >
             <div className="relative h-80 overflow-hidden">
@@ -284,8 +353,8 @@ export function PortfolioGrid({ onSelectProject }: PortfolioGridProps) {
                   project.image,
                   project.afterImage,
                   project.beforeImage,
-                  filteredProjects[(index + 1) % filteredProjects.length]?.image,
-                  filteredProjects[(index + 2) % filteredProjects.length]?.image,
+                  paginatedProjects[(index + 1) % paginatedProjects.length]?.image,
+                  paginatedProjects[(index + 2) % paginatedProjects.length]?.image,
                 ]}
                 alt={project.title}
                 fill
@@ -295,45 +364,107 @@ export function PortfolioGrid({ onSelectProject }: PortfolioGridProps) {
               <div className="absolute inset-4 rounded-[1.55rem] border border-white/0 transition duration-500 group-hover:border-white/25" />
               <div className="absolute bottom-5 left-5 right-5">
                 <p className="mb-2 text-xs uppercase tracking-[0.28em] text-[#D69A66]">{project.category}</p>
-                <h3 className="text-3xl font-light tracking-[-0.04em] transition duration-500 group-hover:translate-x-1">
+                <h3 className="line-clamp-3 text-3xl font-light tracking-normal transition duration-500 group-hover:translate-x-1">
                   {project.title}
                 </h3>
               </div>
             </div>
             <div className="p-6">
-              <p className="text-sm leading-relaxed text-[#D6D1CA]">{project.description}</p>
+              <p className="line-clamp-3 text-sm leading-relaxed text-[#D6D1CA]">{project.description}</p>
               <span className="mt-5 inline-flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-[#D69A66] transition group-hover:gap-3">
                 {text("portfolio.preview", "Предпросмотр")} <span>→</span>
               </span>
             </div>
-          </button>
+          </Link>
         ))}
       </div>
+
+      {showPageSizeControl || showPagination ? (
+        <GlassPanel className="relative z-[120] mt-8 overflow-visible rounded-[1.55rem] p-4 md:p-5">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            {showPageSizeControl ? (
+              <div className="flex flex-col gap-2 sm:w-56">
+                <span className="px-1 text-xs font-medium text-[#D69A66]">{text("portfolio.pagination.perPage", "Проектов на странице")}</span>
+                <CustomSelect
+                  value={pageSize}
+                  onChange={setPageSize}
+                  placeholder={text("portfolio.pagination.perPage", "Проектов на странице")}
+                  options={pageSizeOptions}
+                />
+              </div>
+            ) : (
+              <span className="text-sm text-[#D6D1CA]">
+                {text("portfolio.pagination.total", "Проектов найдено")}: {filteredProjects.length}
+              </span>
+            )}
+
+            {showPagination ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                  disabled={safeCurrentPage === 1}
+                  className="grid h-11 w-11 place-items-center rounded-full border border-white/15 bg-white/[0.04] text-xl text-white transition hover:border-[#D69A66]/60 hover:text-[#D69A66] disabled:pointer-events-none disabled:opacity-35"
+                  aria-label={text("portfolio.pagination.prev", "Предыдущая страница")}
+                >
+                  ‹
+                </button>
+                {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setCurrentPage(page)}
+                    aria-current={page === safeCurrentPage ? "page" : undefined}
+                    className={`h-11 min-w-11 rounded-full border px-4 text-sm transition ${
+                      page === safeCurrentPage
+                        ? "border-[#D69A66] bg-[#D69A66] text-[#050505]"
+                        : "border-white/15 bg-white/[0.04] text-white/70 hover:border-[#D69A66]/60 hover:text-[#D69A66]"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                  disabled={safeCurrentPage === totalPages}
+                  className="grid h-11 w-11 place-items-center rounded-full border border-white/15 bg-white/[0.04] text-xl text-white transition hover:border-[#D69A66]/60 hover:text-[#D69A66] disabled:pointer-events-none disabled:opacity-35"
+                  aria-label={text("portfolio.pagination.next", "Следующая страница")}
+                >
+                  ›
+                </button>
+              </div>
+            ) : null}
+          </div>
+        </GlassPanel>
+      ) : null}
     </div>
   );
 }
 
 export function ProjectShowcase({ project }: { project: Project }) {
-  const { projects, siteSettings } = useCms();
+  const { projects, siteSettings, ready } = useCms();
   const text = useCmsText();
   const [compare, setCompare] = useState(52);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const fallbackImages = [project.image, ...projects.map((item) => item.image)].filter(Boolean);
-  const fallbackImage = fallbackImages[0] || "";
-  const fallbackAfterImage = project.afterImage || projects[1]?.image || projects[0]?.afterImage || fallbackImage;
-  const fallbackBeforeImage = project.beforeImage || projects[2]?.image || projects[0]?.beforeImage || fallbackImage;
+  const [galleryOffset, setGalleryOffset] = useState(0);
+  const galleryStripRef = useRef<HTMLDivElement | null>(null);
   const featuredGallery = project.featuredGalleryImages?.length ? project.featuredGalleryImages : [];
+  const projectGallery = project.galleryImages?.length ? project.galleryImages : [];
+  const fallbackGallery = [project.image, project.afterImage, project.beforeImage].filter(Boolean);
   const gallery = Array.from(
     new Set([
-      ...featuredGallery,
-      project.image || fallbackImage,
-      fallbackAfterImage,
-      fallbackBeforeImage,
+      ...(featuredGallery.length ? featuredGallery : projectGallery.length ? projectGallery : fallbackGallery),
     ].filter(Boolean)),
-  ).slice(0, 3);
+  );
+  const heroImages = project.heroImages?.length ? project.heroImages : [];
+  const projectFallbackImage = project.image || gallery[0] || "";
+  const fallbackAfterImage = project.afterImage || gallery[1] || projectFallbackImage;
+  const fallbackBeforeImage = project.beforeImage || gallery[2] || projectFallbackImage;
   const showcaseFrames = Array.from(
     new Set([
       project.featuredImage,
+      ...heroImages,
       project.image,
       ...featuredGallery,
       project.afterImage,
@@ -344,6 +475,56 @@ export function ProjectShowcase({ project }: { project: Project }) {
   );
   const lightboxImage = lightboxIndex === null ? null : gallery[lightboxIndex];
   const currentLightboxIndex = lightboxIndex ?? 0;
+  const selectedCards = project.selectedCards?.length
+    ? project.selectedCards
+    : [
+        {
+          title: text("portfolio.taskTitle", "Задача"),
+          text: text("portfolio.taskText", "Собрать цельный визуальный код объекта: планировка, материалы, свет и настроение."),
+        },
+        {
+          title: text("portfolio.resultTitle", "Результат"),
+          text: text("portfolio.resultText", "Проект можно презентовать, согласовывать с подрядчиками и использовать как базу реализации."),
+        },
+        {
+          title: text("portfolio.formatTitle", "Формат"),
+          text: text("portfolio.formatText", "3D-ракурсы, подбор решений, рабочая логика и визуальная подача для клиента."),
+        },
+      ];
+  const visibleGallery = gallery.length > 0
+    ? Array.from({ length: Math.min(3, gallery.length) }, (_, index) => {
+        const galleryIndex = (galleryOffset + index) % gallery.length;
+
+        return {
+          image: gallery[galleryIndex],
+          index: galleryIndex,
+        };
+      })
+    : [];
+
+  useEffect(() => {
+    setGalleryOffset(0);
+    setLightboxIndex(null);
+  }, [project.slug]);
+
+  useEffect(() => {
+    const cards = galleryStripRef.current?.querySelectorAll(".showcase-gallery-card");
+    if (!cards?.length) return;
+
+    gsap.fromTo(
+      cards,
+      { autoAlpha: 0, x: 26, scale: 0.985 },
+      {
+        autoAlpha: 1,
+        x: 0,
+        scale: 1,
+        duration: 0.46,
+        stagger: 0.055,
+        ease: "power3.out",
+        clearProps: "transform,opacity,visibility",
+      },
+    );
+  }, [galleryOffset, project.slug]);
 
   useEffect(() => {
     if (lightboxIndex === null) return;
@@ -362,6 +543,10 @@ export function ProjectShowcase({ project }: { project: Project }) {
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [gallery.length, lightboxIndex]);
+
+  if (!ready || !projects.some((item) => item.slug === project.slug)) {
+    return null;
+  }
 
   return (
     <section id="project-showcase" className="scroll-mt-28 px-5 py-28 md:px-10 lg:px-16">
@@ -393,8 +578,8 @@ export function ProjectShowcase({ project }: { project: Project }) {
             <div className="relative flex flex-col justify-between p-7 md:p-10">
               <div>
                 <SectionLabel>{text("portfolio.selectedProjectLabel", "Выбранный проект")}</SectionLabel>
-                <h2 className="text-5xl font-light leading-[0.95] tracking-[-0.055em] md:text-7xl">{project.title}</h2>
-                <p className="mt-7 text-lg leading-relaxed text-[#D6D1CA]">{project.description}</p>
+                <h2 className="text-[clamp(2.8rem,5.2vw,5rem)] font-light leading-[0.98] tracking-normal md:tracking-[-0.035em]">{project.title}</h2>
+                <p className="mt-7 line-clamp-5 text-lg leading-relaxed text-[#D6D1CA]">{project.description}</p>
                 <Link
                   href={`/portfolio/${project.slug}`}
                   className="mt-8 inline-flex rounded-full border border-[#D69A66] bg-[#D69A66] px-6 py-4 text-xs uppercase tracking-[0.24em] text-[#050505] transition duration-300 hover:-translate-y-0.5 hover:bg-[#F5F2EC]"
@@ -404,14 +589,10 @@ export function ProjectShowcase({ project }: { project: Project }) {
               </div>
 
               <div className="mt-10 grid gap-4">
-                {[
-                  [text("portfolio.taskTitle", "Задача"), text("portfolio.taskText", "Собрать цельный визуальный код объекта: планировка, материалы, свет и настроение.")],
-                  [text("portfolio.resultTitle", "Результат"), text("portfolio.resultText", "Проект можно презентовать, согласовывать с подрядчиками и использовать как базу реализации.")],
-                  [text("portfolio.formatTitle", "Формат"), text("portfolio.formatText", "3D-ракурсы, подбор решений, рабочая логика и визуальная подача для клиента.")],
-                ].map(([title, text]) => (
-                  <GlassPanel key={title} className="rounded-[1.25rem] p-5">
-                    <span className="text-xs uppercase tracking-[0.28em] text-[#D69A66]">{title}</span>
-                    <p className="mt-3 text-sm leading-relaxed text-[#D6D1CA]">{text}</p>
+                {selectedCards.slice(0, 3).map((card, index) => (
+                  <GlassPanel key={`${card.title || "card"}-${index}`} className="rounded-[1.25rem] p-5">
+                    <span className="text-xs uppercase tracking-[0.28em] text-[#D69A66]">{card.title}</span>
+                    <p className="mt-3 text-sm leading-relaxed text-[#D6D1CA]">{card.text}</p>
                   </GlassPanel>
                 ))}
               </div>
@@ -419,13 +600,37 @@ export function ProjectShowcase({ project }: { project: Project }) {
           </div>
         </div>
 
-        <div className="mt-8 grid gap-5 md:grid-cols-3">
-          {gallery.map((image, index) => (
+        <div className="mt-8 flex items-center justify-between gap-4">
+          <p className="text-xs uppercase tracking-[0.24em] text-[#D69A66]">{text("portfolio.galleryStrip", "Ракурсы проекта")}</p>
+          {gallery.length > 3 ? (
+            <div className="flex gap-2">
+              <button
+                type="button"
+                aria-label={text("portfolio.prevImagesAria", "Предыдущие изображения")}
+                onClick={() => setGalleryOffset((current) => (current - 1 + gallery.length) % gallery.length)}
+                className="grid h-10 w-10 place-items-center rounded-full border border-white/15 bg-white/[0.05] text-xl text-white transition hover:border-[#D69A66]/60 hover:text-[#D69A66]"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                aria-label={text("portfolio.nextImagesAria", "Следующие изображения")}
+                onClick={() => setGalleryOffset((current) => (current + 1) % gallery.length)}
+                className="grid h-10 w-10 place-items-center rounded-full border border-white/15 bg-white/[0.05] text-xl text-white transition hover:border-[#D69A66]/60 hover:text-[#D69A66]"
+              >
+                ›
+              </button>
+            </div>
+          ) : null}
+        </div>
+
+        <div ref={galleryStripRef} className="mt-4 grid gap-5 md:grid-cols-3">
+          {visibleGallery.map(({ image, index }) => (
             <button
               type="button"
               key={`${project.id}-${image}-${index}`}
               onClick={() => setLightboxIndex(index)}
-              className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] transition duration-300 will-change-transform hover:-translate-y-2 hover:border-[#D69A66]/60 hover:shadow-[0_24px_80px_rgba(0,0,0,0.42)]"
+              className="showcase-gallery-card group relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] transition duration-300 will-change-transform hover:-translate-y-2 hover:border-[#D69A66]/60 hover:shadow-[0_24px_80px_rgba(0,0,0,0.42)]"
             >
               <CinematicImage
                 frames={[image, gallery[(index + 1) % gallery.length], gallery[(index + 2) % gallery.length]]}
@@ -474,6 +679,9 @@ export function ProjectShowcase({ project }: { project: Project }) {
             <img
               src={lightboxImage}
               alt={`${project.title} ${currentLightboxIndex + 1}`}
+              onError={(event) => {
+                event.currentTarget.src = fallbackImage(currentLightboxIndex);
+              }}
               className="max-h-[88vh] w-full max-w-6xl rounded-[1.5rem] object-contain shadow-[0_40px_140px_rgba(0,0,0,0.55)]"
               onClick={(event) => event.stopPropagation()}
             />
@@ -503,14 +711,20 @@ export function ProjectShowcase({ project }: { project: Project }) {
 
           <div className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.025] transition duration-500 hover:-translate-y-1 hover:border-[#D69A66]/55 hover:shadow-[0_28px_90px_rgba(214,154,102,0.12)]">
             <img
-              src={fallbackBeforeImage}
-              alt="before"
+              src={fallbackAfterImage}
+              alt="after"
+              onError={(event) => {
+                event.currentTarget.src = fallbackImage(1);
+              }}
               className="h-[520px] w-full object-cover transition duration-700 group-hover:scale-[1.03] group-hover:saturate-125"
             />
             <div className="absolute inset-y-0 left-0 overflow-hidden" style={{ width: `${compare}%` }}>
               <img
-                src={fallbackAfterImage}
-                alt="after"
+                src={fallbackBeforeImage}
+                alt="before"
+                onError={(event) => {
+                  event.currentTarget.src = fallbackImage(2);
+                }}
                 className="h-[520px] w-[calc(100vw-40px)] max-w-none object-cover transition duration-700 group-hover:scale-[1.03] group-hover:brightness-110 group-hover:saturate-125 lg:w-[760px]"
               />
             </div>
@@ -547,7 +761,7 @@ function PortfolioPage({ activeProject, setActiveProject }: PortfolioProps) {
       <section className="px-5 py-24 md:px-10 lg:px-16">
         <PortfolioGrid onSelectProject={setActiveProject} />
       </section>
-      <ProjectShowcase project={activeProject} />
+      {activeProject ? <ProjectShowcase project={activeProject} /> : null}
     </div>
   );
 }

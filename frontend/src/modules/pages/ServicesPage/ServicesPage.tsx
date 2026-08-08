@@ -6,6 +6,7 @@ import CinematicImage from "@/src/components/common/CinematicImage";
 import HeroBackdropSlider from "@/src/components/common/HeroBackdropSlider";
 import { GlassPanel } from "@/src/ui";
 import SectionLabel from "@/src/components/common/SectionLabel";
+import { imageFrames, projectImageAt } from "@/src/utils/images";
 
 const serviceHeroStats = [
   ["10 лет", "опыта в интерьерах, архитектуре и 3D"],
@@ -21,9 +22,9 @@ function ServicesHero() {
     <section className="relative min-h-screen overflow-hidden px-5 pb-16 pt-28 md:px-10 lg:px-16">
       <HeroBackdropSlider
         slides={[
-          { image: projects[1].image, alt: "Премиальный дизайн интерьера" },
-          { image: projects[0].image, alt: "Интерьерный проект" },
-          { image: projects[4].image, alt: "Архитектурная визуализация" },
+          { image: projectImageAt(projects, 1), alt: "Премиальный дизайн интерьера" },
+          { image: projectImageAt(projects, 0), alt: "Интерьерный проект" },
+          { image: projectImageAt(projects, 4), alt: "Архитектурная визуализация" },
         ]}
       />
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,5,.96)_0%,rgba(5,5,5,.74)_48%,rgba(5,5,5,.24)_100%)]" />
@@ -31,10 +32,10 @@ function ServicesHero() {
 
       <div className="relative z-10 mx-auto grid min-h-[calc(100vh-7rem)] max-w-7xl gap-10 lg:grid-cols-[0.94fr_1.06fr] lg:items-end">
         <div className="pb-6">
-          <p className="text-xs uppercase tracking-[0.38em] text-[#D69A66]">
+          <p className="max-w-full text-[11px] uppercase leading-relaxed tracking-[0.22em] text-[#D69A66] [overflow-wrap:anywhere] sm:text-xs sm:tracking-[0.38em]">
             Услуги / 3D Smart Design Studio
           </p>
-          <h1 className="mt-5 max-w-5xl text-[clamp(3rem,6.4vw,6.2rem)] font-light leading-[0.94] tracking-[-0.045em] text-white">
+          <h1 className="mt-5 max-w-5xl text-[clamp(2.8rem,5vw,5.2rem)] font-light leading-[0.94] tracking-normal md:tracking-[-0.035em] text-white">
             Услуги студии
           </h1>
           <p className="mt-7 max-w-2xl text-lg leading-relaxed text-[#E8E0D8]/85 md:text-xl">
@@ -80,7 +81,7 @@ function ServicesHero() {
                 className="group relative min-h-56 overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] transition duration-300 will-change-transform hover:-translate-y-2 hover:border-[#D69A66]/60"
               >
                 <CinematicImage
-                  frames={[item.image, projects[0].image, projects[2].image]}
+                  frames={imageFrames([item.image, projectImageAt(projects, 0), projectImageAt(projects, 2)])}
                   alt={item.title}
                   fill
                   hint="motion"
@@ -136,7 +137,7 @@ export function ServicesSummary() {
           {text("servicesSummary.label", "Услуги и цены")}
         </SectionLabel>
         <div className="mb-12 grid gap-8 md:grid-cols-[1fr_0.8fr] md:items-end">
-          <h2 className="text-5xl font-light tracking-[-0.055em] md:text-7xl">
+          <h2 className="text-[clamp(2.7rem,5.4vw,4.9rem)] font-light leading-tight tracking-normal md:tracking-[-0.035em]">
             {text("servicesSummary.title", "Услуги и цены")}
           </h2>
           <p className="text-[#D6D1CA]">
@@ -147,14 +148,14 @@ export function ServicesSummary() {
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 xl:grid-cols-2">
           {mainServices.map((service) => (
             <GlassPanel key={service.title} className="rounded-[2rem] p-7">
               <div className="mb-8 flex min-w-0 flex-col items-start justify-between gap-4 sm:flex-row">
-                <h3 className="min-w-0 text-3xl font-light tracking-normal [overflow-wrap:anywhere]">
+                <h3 className="line-clamp-3 min-w-0 text-[clamp(1.75rem,2.4vw,2.25rem)] font-light leading-tight tracking-normal [overflow-wrap:anywhere]">
                   {service.title}
                 </h3>
-                <span className="max-w-full rounded-full bg-white/10 px-4 py-2 text-sm leading-snug text-[#D69A66] [overflow-wrap:anywhere]">
+                <span className="inline-flex min-w-max shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-white/10 px-4 py-2 text-sm leading-none text-[#D69A66]">
                   {service.price}
                 </span>
               </div>
@@ -174,8 +175,9 @@ export function ServicePages() {
   const { projects, serviceNavigationGroups, servicePageItems } = useCms();
   const text = useCmsText();
   const localize = useLocalizedField();
-  const localizedServiceNavigationGroups = serviceNavigationGroups.map(
-    (group) => ({
+  const localizedServiceNavigationGroups = serviceNavigationGroups
+    .filter((group) => group.items.length > 0)
+    .map((group) => ({
       ...group,
       title: localize(group, "title", group.title),
       description: localize(group, "description", group.description),
@@ -183,8 +185,7 @@ export function ServicePages() {
         ...item,
         label: localize(item, "label", item.label),
       })),
-    }),
-  );
+    }));
   const serviceByHref = new Map(
     servicePageItems.map((item) => [`/${item.id}`, item]),
   );
@@ -197,7 +198,7 @@ export function ServicePages() {
             <SectionLabel>
               {text("servicePages.label", "Направления услуг")}
             </SectionLabel>
-            <h2 className="text-5xl font-light tracking-[-0.055em] md:text-7xl">
+            <h2 className="text-[clamp(2.7rem,5.4vw,4.9rem)] font-light leading-tight tracking-normal md:tracking-[-0.035em]">
               {text("servicePages.title", "Направления 3D Smart Design Studio")}
             </h2>
           </div>
@@ -209,11 +210,18 @@ export function ServicePages() {
           </p>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-5 xl:grid-cols-2">
           {localizedServiceNavigationGroups.map((group, index) => {
             const mainService = serviceByHref.get(group.href);
             const image =
-              mainService?.image ?? projects[index % projects.length]?.image;
+              group.image ??
+              mainService?.image ??
+              projects[index % projects.length]?.image;
+            const fallbackFrames = [
+              image,
+              projects[(index + 1) % projects.length]?.image,
+              projects[(index + 3) % projects.length]?.image,
+            ].filter(Boolean);
 
             return (
               <GlassPanel
@@ -223,12 +231,8 @@ export function ServicePages() {
                 <Link href={group.href} className="group block">
                   <div className="relative h-72 overflow-hidden">
                     <CinematicImage
-                      frames={[
-                        image,
-                        projects[(index + 1) % projects.length]?.image,
-                        projects[(index + 3) % projects.length]?.image,
-                      ]}
-                      alt={group.title}
+                      frames={fallbackFrames}
+                      alt={group.imageAlt || group.title}
                       fill
                       hint="motion"
                     />
@@ -240,24 +244,24 @@ export function ServicePages() {
                           "Основная категория",
                         )}
                       </p>
-                      <h3 className="text-3xl font-light tracking-normal [overflow-wrap:anywhere]">
+                      <h3 className="line-clamp-3 text-3xl font-light tracking-normal [overflow-wrap:anywhere]">
                         {group.title}
                       </h3>
                     </div>
                   </div>
                 </Link>
                 <div className="grid gap-5 p-6">
-                  <p className="leading-relaxed text-[#D6D1CA]">
+                  <p className="line-clamp-3 leading-relaxed text-[#D6D1CA]">
                     {group.description}
                   </p>
-                  <div className="grid gap-2">
+                  <div className={`grid gap-2 ${group.items.length > 6 ? "direction-scroll max-h-[318px] overflow-y-auto overscroll-contain pr-2" : ""}`}>
                     {group.items.map((child) => (
                       <Link
                         key={child.href}
                         href={child.href}
                         className="group flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3 text-sm text-white/62 transition hover:border-[#D69A66]/45 hover:text-white"
                       >
-                        <span className="min-w-0 [overflow-wrap:anywhere]">
+                        <span className="line-clamp-2 min-w-0 [overflow-wrap:anywhere]">
                           {child.label}
                         </span>
                         <span className="text-[#D69A66] transition group-hover:translate-x-1">
@@ -291,7 +295,7 @@ export function Workflow() {
     <section className="px-5 py-28 md:px-10 lg:px-16">
       <div className="mx-auto max-w-7xl">
         <SectionLabel>{text("workflow.label", "Этапы работы")}</SectionLabel>
-        <h2 className="mb-14 max-w-4xl text-5xl font-light tracking-[-0.055em] md:text-7xl">
+        <h2 className="mb-14 max-w-4xl text-[clamp(2.7rem,5.4vw,4.9rem)] font-light leading-tight tracking-normal md:tracking-[-0.035em]">
           {text(
             "workflow.title",
             "Этапы работы без хаоса и лишней коммуникации",

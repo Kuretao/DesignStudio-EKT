@@ -17,6 +17,236 @@
         callback();
     }
 
+    function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    function tourFieldByName(form, baseName, field) {
+        const candidates = [
+            baseName.replace(/\[plan_x\]$/, `[${field}]`),
+            baseName.replace(/\.plan_x$/, `.${field}`),
+            baseName.replace(/plan_x$/, field),
+        ].filter((name) => name && name !== baseName);
+
+        for (const name of candidates) {
+            const input = form.elements[name];
+
+            if (input) {
+                return input instanceof RadioNodeList ? input[0] : input;
+            }
+        }
+
+        return null;
+    }
+
+    function collectTourPlanRows(form) {
+        return Array.from(form.querySelectorAll('input[name*="virtual_tour_scenes"][name*="plan_x"]'))
+            .map((xInput, index) => {
+                const name = xInput.getAttribute('name') || '';
+                const yInput = tourFieldByName(form, name, 'plan_y');
+                const widthInput = tourFieldByName(form, name, 'plan_width');
+                const heightInput = tourFieldByName(form, name, 'plan_height');
+                const titleInput = tourFieldByName(form, name, 'title_ru') || tourFieldByName(form, name, 'title');
+                const panoramaInput = tourFieldByName(form, name, 'panorama');
+
+                if (!yInput) {
+                    return null;
+                }
+
+                return {
+                    index,
+                    xInput,
+                    yInput,
+                    widthInput,
+                    heightInput,
+                    title: titleInput ? titleInput.value.trim() : '',
+                    panorama: panoramaInput ? panoramaInput.value.trim() : '',
+                };
+            })
+            .filter(Boolean)
+            .filter((row) => row.panorama || row.title);
+    }
+
+    function numberValue(input, fallback) {
+        const value = Number(input && input.value);
+
+        return Number.isFinite(value) ? value : fallback;
+    }
+
+    function setInputValue(input, value, emit = false) {
+        if (!input) {
+            return;
+        }
+
+        input.value = String(Math.round(value));
+
+        if (emit) {
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    }
+
+    function emitInputChange(input) {
+        if (!input) {
+            return;
+        }
+
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function scheduleTourPlanEditor(form, delay = 160) {
+        if (form.dataset.tourPlanDragging === '1') {
+            return;
+        }
+
+        window.clearTimeout(form.__tourPlanTimer);
+        form.__tourPlanTimer = window.setTimeout(() => renderTourPlanEditor(form), delay);
+    }
+
+    function ensureTourPlanEditor(form) {
+        if (form.dataset.tourPlanEditorReady === '1') {
+            return form.querySelector('[data-tour-plan-editor]');
+        }
+
+        const firstInput = form.querySelector('input[name*="virtual_tour_scenes"][name*="plan_x"]');
+
+        if (!firstInput) {
+            return null;
+        }
+
+        const editor = document.createElement('section');
+        editor.className = 'tour-plan-editor';
+        editor.dataset.tourPlanEditor = '1';
+        editor.innerHTML = `
+            <div class="tour-plan-editor__head">
+                <strong>Мини-план 360° тура</strong>
+                <span>Перетаскивайте зоны мышью. Количество зон берется из сцен с панорамой.</span>
+            </div>
+            <div class="tour-plan-editor__canvas" data-tour-plan-canvas></div>
+        `;
+
+        const anchor = firstInput.closest('.form-group, .moonshine-field, .field, div') || firstInput;
+        anchor.parentNode.insertBefore(editor, anchor);
+        form.dataset.tourPlanEditorReady = '1';
+
+        return editor;
+    }
+
+    function renderTourPlanEditor(form) {
+        const rows = collectTourPlanRows(form);
+        const editor = ensureTourPlanEditor(form);
+
+        if (!editor) {
+            return;
+        }
+
+        const canvas = editor.querySelector('[data-tour-plan-canvas]');
+
+        if (!rows.length) {
+            canvas.innerHTML = '<div class="tour-plan-editor__empty">Добавьте сцену и выберите панораму из галереи.</div>';
+            return;
+        }
+
+        canvas.innerHTML = `
+            <div class="tour-plan-editor__frame"></div>
+            <div class="tour-plan-editor__axis tour-plan-editor__axis--x"></div>
+            <div class="tour-plan-editor__axis tour-plan-editor__axis--y"></div>
+            ${rows.map((row, order) => {
+                const width = clamp(numberValue(row.widthInput, 34), 16, 82);
+                const height = clamp(numberValue(row.heightInput, 30), 14, 82);
+                const x = clamp(numberValue(row.xInput, 50), width / 2, 100 - width / 2);
+                const y = clamp(numberValue(row.yInput, 50), height / 2, 100 - height / 2);
+                const left = clamp(x - width / 2, 0, 100 - width);
+                const top = clamp(y - height / 2, 0, 100 - height);
+                const label = row.title || `Сцена ${row.index + 1}`;
+
+                return `
+                    <button type="button" class="tour-plan-editor__zone" data-tour-plan-index="${order}" style="left:${left}%;top:${top}%;width:${width}%;height:${height}%">
+                        <span>${row.index + 1}</span>
+                        <em>${escapeHtml(label)}</em>
+                    </button>
+                `;
+            }).join('')}
+        `;
+
+        canvas.querySelectorAll('[data-tour-plan-index]').forEach((zone) => {
+            zone.addEventListener('pointerdown', (event) => {
+                event.preventDefault();
+                const row = rows[Number(zone.dataset.tourPlanIndex)];
+
+                if (!row) {
+                    return;
+                }
+
+                zone.setPointerCapture(event.pointerId);
+                zone.classList.add('is-dragging');
+                form.dataset.tourPlanDragging = '1';
+                let lastX = numberValue(row.xInput, 50);
+                let lastY = numberValue(row.yInput, 50);
+
+                const move = (moveEvent) => {
+                    const rect = canvas.getBoundingClientRect();
+                    const width = clamp(numberValue(row.widthInput, 34), 16, 82);
+                    const height = clamp(numberValue(row.heightInput, 30), 14, 82);
+                    const x = clamp(((moveEvent.clientX - rect.left) / rect.width) * 100, width / 2, 100 - width / 2);
+                    const y = clamp(((moveEvent.clientY - rect.top) / rect.height) * 100, height / 2, 100 - height / 2);
+
+                    lastX = x;
+                    lastY = y;
+                    setInputValue(row.xInput, x);
+                    setInputValue(row.yInput, y);
+                    zone.style.left = `${x - width / 2}%`;
+                    zone.style.top = `${y - height / 2}%`;
+                };
+
+                const up = () => {
+                    zone.classList.remove('is-dragging');
+                    delete form.dataset.tourPlanDragging;
+                    setInputValue(row.xInput, lastX);
+                    setInputValue(row.yInput, lastY);
+                    emitInputChange(row.xInput);
+                    emitInputChange(row.yInput);
+                    zone.removeEventListener('pointermove', move);
+                    zone.removeEventListener('pointerup', up);
+                    zone.removeEventListener('pointercancel', up);
+                    scheduleTourPlanEditor(form, 80);
+                };
+
+                zone.addEventListener('pointermove', move);
+                zone.addEventListener('pointerup', up);
+                zone.addEventListener('pointercancel', up);
+            });
+        });
+    }
+
+    function initTourPlanEditors() {
+        document.querySelectorAll('form').forEach((form) => {
+            if (!form.querySelector('[name*="virtual_tour_scenes"]')) {
+                return;
+            }
+
+            scheduleTourPlanEditor(form, form.dataset.tourPlanEditorReady === '1' ? 180 : 0);
+
+            if (form.dataset.tourPlanListenerReady === '1') {
+                return;
+            }
+
+            form.dataset.tourPlanListenerReady = '1';
+            form.addEventListener('input', (event) => {
+                if (form.dataset.tourPlanDragging === '1') {
+                    return;
+                }
+
+                const target = event.target;
+
+                if (target instanceof HTMLElement && (target.getAttribute('name') || '').includes('virtual_tour_scenes')) {
+                    scheduleTourPlanEditor(form, 180);
+                }
+            });
+        });
+    }
+
     function isGalleryInput(input) {
         if (!(input instanceof HTMLInputElement) || input.type !== 'file') {
             return false;
@@ -207,7 +437,7 @@
             return `<span class="admin-image-gallery__thumb"><video src="${escapeAttr(image.url || '')}" muted preload="metadata"></video><em>Видео</em></span>`;
         }
 
-        return `<span class="admin-image-gallery__thumb"><img src="${escapeAttr(image.url || '')}" alt=""><em>Фото</em></span>`;
+        return `<span class="admin-image-gallery__thumb"><img src="${escapeAttr(image.thumbUrl || image.url || '')}" alt=""><em>Фото</em></span>`;
     }
 
     function renderModal() {
@@ -380,12 +610,14 @@
 
     ready(() => {
         addButtons(document);
+        initTourPlanEditors();
 
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 mutation.addedNodes.forEach((node) => {
                     if (node instanceof HTMLElement) {
                         addButtons(node);
+                        initTourPlanEditors();
                     }
                 });
             });

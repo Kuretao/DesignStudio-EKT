@@ -104,7 +104,27 @@
     }
 
     function imageValue(root, key) {
-        return value(root, key) || value(root, `styleLab.styles.${state.style}.image`) || '/images/cms/river-park-interior.webp';
+        const image = value(root, key) || value(root, `styleLab.styles.${state.style}.image`) || '/images/cms/river-park-interior.webp';
+
+        return normalizeMediaUrl(image);
+    }
+
+    function normalizeMediaUrl(value) {
+        const path = String(value || '').trim().replace(/\\/g, '/');
+
+        if (!path || /^(?:https?:|data:|blob:|\/)/i.test(path)) {
+            return path;
+        }
+
+        if (path.startsWith('storage/')) {
+            return `/${path}`;
+        }
+
+        if (/^(?:cms|projects|services|news|promo|awards|partners|vacancies|service-directions)\//i.test(path)) {
+            return `/storage/${path}`;
+        }
+
+        return `/${path}`;
     }
 
     function setText(root, selector, text) {

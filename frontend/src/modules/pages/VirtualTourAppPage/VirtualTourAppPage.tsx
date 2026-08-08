@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-
-type TourSceneId = "living" | "bedroom" | "hall";
+import { useCms } from "@/src/cms";
+import type { Project } from "@/src/types";
 
 type TourScene = {
-  id: TourSceneId;
+  id: string;
   title: string;
   shortTitle: string;
   panorama: string;
@@ -14,7 +14,7 @@ type TourScene = {
   pitch: number;
   plan: { x: number; y: number };
   next: {
-    id: TourSceneId;
+    id: string;
     text: string;
     yaw: number;
     pitch: number;
@@ -83,7 +83,7 @@ function loadPannellumScript() {
   });
 }
 
-const scenes: TourScene[] = [
+const demoScenes: TourScene[] = [
   {
     id: "living",
     title: "Гостиная зона",
@@ -125,21 +125,66 @@ const scenes: TourScene[] = [
   },
 ];
 
-const sceneById = new Map(scenes.map((scene) => [scene.id, scene]));
+function getProjectTourScenes(project?: Project): TourScene[] {
+  const sourceScenes = project?.virtualTour?.scenes?.filter((scene) => scene.panorama) ?? [];
+
+  return sourceScenes.map((scene, index) => ({
+    id: scene.id || `scene-${index + 1}`,
+    title: scene.title || scene.titleRu || `Точка ${index + 1}`,
+    shortTitle: scene.label || scene.title || scene.titleRu || `Точка ${index + 1}`,
+    panorama: scene.panorama,
+    yaw: Number(scene.yaw ?? 0),
+    pitch: Number(scene.pitch ?? 0),
+    plan: {
+      x: Math.max(0, Math.min(100, Number(scene.plan?.x ?? 28 + ((index * 23) % 54)))),
+      y: Math.max(0, Math.min(100, Number(scene.plan?.y ?? 30 + ((index * 19) % 46)))),
+    },
+    next: Array.isArray(scene.next)
+      ? scene.next.map((link) => ({
+          id: link.id,
+          text: link.text || link.textRu || "Открыть",
+          yaw: Number(link.yaw ?? 0),
+          pitch: Number(link.pitch ?? 0),
+          targetYaw: link.targetYaw ?? undefined,
+        }))
+      : [],
+  }));
+}
+
+function hasTourScenes(project: Project) {
+  return Boolean(project.isVirtualTour && project.virtualTour?.scenes?.some((scene) => scene.panorama));
+}
 
 export default function VirtualTourAppPage() {
+  const { projects } = useCms();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const viewerRef = useRef<PannellumViewer | null>(null);
-  const [activeSceneId, setActiveSceneId] = useState<TourSceneId>("living");
+  const [requestedProjectSlug, setRequestedProjectSlug] = useState<string | null>(() =>
+    typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("project"),
+  );
+  const [activeSceneId, setActiveSceneId] = useState("living");
   const [viewerReady, setViewerReady] = useState(false);
   const [viewerError, setViewerError] = useState<string | null>(null);
   const [planOpen, setPlanOpen] = useState(true);
+  const activeProject = useMemo(
+    () =>
+      projects.find((project) => project.slug === requestedProjectSlug && hasTourScenes(project)) ??
+      projects.find(hasTourScenes),
+    [projects, requestedProjectSlug],
+  );
+  const scenes = useMemo(() => {
+    const projectScenes = getProjectTourScenes(activeProject);
+
+    return projectScenes.length ? projectScenes : demoScenes;
+  }, [activeProject]);
+  const sceneById = useMemo(() => new Map(scenes.map((scene) => [scene.id, scene])), [scenes]);
+  const firstSceneId = scenes[0]?.id ?? "living";
   const activeScene = sceneById.get(activeSceneId) ?? scenes[0];
 
   const pannellumConfig = useMemo(
     () => ({
       default: {
-        firstScene: "living",
+        firstScene: firstSceneId,
         sceneFadeDuration: 900,
         autoLoad: true,
         showControls: true,
@@ -159,21 +204,33 @@ export default function VirtualTourAppPage() {
             panorama: withBasePath(scene.panorama),
             yaw: scene.yaw,
             pitch: scene.pitch,
-            hotSpots: scene.next.map((link) => ({
-              type: "scene",
-              text: link.text,
-              sceneId: link.id,
-              yaw: link.yaw,
-              pitch: link.pitch,
-              targetYaw: link.targetYaw,
-              cssClass: "virtual-tour-hotspot",
-            })),
+            hotSpots: scene.next
+              .filter((link) => sceneById.has(link.id))
+              .map((link) => ({
+                type: "scene",
+                text: link.text,
+                sceneId: link.id,
+                yaw: link.yaw,
+                pitch: link.pitch,
+                targetYaw: link.targetYaw,
+                cssClass: "virtual-tour-hotspot",
+              })),
           },
         ]),
       ),
     }),
-    [],
+    [firstSceneId, sceneById, scenes],
   );
+
+  useEffect(() => {
+    setRequestedProjectSlug(new URLSearchParams(window.location.search).get("project"));
+  }, []);
+
+  useEffect(() => {
+    setActiveSceneId(firstSceneId);
+    setViewerReady(false);
+    setViewerError(null);
+  }, [firstSceneId]);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -199,8 +256,8 @@ export default function VirtualTourAppPage() {
 
         viewerRef.current = viewer;
         viewer.on?.("scenechange", (sceneId: string) => {
-          if (sceneById.has(sceneId as TourSceneId)) {
-            setActiveSceneId(sceneId as TourSceneId);
+          if (sceneById.has(sceneId)) {
+            setActiveSceneId(sceneId);
           }
         });
         setViewerReady(true);
@@ -217,9 +274,9 @@ export default function VirtualTourAppPage() {
       viewerRef.current?.destroy();
       viewerRef.current = null;
     };
-  }, [pannellumConfig]);
+  }, [pannellumConfig, sceneById]);
 
-  const loadScene = (sceneId: TourSceneId) => {
+  const loadScene = (sceneId: string) => {
     const target = sceneById.get(sceneId);
     if (!target) return;
 
@@ -237,6 +294,8 @@ export default function VirtualTourAppPage() {
 
     root.requestFullscreen?.();
   };
+  const closeHref = activeProject ? `/portfolio/${activeProject.slug}` : "/";
+  const tourTitle = activeProject ? activeProject.title : "Демо-тур";
 
   return (
     <div className="fixed inset-0 z-[200] overflow-hidden bg-black text-white">
@@ -258,7 +317,7 @@ export default function VirtualTourAppPage() {
           <div>
             <p className="text-2xl font-light">{viewerError}</p>
             <Link
-              href="/virtualnyj-3d-tur-360"
+              href={closeHref}
               className="mt-6 inline-flex rounded-full border border-white/18 px-5 py-3 text-xs uppercase tracking-[0.2em] text-white/70 transition hover:border-[#D69A66] hover:text-white"
             >
               Вернуться
@@ -272,7 +331,7 @@ export default function VirtualTourAppPage() {
       <div className="pointer-events-auto absolute left-4 right-4 top-4 z-30 flex flex-wrap items-center justify-between gap-3 md:left-6 md:right-6">
         <div className="flex items-center gap-3 rounded-full border border-white/14 bg-black/38 px-4 py-3 backdrop-blur-xl">
           <Link
-            href="/virtualnyj-3d-tur-360"
+            href={closeHref}
             className="grid h-9 w-9 place-items-center rounded-full border border-white/12 bg-white/8 text-lg leading-none transition hover:border-[#D69A66] hover:text-[#D69A66]"
             aria-label="Закрыть тур"
           >
@@ -283,7 +342,7 @@ export default function VirtualTourAppPage() {
               3D Smart virtual tour
             </p>
             <h1 className="text-base font-light md:text-xl">
-              Моковый дом / {activeScene.title}
+              {tourTitle} / {activeScene.title}
             </h1>
           </div>
         </div>

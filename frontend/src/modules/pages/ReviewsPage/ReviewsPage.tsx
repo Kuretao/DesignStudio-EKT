@@ -25,7 +25,7 @@ function ReviewsHero({ featuredReview }: { featuredReview: (typeof fallbackTesti
       <div className="relative z-10 mx-auto grid min-h-[calc(100vh-7rem)] max-w-7xl gap-10 lg:grid-cols-[0.96fr_1.04fr] lg:items-end">
         <div className="pb-8">
           <p className="text-xs uppercase tracking-[0.38em] text-[#D69A66]">{text("reviews.hero.label", "Client stories")}</p>
-          <h1 className="mt-5 max-w-5xl text-[clamp(3rem,6.4vw,6.2rem)] font-light leading-[0.94] tracking-[-0.045em] text-white">
+          <h1 className="mt-5 max-w-5xl text-[clamp(2.8rem,5vw,5.2rem)] font-light leading-[0.94] tracking-normal md:tracking-[-0.035em] text-white">
             {text("reviews.hero.title", "Отзывы о нас")}
           </h1>
           <p className="mt-7 max-w-2xl text-lg leading-relaxed text-[#E8E0D8]/85 md:text-xl">
@@ -87,7 +87,7 @@ function ReviewsPage() {
           <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-end">
             <div>
               <p className="review-card mb-5 text-xs uppercase tracking-[0.45em] text-[#D69A66]">{text("reviews.list.label", "Опыт клиентов")}</p>
-              <h2 className="review-card max-w-5xl text-5xl font-light leading-[0.92] tracking-[-0.055em] md:text-7xl">
+              <h2 className="review-card max-w-5xl text-[clamp(2.6rem,5vw,4.8rem)] font-light leading-[0.98] tracking-normal md:tracking-[-0.035em]">
                 {text("reviews.list.title", "Слова, за которыми виден процесс")}
               </h2>
             </div>
@@ -157,7 +157,7 @@ function ReviewsPage() {
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.8fr_1.2fr]">
           <div className="review-card">
             <p className="mb-5 text-xs uppercase tracking-[0.45em] text-[#D69A66]">{text("reviews.replies.label", "Диалог со студией")}</p>
-            <h2 className="text-5xl font-light tracking-[-0.055em] md:text-7xl">{text("reviews.replies.title", "Ответы администратора без сухой формальности")}</h2>
+            <h2 className="text-[clamp(2.6rem,5vw,4.8rem)] font-light leading-tight tracking-normal md:tracking-[-0.035em]">{text("reviews.replies.title", "Ответы администратора без сухой формальности")}</h2>
             <p className="mt-6 text-lg leading-relaxed text-[#D6D1CA]">
               {text("reviews.replies.text", "Для страницы оставили не только клиентские впечатления, но и короткий ответ студии — так блок выглядит живым и поддерживает доверие.")}
             </p>

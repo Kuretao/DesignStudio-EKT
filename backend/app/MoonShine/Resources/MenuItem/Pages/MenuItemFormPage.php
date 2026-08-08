@@ -85,6 +85,18 @@ class MenuItemFormPage extends FormPage
                         ]),
                     ])->icon('bars-3')->customAttributes(['class' => 'menu-section']),
                 ])->icon('bars-3'),
+                Tab::make('Картинка направления', [
+                    Box::make('Медиа для карточки направления', [
+                        $this->sectionNote(
+                            'Используется только у верхнего раздела услуг',
+                            'Если этот пункт - направление услуг без родителя, картинка попадет на карточку страницы "Услуги". Для обычных пунктов меню и подпунктов можно оставить пусто.'
+                        ),
+                        Grid::make([
+                            Column::make(array_slice(CmsFieldSets::menuItemSection('media'), 0, 2))->columnSpan(6),
+                            Column::make(array_slice(CmsFieldSets::menuItemSection('media'), 2))->columnSpan(6),
+                        ]),
+                    ])->icon('photo')->customAttributes(['class' => 'menu-section']),
+                ])->icon('photo'),
             ])->vertical()->customAttributes(['class' => 'menu-tabs']),
         ];
     }
@@ -120,12 +132,33 @@ class MenuItemFormPage extends FormPage
                     }
                 },
             ],
-            'label_ru' => ['nullable', 'string', 'max:255', 'required_without:page_id'],
+            'label_ru' => ['required', 'string', 'max:255'],
             'label_en' => ['nullable', 'string', 'max:255'],
-            'page_id' => ['nullable', 'integer', 'exists:pages,id', 'required_without:href'],
-            'href' => ['nullable', 'string', 'max:2048', 'required_without:page_id', 'regex:/^(\/(?!\/)|#|https?:\/\/|mailto:|tel:)/i'],
+            'page_id' => ['nullable', 'integer', 'exists:pages,id'],
+            'href' => [
+                'nullable',
+                'string',
+                'max:2048',
+                'regex:/^(\/(?!\/)|#|https?:\/\/|mailto:|tel:)/i',
+                static function (string $attribute, mixed $value, \Closure $fail): void {
+                    $isTopServiceDirection = request()->input('menu_area') === MenuItem::AREA_SERVICES
+                        && blank(request()->input('parent_id'));
+
+                    if ($isTopServiceDirection) {
+                        return;
+                    }
+
+                    if (blank($value) && blank(request()->input('page_id'))) {
+                        $fail('Выберите страницу или укажите ссылку. Для верхнего направления услуг ссылку можно оставить пустой.');
+                    }
+                },
+            ],
             'description_ru' => ['nullable', 'string', 'max:2000'],
             'description_en' => ['nullable', 'string', 'max:2000'],
+            'image_file' => ['nullable'],
+            'image' => ['nullable', 'string', 'max:2048'],
+            'image_alt_ru' => ['nullable', 'string', 'max:255'],
+            'image_alt_en' => ['nullable', 'string', 'max:255'],
             'position' => ['required', 'integer', 'min:0', 'max:9999'],
             'is_active' => ['nullable', 'boolean'],
         ];
@@ -138,16 +171,17 @@ class MenuItemFormPage extends FormPage
             'menu_area.in' => 'Выберите один из доступных разделов меню.',
             'parent_id.exists' => 'Выбранный родительский раздел больше недоступен.',
             'parent_id.not_in' => 'Пункт не может быть родителем самому себе.',
-            'label_ru.required_without' => 'Напишите русское название пункта меню или выберите страницу, чтобы взять ее заголовок.',
+            'label_ru.required' => 'Напишите русское название пункта меню или направления.',
             'label_ru.max' => 'Русское название пункта меню должно быть короче 255 символов.',
             'label_en.max' => 'Английское название пункта меню должно быть короче 255 символов.',
-            'page_id.required_without' => 'Выберите страницу или заполните поле "Другая ссылка".',
             'page_id.exists' => 'Выбранная страница больше недоступна. Выберите ее заново.',
-            'href.required_without' => 'Выберите страницу или укажите другую ссылку.',
             'href.regex' => 'Другая ссылка должна начинаться с /, #, http://, https://, mailto: или tel:.',
             'href.max' => 'Ссылка слишком длинная. Проверьте, что вставлен именно адрес.',
             'description_ru.max' => 'Русское описание раздела услуг должно быть короче 2000 символов.',
             'description_en.max' => 'Английское описание раздела услуг должно быть короче 2000 символов.',
+            'image.max' => 'URL картинки направления слишком длинный.',
+            'image_alt_ru.max' => 'Alt картинки RU должен быть короче 255 символов.',
+            'image_alt_en.max' => 'Alt картинки EN должен быть короче 255 символов.',
             'position.required' => 'Укажите порядок пункта в меню.',
             'position.integer' => 'Порядок должен быть целым числом.',
             'position.min' => 'Порядок не может быть отрицательным.',

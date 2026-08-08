@@ -49,6 +49,17 @@ class SiteSettingFormPage extends FormPage
             Alert::make('information-circle', 'info')
                 ->content('Заполняйте только нужные поля. Пустые ссылки и файлы не будут показываться посетителям сайта.'),
             Tabs::make([
+                Tab::make('Доступ', [
+                    Box::make('Публикация сайта', [
+                        $this->sectionNote(
+                            'Режим технических работ',
+                            'Включите заглушку перед обновлением сайта или отключите её, когда сайт готов принимать посетителей.'
+                        ),
+                        Grid::make([
+                            Column::make(CmsFieldSets::siteSettingSection('maintenance'))->columnSpan(12),
+                        ]),
+                    ])->icon('lock-closed')->customAttributes(['class' => 'settings-section']),
+                ])->icon('lock-closed')->active(),
                 Tab::make('Сайт и SEO', [
                     Box::make('Основное', [
                         $this->sectionNote(
@@ -60,7 +71,7 @@ class SiteSettingFormPage extends FormPage
                             Column::make(CmsFieldSets::siteSettingSection('seo'))->columnSpan(7),
                         ]),
                     ])->icon('magnifying-glass')->customAttributes(['class' => 'settings-section']),
-                ])->icon('globe-alt')->active(),
+                ])->icon('globe-alt'),
                 Tab::make('Логотипы', [
                     Box::make('Внешний вид', [
                         $this->sectionNote(
@@ -153,6 +164,7 @@ class SiteSettingFormPage extends FormPage
             'animations_enabled' => ['boolean'],
             'smooth_scroll_enabled' => ['boolean'],
             'page_reveal_enabled' => ['boolean'],
+            'maintenance_enabled' => ['boolean'],
         ];
     }
 

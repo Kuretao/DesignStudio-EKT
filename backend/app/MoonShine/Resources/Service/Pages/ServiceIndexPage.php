@@ -105,6 +105,18 @@ class ServiceIndexPage extends IndexPage
                     : '<span style="color:#cbd5e1;font-size:12px;">—</span>';
             }),
 
+            Preview::make('Направление', 'service_direction_id', function (mixed $item): string {
+                if (! is_object($item)) {
+                    return '<span style="color:#cbd5e1;font-size:12px;">—</span>';
+                }
+
+                $direction = $item->direction?->labelRu();
+
+                return filled($direction)
+                    ? '<span class="svc-badge svc-badge--published">'.e($direction).'</span>'
+                    : '<span class="svc-badge svc-badge--draft">Без направления</span>';
+            }),
+
             Preview::make('Статус', 'is_published', function (mixed $item): string {
                 $published = is_object($item) ? (bool) ($item->is_published ?? false) : (bool) $item;
 

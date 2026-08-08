@@ -61,6 +61,23 @@ export default function HeroBackdropSlider({
     setActiveSlide(0);
   }, [activeSlide, cleanSlides.length]);
 
+  useEffect(() => {
+    if (!cleanSlides.length) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setLoadedSlides((current) => {
+        const next = { ...current };
+        cleanSlides.forEach((slide) => {
+          next[slide.image] = true;
+        });
+
+        return next;
+      });
+    }, 4200);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [cleanSlides]);
+
   if (!cleanSlides.length) return null;
 
   const moveSlide = (direction: number) => {
@@ -77,9 +94,12 @@ export default function HeroBackdropSlider({
               loadedSlides[slide.image] ? "media-frame-loaded" : ""
             } ${
               activeSlide === index ? "opacity-100" : "opacity-0"
-            }`}
+          }`}
             aria-hidden={activeSlide !== index}
           >
+            <div className="media-frame-loader pointer-events-none absolute inset-0 z-[1] flex items-center justify-center bg-[#17130f]" aria-hidden="true">
+              <span className="media-frame-loader__ring" />
+            </div>
             <img
               src={slide.image}
               alt={activeSlide === index ? slide.alt : ""}
@@ -92,13 +112,16 @@ export default function HeroBackdropSlider({
               onLoad={() =>
                 setLoadedSlides((current) => ({ ...current, [slide.image]: true }))
               }
+              onError={() =>
+                setLoadedSlides((current) => ({ ...current, [slide.image]: true }))
+              }
             />
           </div>
         ))}
 
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_28%,rgba(214,154,102,.28),transparent_30%)] mix-blend-screen" />
         <div className="pointer-events-none absolute -inset-x-20 bottom-0 h-52 bg-gradient-to-t from-[#050505] to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2 overflow-hidden opacity-35">
+        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 overflow-hidden opacity-25 lg:block">
           <div className="absolute right-[8%] top-[18%] h-[52vh] w-[52vh] rounded-full border border-white/15 animate-[spin_28s_linear_infinite]" />
           <div className="absolute right-[18%] top-[30%] h-[34vh] w-[34vh] rounded-full border border-[#D69A66]/30 animate-[spin_18s_linear_infinite_reverse]" />
         </div>

@@ -6,6 +6,7 @@ import {
   seoLandingPageItems,
 } from "@/src/data";
 import VirtualTourDemo from "@/src/components/common/VirtualTourDemo";
+import { imageFrames, projectImageAt } from "@/src/utils/images";
 
 type SeoLandingItem = (typeof seoLandingPageItems)[number];
 
@@ -36,7 +37,7 @@ const fallbackVariant: LandingVariant = {
   promise: "Проектируем пространство до понятного результата",
   result: "готовый комплект для обсуждения, реализации и закупок",
   audience: "для частных клиентов и бизнеса",
-  images: [projects[0].image, projects[1].image, projects[2].image],
+  images: [projectImageAt(projects, 0), projectImageAt(projects, 1), projectImageAt(projects, 2)],
 };
 
 const variants: Record<string, LandingVariant> = {
@@ -53,9 +54,9 @@ const variants: Record<string, LandingVariant> = {
     result: "планировка, визуализация, чертежи и ведомости",
     audience: "новостройки, вторичное жилье, квартиры под сдачу",
     images: [
-      projects[1].image,
-      projects[0].image,
-      projects[1].afterImage || projects[1].image,
+      projectImageAt(projects, 1),
+      projectImageAt(projects, 0),
+      projectImageAt(projects, 1, "afterImage"),
     ],
   },
   "3d-vizualizaciya-interera-i-arhitektury": {
@@ -70,7 +71,7 @@ const variants: Record<string, LandingVariant> = {
     promise: "Показываем объект так, чтобы его можно было согласовать или продать",
     result: "модель, материалы, свет, ракурсы и финальные рендеры",
     audience: "интерьеры, фасады, мебель, девелопмент",
-    images: [projects[4].image, projects[5].image, projects[0].image],
+    images: [projectImageAt(projects, 4), projectImageAt(projects, 5), projectImageAt(projects, 0)],
   },
   "landshaftnyj-dizajn-uchastka": {
     accent: "#A7C957",
@@ -84,7 +85,7 @@ const variants: Record<string, LandingVariant> = {
     promise: "Участок становится системой маршрутов, света, растений и отдыха",
     result: "генплан, дендроплан, покрытия, освещение и 3D",
     audience: "частные дома, дачи, коттеджи, загородные участки",
-    images: [projects[2].image, projects[4].image, projects[5].image],
+    images: [projectImageAt(projects, 2), projectImageAt(projects, 4), projectImageAt(projects, 5)],
   },
   "virtualnyj-3d-tur-dlya-biznesa": {
     accent: "#C084FC",
@@ -98,7 +99,7 @@ const variants: Record<string, LandingVariant> = {
     promise: "Клиент изучает пространство до визита и быстрее принимает решение",
     result: "панорамы, переходы, точки интереса и ссылка для сайта",
     audience: "отели, рестораны, шоурумы, квартиры, офисы",
-    images: [projects[3].image, projects[1].image, projects[0].image],
+    images: [projectImageAt(projects, 3), projectImageAt(projects, 1), projectImageAt(projects, 0)],
   },
   "arhitekturnoe-proektirovanie-domov": {
     accent: "#E6C27A",
@@ -112,7 +113,7 @@ const variants: Record<string, LandingVariant> = {
     promise: "Будущий дом получает форму, посадку и понятную проектную базу",
     result: "эскиз, планы, фасады, разрезы и 3D-образ",
     audience: "частные дома, коттеджи, загородные участки",
-    images: [projects[5].image, projects[4].image, projects[2].image],
+    images: [projectImageAt(projects, 5), projectImageAt(projects, 4), projectImageAt(projects, 2)],
   },
 };
 

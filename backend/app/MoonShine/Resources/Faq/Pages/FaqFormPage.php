@@ -27,6 +27,24 @@ class FaqFormPage extends FormPage
 
     protected function rules(DataWrapperContract $item): array
     {
-        return [];
+        return [
+            'question_ru' => ['required', 'string', 'max:1000'],
+            'question_en' => ['nullable', 'string', 'max:1000'],
+            'answer_ru' => ['required', 'string', 'max:10000'],
+            'answer_en' => ['nullable', 'string', 'max:10000'],
+            'position' => ['required', 'integer', 'min:0', 'max:9999'],
+            'is_published' => ['nullable', 'boolean'],
+        ];
+    }
+
+    public function validationMessages(): array
+    {
+        return [
+            'question_ru.required' => 'Напишите вопрос на русском языке.',
+            'answer_ru.required' => 'Напишите ответ на русском языке.',
+            'position.required' => 'Укажите позицию вопроса в списке.',
+            'position.integer' => 'Позиция должна быть целым числом.',
+            '*.max' => 'Вопрос или ответ превышает допустимую длину.',
+        ];
     }
 }

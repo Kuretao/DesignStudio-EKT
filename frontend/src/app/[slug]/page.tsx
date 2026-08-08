@@ -35,11 +35,12 @@ export async function generateMetadata({
   const { slug } = await params;
   const servicePage = servicePageItems.find((item) => item.id === slug);
   const seoLandingPage = seoLandingPageItems.find((item) => item.id === slug);
-  const cmsServicePage = await loadCmsService(slug, servicePage);
+  const developmentFallback = process.env.NODE_ENV !== "production" ? servicePage : undefined;
+  const cmsServicePage = await loadCmsService(slug, developmentFallback);
   const defaultPreviewImage = await getSocialPreviewImage();
 
-  if (cmsServicePage || servicePage) {
-    const item = cmsServicePage ?? servicePage!;
+  if (cmsServicePage || developmentFallback) {
+    const item = cmsServicePage ?? developmentFallback!;
     const copy = getServiceLandingCopy(item);
     const previewImage = absoluteSiteUrl(item.image) ?? defaultPreviewImage;
 
@@ -108,19 +109,20 @@ export default async function Page({
   const { slug } = await params;
 
   const servicePage = servicePageItems.find((item) => item.id === slug);
-  const cmsServicePage = await loadCmsService(slug, servicePage);
+  const developmentFallback = process.env.NODE_ENV !== "production" ? servicePage : undefined;
+  const cmsServicePage = await loadCmsService(slug, developmentFallback);
   if (cmsServicePage) return <ServiceDetailPage item={cmsServicePage} />;
 
-  if (servicePage) return <ServiceDetailPage item={servicePage} />;
+  if (developmentFallback) return <ServiceDetailPage item={developmentFallback} />;
 
   const seoLandingPage = seoLandingPageItems.find((item) => item.id === slug);
   if (seoLandingPage) return <SeoLandingPage item={seoLandingPage} />;
 
-  const contentPage = contentPages.find((page) => page.id === slug);
-  if (contentPage) return <ContentPage page={contentPage} />;
-
   const cmsPage = await loadCmsPage(slug);
   if (cmsPage) return <ContentPage page={cmsPage} />;
+
+  const contentPage = contentPages.find((page) => page.id === slug);
+  if (contentPage) return <ContentPage page={contentPage} />;
 
   notFound();
 }

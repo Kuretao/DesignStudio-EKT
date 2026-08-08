@@ -101,6 +101,18 @@ class ServiceFormPage extends FormPage
                         ]),
                     ])->icon('photo')->customAttributes(['class' => 'svc-form-section']),
                 ])->icon('photo'),
+                Tab::make('До / После', [
+                    Box::make('Индивидуальный блок сравнения', [
+                        $this->sectionNote(
+                            'Настройка только этой услуги',
+                            'Здесь меняются заголовок, описание и обе картинки блока "До / После" для конкретной услуги. Если оставить поля пустыми, сайт возьмет общие fallback-тексты и релевантные картинки.'
+                        ),
+                        Grid::make([
+                            Column::make(array_slice(CmsFieldSets::serviceSection('compare'), 0, 6))->columnSpan(6),
+                            Column::make(array_slice(CmsFieldSets::serviceSection('compare'), 6))->columnSpan(6),
+                        ]),
+                    ])->icon('arrows-right-left')->customAttributes(['class' => 'svc-form-section']),
+                ])->icon('arrows-right-left'),
                 Tab::make('PDF-бонус', [
                     Box::make('Файл после заявки', [
                         $this->sectionNote(
@@ -165,10 +177,25 @@ class ServiceFormPage extends FormPage
             'pdf_file' => ['nullable'],
             'pdf_title_ru' => ['nullable', 'string', 'max:255'],
             'pdf_title_en' => ['nullable', 'string', 'max:255'],
+            'service_direction_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('menu_items', 'id')->where(static fn ($query) => $query
+                    ->where('menu_area', \App\Models\MenuItem::AREA_SERVICES)
+                    ->whereNull('parent_id')),
+            ],
             'text_ru' => ['nullable', 'string'],
             'text_en' => ['nullable', 'string'],
             'image' => ['nullable', 'string', 'max:2048'],
             'hero_images' => ['nullable', 'string', 'max:10000'],
+            'compare_eyebrow_ru' => ['nullable', 'string', 'max:255'],
+            'compare_eyebrow_en' => ['nullable', 'string', 'max:255'],
+            'compare_title_ru' => ['nullable', 'string', 'max:255'],
+            'compare_title_en' => ['nullable', 'string', 'max:255'],
+            'compare_text_ru' => ['nullable', 'string', 'max:2000'],
+            'compare_text_en' => ['nullable', 'string', 'max:2000'],
+            'compare_before_image' => ['nullable', 'string', 'max:2048'],
+            'compare_after_image' => ['nullable', 'string', 'max:2048'],
             'deliverable_images' => ['nullable', 'string', 'max:10000'],
             'deliverables_ru' => ['nullable', 'string', 'max:10000'],
             'deliverables_en' => ['nullable', 'string', 'max:10000'],
@@ -195,6 +222,7 @@ class ServiceFormPage extends FormPage
             'price_en.max' => 'Цена EN должна быть короче 255 символов.',
             'timeline_ru.max' => 'Срок RU должен быть короче 255 символов.',
             'timeline_en.max' => 'Срок EN должен быть короче 255 символов.',
+            'service_direction_id.exists' => 'Выберите существующее верхнее направление услуг.',
             'image.max' => 'URL обложки слишком длинный.',
             'hero_images.max' => 'Список слайдов слишком большой. Оставьте только нужные изображения.',
             'deliverable_images.max' => 'Список картинок для состава услуги слишком большой.',

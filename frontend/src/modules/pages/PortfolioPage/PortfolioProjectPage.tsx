@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import gsap from "gsap";
 import { useCms, useCmsText } from "@/src/cms";
 import type { Project, ProjectCategory } from "@/src/types";
 import CinematicImage from "@/src/components/common/CinematicImage";
 import HeroBackdropSlider from "@/src/components/common/HeroBackdropSlider";
 import SectionLabel from "@/src/components/common/SectionLabel";
+import VirtualTourDemo from "@/src/components/common/VirtualTourDemo";
 import { GlassPanel } from "@/src/ui";
 
 type ProjectCaseCopy = {
@@ -121,22 +123,19 @@ function getProjectCopy(project: Project, text: (key: string, fallback?: string)
           title: chapter.title || chapter.title_ru || "Заголовок",
           text: chapter.text || chapter.text_ru || "Текст",
         }))
-      : copy.chapters.map((chapter, index) => ({
-          title: text(`portfolioCase.${id}.chapters.${index + 1}.title`, chapter.title),
-          text: text(`portfolioCase.${id}.chapters.${index + 1}.text`, chapter.text),
-        }));
+      : [];
 
   const deliverables =
     project.deliverables && project.deliverables.length > 0
       ? project.deliverables
-      : copy.deliverables.map((item, index) => text(`portfolioCase.${id}.deliverables.${index + 1}`, item));
+      : [];
 
   return {
     focus: text(`portfolioCase.${id}.focus`, copy.focus),
-    intro: text(`portfolioCase.${id}.intro`, copy.intro),
+    intro: project.caseIntro || text(`portfolioCase.${id}.intro`, copy.intro),
     chapters,
     deliverables,
-    process: copy.process.map((item, index) => text(`portfolioCase.${id}.process.${index + 1}`, item)),
+    process: [],
     values: copy.values.map((item, index) => text(`portfolioCase.${id}.values.${index + 1}`, item)),
   };
 }
@@ -146,6 +145,23 @@ function getRelatedProjects(projects: Project[], project: Project) {
   const other = projects.filter((item) => item.slug !== project.slug && item.category !== project.category);
 
   return [...sameCategory, ...other].slice(0, 3);
+}
+
+function hasText(value?: string | null) {
+  return Boolean(value && value.trim());
+}
+
+function hasStoryContent(project: Project) {
+  return Boolean(
+    project.storyChapters?.some((chapter) =>
+      hasText(chapter.title || chapter.titleRu || chapter.title_ru) ||
+      hasText(chapter.text || chapter.textRu || chapter.text_ru),
+    ),
+  );
+}
+
+function hasDeliverablesContent(project: Project) {
+  return Boolean(project.deliverables?.some((item) => hasText(item)));
 }
 
 function MetricStrip({ project, copy }: { project: Project; copy: ProjectCaseCopy }) {
@@ -176,7 +192,7 @@ function ProjectHero({ project, gallery, copy }: { project: Project; gallery: st
   return (
     <section className="relative min-h-[92vh] overflow-hidden px-5 pb-16 pt-28 md:px-10 lg:px-16">
       <HeroBackdropSlider
-        slides={gallery.slice(0, 3).map((image) => ({ image, alt: project.title }))}
+        slides={gallery.map((image) => ({ image, alt: project.title }))}
         controlsClassName="bottom-5"
       />
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,5,.96)_0%,rgba(5,5,5,.76)_48%,rgba(5,5,5,.28)_100%)]" />
@@ -233,14 +249,32 @@ function ProjectHero({ project, gallery, copy }: { project: Project; gallery: st
   );
 }
 
-function CaseNavigation() {
+function CaseNavigation({
+  hasStory = false,
+  hasDeliverables = false,
+  hasVirtualTour = false,
+  hasGallery = false,
+  hasCompare = false,
+  hasRelated = false,
+}: {
+  hasStory?: boolean;
+  hasDeliverables?: boolean;
+  hasVirtualTour?: boolean;
+  hasGallery?: boolean;
+  hasCompare?: boolean;
+  hasRelated?: boolean;
+}) {
   const text = useCmsText();
   const items = [
-    [text("portfolioCase.nav.story", "История"), "#case-story"],
-    [text("portfolioCase.nav.gallery", "Галерея"), "#case-gallery"],
-    [text("portfolioCase.nav.compare", "До / после"), "#case-compare"],
-    [text("portfolioCase.nav.related", "Похожие"), "#case-related"],
+    ...(hasStory ? [[text("portfolioCase.nav.story", "История"), "#case-story"]] : []),
+    ...(hasDeliverables ? [[text("portfolioCase.nav.deliverables", "Состав"), "#case-deliverables"]] : []),
+    ...(hasVirtualTour ? [[text("portfolioCase.nav.virtualTour", "360° тур"), "#case-virtual-tour"]] : []),
+    ...(hasGallery ? [[text("portfolioCase.nav.gallery", "Галерея"), "#case-gallery"]] : []),
+    ...(hasCompare ? [[text("portfolioCase.nav.compare", "До / после"), "#case-compare"]] : []),
+    ...(hasRelated ? [[text("portfolioCase.nav.related", "Похожие"), "#case-related"]] : []),
   ];
+
+  if (!items.length) return null;
 
   return (
     <nav className="relative z-20 border-y border-white/10 bg-[#0c0b09] px-5 py-3 md:px-10 lg:px-16">
@@ -261,6 +295,9 @@ function CaseNavigation() {
 
 function ProjectStory({ project, copy }: { project: Project; copy: ProjectCaseCopy }) {
   const text = useCmsText();
+  const hasChapters = copy.chapters.some((chapter) => hasText(chapter.title) || hasText(chapter.text));
+  if (!hasText(project.caseIntro) && !hasChapters) return null;
+
   return (
     <section id="case-story" className="scroll-mt-36 px-5 py-24 md:px-10 lg:px-16">
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.8fr_1.2fr]">
@@ -292,15 +329,18 @@ function ProjectStory({ project, copy }: { project: Project; copy: ProjectCaseCo
 
 function Deliverables({ copy }: { copy: ProjectCaseCopy }) {
   const text = useCmsText();
+  const items = copy.deliverables.filter(hasText);
+  if (!items.length) return null;
+
   return (
-    <section className="border-y border-white/10 px-5 py-20 md:px-10 lg:px-16">
+    <section id="case-deliverables" className="scroll-mt-36 border-y border-white/10 px-5 py-20 md:px-10 lg:px-16">
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
         <div>
           <SectionLabel>{text("portfolioCase.deliverables.label", "Состав")}</SectionLabel>
           <h2 className="text-4xl font-light leading-tight md:text-6xl">{text("portfolioCase.deliverables.title", "Что входит в проектную подачу")}</h2>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
-          {copy.deliverables.map((item, index) => (
+          {items.map((item, index) => (
             <div key={item} className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-6">
               <span className="text-sm text-[#D69A66]">0{index + 1}</span>
               <h3 className="mt-8 text-2xl font-light text-white">{item}</h3>
@@ -338,6 +378,8 @@ function ProjectGallery({
     return cmsText(key, fallback);
   };
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [galleryOffset, setGalleryOffset] = useState(0);
+  const galleryStripRef = useRef<HTMLDivElement | null>(null);
   const defaultLabels = [
     text("portfolioCase.gallery.label1", "Главный ракурс"),
     text("portfolioCase.gallery.label2", "Финальная подача"),
@@ -348,6 +390,45 @@ function ProjectGallery({
   const labels = defaultLabels.map((label, index) => project.galleryLabels?.[index] || label);
   const lightboxImage = lightboxIndex === null ? null : gallery[lightboxIndex];
   const currentLightboxIndex = lightboxIndex ?? 0;
+  const lowerGallery = gallery.slice(1);
+  const labelFor = (index: number) => labels[index] || text("portfolioCase.gallery.defaultCardLabel", "Ракурс проекта");
+  const visibleLowerGallery = lowerGallery.length > 0
+    ? Array.from({ length: Math.min(3, lowerGallery.length) }, (_, index) => {
+        const lowerIndex = (galleryOffset + index) % lowerGallery.length;
+        const galleryIndex = lowerIndex + 1;
+
+        return {
+          image: gallery[galleryIndex],
+          index: galleryIndex,
+        };
+      })
+    : [];
+
+  useEffect(() => {
+    setGalleryOffset(0);
+    setLightboxIndex(null);
+  }, [project.slug]);
+
+  useEffect(() => {
+    const cards = galleryStripRef.current?.querySelectorAll(".case-gallery-card");
+    if (!cards?.length) return;
+
+    gsap.fromTo(
+      cards,
+      { autoAlpha: 0, x: 24, scale: 0.985 },
+      {
+        autoAlpha: 1,
+        x: 0,
+        scale: 1,
+        duration: 0.46,
+        stagger: 0.055,
+        ease: "power3.out",
+        clearProps: "transform,opacity,visibility",
+      },
+    );
+  }, [galleryOffset, project.slug]);
+
+  if (!gallery.length) return null;
 
   return (
     <section id="case-gallery" className="scroll-mt-36 px-5 py-24 md:px-10 lg:px-16">
@@ -376,28 +457,56 @@ function ProjectGallery({
             </div>
           </button>
 
-          <div className="grid gap-5 md:grid-cols-3">
-            {gallery.slice(1, 4).map((image, index) => (
-              <button
-                type="button"
-                key={`${image}-${index}`}
-                onClick={() => setLightboxIndex(index + 1)}
-                className="group relative min-h-[210px] overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] text-left transition duration-300 hover:-translate-y-1 hover:border-[#D69A66]/60"
-              >
-                <CinematicImage
-                  frames={[image, gallery[(index + 2) % gallery.length], related[index]?.image]}
-                  alt={`${project.title}: ${labels[index + 1]}`}
-                  fill
-                  hint="view"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/72 via-transparent to-transparent" />
-                <div className="absolute bottom-5 left-5 right-5">
-                  <p className="text-xs uppercase text-[#D69A66]">0{index + 2}</p>
-                  <h3 className="mt-2 text-xl font-light text-white">{labels[index + 1]}</h3>
-                </div>
-              </button>
-            ))}
-          </div>
+          {visibleLowerGallery.length ? (
+            <>
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-xs uppercase tracking-[0.24em] text-[#D69A66]">{text("portfolioCase.gallery.moreLabel", "Дополнительные ракурсы")}</p>
+                {lowerGallery.length > 3 ? (
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      aria-label={text("portfolioCase.gallery.prevCardsAria", "Предыдущие ракурсы")}
+                      onClick={() => setGalleryOffset((current) => (current - 1 + lowerGallery.length) % lowerGallery.length)}
+                      className="grid h-10 w-10 place-items-center rounded-full border border-white/15 bg-white/[0.05] text-xl text-white transition hover:border-[#D69A66]/60 hover:text-[#D69A66]"
+                    >
+                      ‹
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={text("portfolioCase.gallery.nextCardsAria", "Следующие ракурсы")}
+                      onClick={() => setGalleryOffset((current) => (current + 1) % lowerGallery.length)}
+                      className="grid h-10 w-10 place-items-center rounded-full border border-white/15 bg-white/[0.05] text-xl text-white transition hover:border-[#D69A66]/60 hover:text-[#D69A66]"
+                    >
+                      ›
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+
+              <div ref={galleryStripRef} className="grid gap-5 md:grid-cols-3">
+                {visibleLowerGallery.map(({ image, index }) => (
+                  <button
+                    type="button"
+                    key={`${image}-${index}`}
+                    onClick={() => setLightboxIndex(index)}
+                    className="case-gallery-card group relative min-h-[210px] overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] text-left transition duration-300 hover:-translate-y-1 hover:border-[#D69A66]/60"
+                  >
+                    <CinematicImage
+                      frames={[image, gallery[(index + 1) % gallery.length], related[index % Math.max(related.length, 1)]?.image]}
+                      alt={`${project.title}: ${labelFor(index)}`}
+                      fill
+                      hint="view"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/72 via-transparent to-transparent" />
+                    <div className="absolute bottom-5 left-5 right-5">
+                      <p className="text-xs uppercase text-[#D69A66]">0{index + 1}</p>
+                      <h3 className="mt-2 text-xl font-light text-white">{labelFor(index)}</h3>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : null}
         </div>
       </div>
 
@@ -465,6 +574,7 @@ function CompareBlock({
 }) {
   const text = useCmsText();
   const [compare, setCompare] = useState(52);
+  if (!beforeImage || !afterImage) return null;
 
   return (
     <section id="case-compare" className="scroll-mt-36 border-y border-white/10 px-5 py-24 md:px-10 lg:px-16">
@@ -479,14 +589,14 @@ function CompareBlock({
 
         <div className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.025]">
           <img
-            src={beforeImage}
-            alt={`${project.title}: ${text("portfolioCase.compare.before", "до")}`}
+            src={afterImage}
+            alt={`${project.title}: ${text("portfolioCase.compare.after", "после")}`}
             className="h-[560px] w-full object-cover transition duration-700 group-hover:scale-[1.02]"
           />
           <div className="absolute inset-y-0 left-0 overflow-hidden" style={{ width: `${compare}%` }}>
             <img
-              src={afterImage}
-              alt={`${project.title}: ${text("portfolioCase.compare.after", "после")}`}
+              src={beforeImage}
+              alt={`${project.title}: ${text("portfolioCase.compare.before", "до")}`}
               className="h-[560px] w-[calc(100vw-40px)] max-w-none object-cover transition duration-700 group-hover:scale-[1.02] lg:w-[760px]"
             />
           </div>
@@ -522,6 +632,9 @@ function CompareBlock({
 
 function ProcessBlock({ copy }: { copy: ProjectCaseCopy }) {
   const text = useCmsText();
+  const items = copy.process.filter(hasText);
+  if (!items.length) return null;
+
   return (
     <section className="px-5 py-24 md:px-10 lg:px-16">
       <div className="mx-auto max-w-7xl">
@@ -536,7 +649,7 @@ function ProcessBlock({ copy }: { copy: ProjectCaseCopy }) {
         </div>
 
         <div className="grid gap-px overflow-hidden rounded-[2rem] border border-white/10 bg-white/10 md:grid-cols-5">
-          {copy.process.map((step, index) => (
+          {items.map((step, index) => (
             <div key={step} className="bg-[#15130f]/90 p-6">
               <span className="mb-12 block text-sm text-[#D69A66]">0{index + 1}</span>
               <h3 className="text-xl font-light leading-tight text-white">{step}</h3>
@@ -637,30 +750,66 @@ function PortfolioProjectPage({ project }: { project: Project }) {
   const related = useMemo(() => getRelatedProjects(projects.length ? projects : [project], currentProject), [currentProject, project, projects]);
   const copy = getProjectCopy(currentProject, text);
   const gallery = useMemo(
-    () =>
-      uniqueImages([
-        ...(currentProject.galleryImages ?? []),
-        currentProject.image,
-        currentProject.afterImage,
-        currentProject.beforeImage,
-        related[0]?.image,
-        related[1]?.image,
-      ]),
-    [currentProject, related],
+    () => {
+      const cmsGallery = currentProject.galleryImages ?? [];
+
+      return uniqueImages(
+        cmsGallery.length
+          ? cmsGallery
+          : [currentProject.image, currentProject.afterImage, currentProject.beforeImage],
+      );
+    },
+    [currentProject],
   );
-  const beforeImage = currentProject.beforeImage || related[0]?.image || gallery[0];
-  const afterImage = currentProject.afterImage || currentProject.image || gallery[0];
+  const heroImages = useMemo(
+    () => uniqueImages(currentProject.heroImages?.length ? currentProject.heroImages : [currentProject.image, ...gallery]),
+    [currentProject, gallery],
+  );
+  const beforeImage = currentProject.beforeImage || "";
+  const afterImage = currentProject.afterImage || "";
+  const virtualTourScenes = currentProject.virtualTour?.scenes?.filter((scene) => scene.panorama) ?? [];
+  const hasStory = hasStoryContent(currentProject);
+  const hasDeliverables = hasDeliverablesContent(currentProject);
+  const hasVirtualTour = Boolean(currentProject.isVirtualTour && virtualTourScenes.length);
+  const hasGallery = gallery.length > 0;
+  const hasCompare = Boolean(beforeImage && afterImage);
 
   return (
     <article className="page-in">
-      <ProjectHero project={currentProject} gallery={gallery} copy={copy} />
-      <CaseNavigation />
+      <ProjectHero project={currentProject} gallery={heroImages} copy={copy} />
+      <CaseNavigation
+        hasStory={hasStory}
+        hasDeliverables={hasDeliverables}
+        hasVirtualTour={hasVirtualTour}
+        hasGallery={hasGallery}
+        hasCompare={hasCompare}
+        hasRelated={related.length > 0}
+      />
       <MetricStrip project={currentProject} copy={copy} />
-      <ProjectStory project={currentProject} copy={copy} />
-      <Deliverables copy={copy} />
-      <ProjectGallery project={currentProject} gallery={gallery} related={related} />
-      <CompareBlock project={currentProject} beforeImage={beforeImage} afterImage={afterImage} />
-      <ProcessBlock copy={copy} />
+      {hasVirtualTour ? (
+        <VirtualTourDemo
+          sectionId="case-virtual-tour"
+          scenes={virtualTourScenes}
+          eyebrow={currentProject.virtualTour?.eyebrow || text("portfolioCase.virtualTour.eyebrow", "Demo / virtual tour")}
+          title={currentProject.virtualTour?.title || text("portfolioCase.virtualTour.title", "Пример тура по проекту из сшитых 360° панорам")}
+          text={
+            currentProject.virtualTour?.text ||
+            text(
+              "portfolioCase.virtualTour.text",
+              "Внутри можно крутиться мышью или пальцем, приближать колесом и переходить между точками через хотспоты и мини-план.",
+            )
+          }
+          buttonLabel={currentProject.virtualTour?.buttonLabel || text("portfolioCase.virtualTour.button", "Открыть полноэкранный тур")}
+          fullscreenHref={`/virtualnyj-3d-tur-demo?project=${encodeURIComponent(currentProject.slug)}`}
+          formatTitle={text("portfolioCase.virtualTour.formatTitle", "Сцены проекта")}
+          formatItems={virtualTourScenes.map((scene, index) => scene.title || `${index + 1}`)}
+          credit={text("portfolioCase.virtualTour.credit", "Панорамы загружены для этого проекта.")}
+        />
+      ) : null}
+      {hasStory ? <ProjectStory project={currentProject} copy={copy} /> : null}
+      {hasDeliverables ? <Deliverables copy={copy} /> : null}
+      {hasGallery ? <ProjectGallery project={currentProject} gallery={gallery} related={related} /> : null}
+      {hasCompare ? <CompareBlock project={currentProject} beforeImage={beforeImage} afterImage={afterImage} /> : null}
       <RelatedProjects project={currentProject} related={related} />
       <ProjectCta project={currentProject} />
     </article>

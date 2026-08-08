@@ -64,6 +64,7 @@ final class CmsFieldSets
 
         return [
             ...self::siteSettingSection('main'),
+            ...self::siteSettingSection('maintenance'),
             ...self::siteSettingSection('compare'),
             ...self::siteSettingSection('branding'),
             ...self::siteSettingSection('animations'),
@@ -81,6 +82,11 @@ final class CmsFieldSets
                     ->required()
                     ->placeholder('3D Smart Design Studio')
                     ->hint('Показывается в подписи логотипа и используется как запасной заголовок сайта.'),
+            ],
+            'maintenance' => [
+                Switcher::make('Включить технические работы', 'maintenance_enabled')
+                    ->default(true)
+                    ->hint('Когда включено, посетители видят заглушку «Ведутся технические работы». Войти на сайт можно через кнопку «админ» и PIN 1208.'),
             ],
             'compare' => [
                 Text::make('Подпись блока «До / После»', 'compare_eyebrow')
@@ -256,7 +262,7 @@ final class CmsFieldSets
                         MenuItem::AREA_MAIN => 'Главное меню сайта',
                         MenuItem::AREA_SERVICES => 'Структура услуг',
                     ])
-                    ->default(MenuItem::AREA_MAIN)
+                    ->default((string) request()->query('menu_area', MenuItem::AREA_MAIN))
                     ->required()
                     ->hint('Главное меню - обычные ссылки сайта. Структура услуг - группы и подпункты в раскрытии "Услуги" и на странице услуг.'),
                 Select::make('Родительский раздел услуг', 'parent_id')
@@ -270,6 +276,7 @@ final class CmsFieldSets
                         ])
                         ->all())
                     ->nullable()
+                    ->default(request()->query('parent_id'))
                     ->searchable()
                     ->hint('Заполняйте только для подпунктов. Если оставить пустым, запись станет верхним разделом структуры услуг.'),
                 Textarea::make('Описание раздела услуг RU', 'description_ru')
@@ -302,6 +309,22 @@ final class CmsFieldSets
                 Switcher::make('Показывать на сайте', 'is_active')
                     ->default(true)
                     ->hint('Выключите, чтобы временно скрыть пункт меню без удаления.'),
+            ],
+            'media' => [
+                Image::make('Картинка направления', 'image_file')
+                    ->disk('public')
+                    ->dir('service-directions')
+                    ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])
+                    ->removable()
+                    ->hint('Показывается на карточке направления на странице "Услуги". Используется только у верхних разделов услуг.'),
+                Textarea::make('Или URL картинки направления', 'image')
+                    ->customAttributes(['data-gallery-lines' => '1'])
+                    ->placeholder('/images/cms/service-direction.webp')
+                    ->hint('Можно выбрать изображение из галереи. Файл выше имеет приоритет.'),
+                Text::make('Alt картинки RU', 'image_alt_ru')
+                    ->placeholder('Направление услуг 3D Smart Design'),
+                Text::make('Alt картинки EN', 'image_alt_en')
+                    ->placeholder('3D Smart Design service direction'),
             ],
             default => [],
         };
@@ -512,6 +535,8 @@ final class CmsFieldSets
                         'text' => 'Текстовый блок',
                         'media' => 'Текст + изображение',
                         'gallery' => 'Галерея / слайдер',
+                        'list' => 'Список карточек',
+                        'form' => 'Форма заявки',
                         'quote' => 'Акцентная цитата',
                         'cta' => 'Призыв к действию',
                     ])
@@ -694,6 +719,9 @@ final class CmsFieldSets
             Textarea::make('Или URL главного изображения', 'image')
                 ->customAttributes(['data-gallery-lines' => '1'])
                 ->hint('Вставьте путь из галереи или внешнюю ссылку. Используется если файл выше не загружен.'),
+            Textarea::make('Hero-слайдер проекта: изображения, по одному в строке', 'hero_images')
+                ->customAttributes(['data-gallery-lines' => '1'])
+                ->hint('Отдельные изображения для первого экрана страницы проекта. Если пусто, сайт возьмет главное изображение и галерею кейса.'),
             Image::make('Загрузить изображение «До»', 'before_image_file')
                 ->disk('public')
                 ->dir('projects')
@@ -711,6 +739,12 @@ final class CmsFieldSets
                 ->customAttributes(['data-gallery-lines' => '1'])
                 ->hint('Вставьте путь из галереи или внешнюю ссылку. Используется если файл выше не загружен.'),
             Switcher::make('Избранный', 'is_featured'),
+            Text::make('Избранный: подпись RU', 'featured_label_ru')
+                ->placeholder('Избранный проект 01')
+                ->hint('Маленькая подпись в большом блоке избранного проекта.'),
+            Text::make('Избранный: подпись EN', 'featured_label_en')
+                ->placeholder('Featured project 01')
+                ->hint('Английская версия подписи.'),
             Text::make('Избранный: заголовок RU', 'featured_title_ru')
                 ->placeholder('Можно оставить пустым - будет обычный заголовок кейса')
                 ->hint('Отдельный заголовок для большой структуры избранного кейса.'),
@@ -790,6 +824,97 @@ final class CmsFieldSets
                 ->hint('Блок "Что входит в проектную подачу". Если пусто, сайт покажет текст по умолчанию для категории проекта.'),
             Textarea::make('Состав проекта EN (по одному в строке)', 'deliverables_en')
                 ->hint('Английская версия состава проекта.'),
+            Textarea::make('Вступление кейса RU', 'case_intro_ru')
+                ->hint('Текст в паспорте проекта на первом экране. Это тот самый текст про механику, маршруты, хранение, свет и материалы.'),
+            Textarea::make('Вступление кейса EN', 'case_intro_en')
+                ->hint('Английская версия вступления кейса.'),
+            Switcher::make('Выбранный проект на главной', 'is_selected')
+                ->hint('Этот проект будет показан в блоке "Выбранный проект" на главной. При включении у других проектов статус снимется автоматически.'),
+            Text::make('Выбранный: заголовок задачи RU', 'selected_task_title_ru')
+                ->placeholder('Задача'),
+            Text::make('Выбранный: заголовок задачи EN', 'selected_task_title_en')
+                ->placeholder('Task'),
+            Textarea::make('Выбранный: текст задачи RU', 'selected_task_text_ru'),
+            Textarea::make('Выбранный: текст задачи EN', 'selected_task_text_en'),
+            Text::make('Выбранный: заголовок результата RU', 'selected_result_title_ru')
+                ->placeholder('Результат'),
+            Text::make('Выбранный: заголовок результата EN', 'selected_result_title_en')
+                ->placeholder('Result'),
+            Textarea::make('Выбранный: текст результата RU', 'selected_result_text_ru'),
+            Textarea::make('Выбранный: текст результата EN', 'selected_result_text_en'),
+            Text::make('Выбранный: заголовок формата RU', 'selected_format_title_ru')
+                ->placeholder('Формат'),
+            Text::make('Выбранный: заголовок формата EN', 'selected_format_title_en')
+                ->placeholder('Format'),
+            Textarea::make('Выбранный: текст формата RU', 'selected_format_text_ru'),
+            Textarea::make('Выбранный: текст формата EN', 'selected_format_text_en'),
+            Select::make('Фильтр площади', 'filter_square')
+                ->options([
+                    'compact' => 'До 100 м²',
+                    'medium' => '100-250 м²',
+                    'large' => '250+ м²',
+                ])
+                ->nullable()
+                ->hint('Это поле нужно только для фильтра "Площадь" в портфолио. Если оставить пустым, проект будет виден только в "Все".'),
+            Select::make('Фильтр тона', 'filter_tone')
+                ->options([
+                    'warm' => 'Теплый',
+                    'neutral' => 'Нейтральный',
+                    'dark' => 'Темный',
+                ])
+                ->nullable()
+                ->hint('Это поле нужно только для фильтра "Тон" в портфолио.'),
+            Switcher::make('Включить виртуальный 3D-тур', 'is_virtual_tour')
+                ->hint('Если включено и добавлены сцены ниже, на странице проекта появится интерактивный блок 360°-тура.'),
+            Text::make('3D-тур: надзаголовок RU', 'virtual_tour_eyebrow_ru')
+                ->placeholder('Demo / virtual tour'),
+            Text::make('3D-тур: надзаголовок EN', 'virtual_tour_eyebrow_en')
+                ->placeholder('Demo / virtual tour'),
+            Text::make('3D-тур: заголовок RU', 'virtual_tour_title_ru')
+                ->placeholder('Пример тура по дому из сшитых 360° панорам'),
+            Text::make('3D-тур: заголовок EN', 'virtual_tour_title_en')
+                ->placeholder('Virtual tour from stitched 360 panoramas'),
+            Textarea::make('3D-тур: описание RU', 'virtual_tour_text_ru')
+                ->hint('Коротко объясните, что можно делать внутри тура: крутиться, приближать, переходить по точкам.'),
+            Textarea::make('3D-тур: описание EN', 'virtual_tour_text_en'),
+            Text::make('3D-тур: текст кнопки RU', 'virtual_tour_button_ru')
+                ->placeholder('Открыть полноэкранный тур'),
+            Text::make('3D-тур: текст кнопки EN', 'virtual_tour_button_en')
+                ->placeholder('Open fullscreen tour'),
+            Json::make('Сцены виртуального тура', 'virtual_tour_scenes')
+                ->fields([
+                    Text::make('ID сцены', 'id')
+                        ->placeholder('living'),
+                    Text::make('Название RU', 'title_ru')
+                        ->placeholder('Гостиная зона'),
+                    Text::make('Название EN', 'title_en')
+                        ->placeholder('Living area'),
+                    Text::make('Подпись', 'label')
+                        ->placeholder('01 / Living'),
+                    Textarea::make('Панорама', 'panorama')
+                        ->customAttributes(['data-gallery-lines' => '1'])
+                        ->placeholder('/storage/projects/tours/living.webp')
+                        ->hint('Выберите панораму из галереи. Формат лучше 2:1, например 4096x2048.'),
+                    Number::make('Стартовый yaw', 'yaw')
+                        ->default(0),
+                    Number::make('Стартовый pitch', 'pitch')
+                        ->default(0),
+                    Number::make('Точка на плане X, %', 'plan_x')
+                        ->default(50),
+                    Number::make('Точка на плане Y, %', 'plan_y')
+                        ->default(50),
+                    Number::make('Ширина карточки на плане, %', 'plan_width')
+                        ->default(34)
+                        ->hint('Размер зоны комнаты на мини-плане. Позицию X/Y можно двигать мышью в превью ниже.'),
+                    Number::make('Высота карточки на плане, %', 'plan_height')
+                        ->default(30),
+                    Textarea::make('Переходы-hotspots', 'next')
+                        ->placeholder("hall | В холл | 144 | -4 | 12\nbedroom | В спальню | 62 | -3 | -92")
+                        ->hint('Одна строка = ID сцены | подпись | yaw | pitch | targetYaw. ID должен совпадать с ID другой сцены.'),
+                ])
+                ->removable()
+                ->sortable()
+                ->hint('Каждая сцена — отдельная 360° панорама. Минимум одна сцена, для переходов указывайте ID других сцен.'),
 
         ];
     }
@@ -874,6 +999,38 @@ final class CmsFieldSets
                     ->placeholder("/images/cms/slide-1.webp\n/images/cms/slide-2.webp")
                     ->hint('Карусель на посадочной странице услуги. Нажмите "Вставить из галереи" и добавляйте слайды построчно.'),
             ],
+            'compare' => [
+                Text::make('До / После: надзаголовок RU', 'compare_eyebrow_ru')
+                    ->placeholder('До / После')
+                    ->hint('Если пусто, сайт возьмет общий текст блока из UI-текстов.'),
+                Text::make('До / После: надзаголовок EN', 'compare_eyebrow_en'),
+                Text::make('До / После: заголовок RU', 'compare_title_ru')
+                    ->placeholder('Как идея превращается в готовое пространство'),
+                Text::make('До / После: заголовок EN', 'compare_title_en'),
+                Textarea::make('До / После: текст RU', 'compare_text_ru')
+                    ->hint('Индивидуальное описание блока для этой услуги.'),
+                Textarea::make('До / После: текст EN', 'compare_text_en'),
+                Image::make('Загрузить изображение «До»', 'compare_before_image_file')
+                    ->disk('public')
+                    ->dir('services/compare')
+                    ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])
+                    ->removable()
+                    ->hint('Файл имеет приоритет над URL ниже.'),
+                Textarea::make('Или URL изображения «До»', 'compare_before_image')
+                    ->customAttributes(['data-gallery-lines' => '1'])
+                    ->placeholder('/images/cms/service-before.webp')
+                    ->hint('Можно выбрать из галереи.'),
+                Image::make('Загрузить изображение «После»', 'compare_after_image_file')
+                    ->disk('public')
+                    ->dir('services/compare')
+                    ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])
+                    ->removable()
+                    ->hint('Файл имеет приоритет над URL ниже.'),
+                Textarea::make('Или URL изображения «После»', 'compare_after_image')
+                    ->customAttributes(['data-gallery-lines' => '1'])
+                    ->placeholder('/images/cms/service-after.webp')
+                    ->hint('Можно выбрать из галереи.'),
+            ],
             'pdf' => [
                 File::make('PDF-файл услуги', 'pdf_file')
                     ->disk('public')
@@ -910,6 +1067,19 @@ final class CmsFieldSets
                     ->hint('Английская версия этапов.'),
             ],
             'publish' => [
+                Select::make('Направление услуги', 'service_direction_id')
+                    ->options(static fn (): array => MenuItem::query()
+                        ->where('menu_area', MenuItem::AREA_SERVICES)
+                        ->whereNull('parent_id')
+                        ->orderBy('position')
+                        ->get()
+                        ->mapWithKeys(static fn (MenuItem $item): array => [
+                            $item->id => $item->labelRu(),
+                        ])
+                        ->all())
+                    ->nullable()
+                    ->searchable()
+                    ->hint('Выберите, в какой карточке направления показывать услугу. После сохранения пункт появится в структуре услуг автоматически.'),
                 Number::make('Позиция', 'position')
                     ->default(0)
                     ->sortable()
@@ -1157,29 +1327,85 @@ final class CmsFieldSets
 
     private static function vacancy(bool $compact): array
     {
-        $fields = [
-            ID::make()->sortable(),
-            Text::make('Заголовок RU', 'title_ru')->required(),
-            Text::make('Заголовок EN', 'title_en'),
-            Text::make('Занятость RU', 'employment_ru'),
-            Text::make('Занятость EN', 'employment_en'),
-            Text::make('Локация RU', 'location_ru'),
-            Text::make('Локация EN', 'location_en'),
-            Text::make('Зарплата RU', 'salary_ru'),
-            Text::make('Зарплата EN', 'salary_en'),
-            Number::make('Позиция', 'position')->sortable(),
-            Switcher::make('Активно', 'is_active'),
-        ];
+        if ($compact) {
+            return [
+                ID::make()->sortable(),
+                Text::make('Заголовок RU', 'title_ru')->required(),
+                Text::make('Отдел RU', 'department_ru'),
+                Text::make('Формат RU', 'format_ru'),
+                Text::make('Локация RU', 'location_ru'),
+                Text::make('Зарплата RU', 'salary_ru'),
+                Number::make('Позиция', 'position')->sortable(),
+                Switcher::make('Активно', 'is_active'),
+            ];
+        }
 
-        return $compact ? $fields : [
-            ...$fields,
-            Textarea::make('Описание RU', 'description_ru'),
-            Textarea::make('Описание EN', 'description_en'),
-            Textarea::make('Требования RU, по одному в строке', 'requirements_ru'),
-            Textarea::make('Требования EN, по одному в строке', 'requirements_en'),
-            Textarea::make('Обязанности RU, по одной в строке', 'responsibilities_ru'),
-            Textarea::make('Обязанности EN, по одной в строке', 'responsibilities_en'),
+        return [
+            ...self::vacancySection('main'),
+            ...self::vacancySection('terms'),
+            ...self::vacancySection('content'),
+            ...self::vacancySection('media'),
+            ...self::vacancySection('publish'),
         ];
+    }
+
+    public static function vacancySection(string $section): array
+    {
+        return match ($section) {
+            'main' => [
+                Text::make('Название вакансии RU', 'title_ru')->required()
+                    ->hint('Главный заголовок карточки вакансии.'),
+                Text::make('Название вакансии EN', 'title_en'),
+                Text::make('Отдел / направление RU', 'department_ru')
+                    ->placeholder('Интерьеры'),
+                Text::make('Отдел / направление EN', 'department_en'),
+            ],
+            'terms' => [
+                Text::make('Формат работы RU', 'format_ru')
+                    ->placeholder('Удаленно / гибрид'),
+                Text::make('Формат работы EN', 'format_en'),
+                Text::make('Тип занятости RU', 'employment_ru')
+                    ->placeholder('Полная или проектная занятость'),
+                Text::make('Тип занятости EN', 'employment_en'),
+                Text::make('Локация RU', 'location_ru'),
+                Text::make('Локация EN', 'location_en'),
+                Text::make('Опыт RU', 'experience_ru')
+                    ->placeholder('От 2 лет'),
+                Text::make('Опыт EN', 'experience_en'),
+                Text::make('Зарплата RU', 'salary_ru'),
+                Text::make('Зарплата EN', 'salary_en'),
+            ],
+            'content' => [
+                Textarea::make('Краткое описание RU', 'description_ru')
+                    ->hint('Показывается сразу под названием вакансии.'),
+                Textarea::make('Краткое описание EN', 'description_en'),
+                Textarea::make('Обязанности RU, по одной в строке', 'responsibilities_ru'),
+                Textarea::make('Обязанности EN, по одной в строке', 'responsibilities_en'),
+                Textarea::make('Требования RU, по одному в строке', 'requirements_ru'),
+                Textarea::make('Требования EN, по одному в строке', 'requirements_en'),
+                Textarea::make('Преимущества RU, по одному в строке', 'perks_ru')
+                    ->hint('Короткие преимущества в нижних плашках карточки.'),
+                Textarea::make('Преимущества EN, по одному в строке', 'perks_en'),
+            ],
+            'media' => [
+                Image::make('Загрузить изображение вакансии', 'image_file')
+                    ->disk('public')
+                    ->dir('vacancies')
+                    ->allowedExtensions(['jpg', 'jpeg', 'png', 'webp', 'avif'])
+                    ->removable()
+                    ->hint('Используется в верхней части карточки вакансии.'),
+                Textarea::make('Или выбрать из галереи / указать URL', 'image')
+                    ->customAttributes(['data-gallery-lines' => '1'])
+                    ->hint('Используется, если файл выше не загружен.'),
+            ],
+            'publish' => [
+                Number::make('Позиция', 'position')->default(0)->sortable()
+                    ->hint('Меньшее число поднимает вакансию выше.'),
+                Switcher::make('Активно', 'is_active')->default(true)
+                    ->hint('Выключенная вакансия полностью скрыта с сайта.'),
+            ],
+            default => [],
+        };
     }
 
     private static function uiText(bool $compact): array

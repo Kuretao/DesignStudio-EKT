@@ -712,6 +712,130 @@
     color: rgba(226, 232, 240, 0.74);
 }
 
+.tour-plan-editor {
+    margin: 18px 0;
+    padding: 18px;
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.14), rgba(20, 184, 166, 0.08)), rgba(15, 23, 42, 0.72);
+}
+
+.tour-plan-editor__head {
+    display: grid;
+    gap: 4px;
+    margin-bottom: 14px;
+}
+
+.tour-plan-editor__head strong {
+    color: #f8fafc;
+    font-size: 15px;
+}
+
+.tour-plan-editor__head span {
+    color: rgba(226, 232, 240, 0.68);
+    font-size: 12px;
+}
+
+.tour-plan-editor__canvas {
+    position: relative;
+    height: 280px;
+    overflow: hidden;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 18px;
+    background: #0b1020;
+    touch-action: none;
+}
+
+.tour-plan-editor__frame {
+    position: absolute;
+    inset: 20px;
+    border: 1px solid rgba(226, 232, 240, 0.14);
+    border-radius: 14px;
+    pointer-events: none;
+}
+
+.tour-plan-editor__axis {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(226, 232, 240, 0.12);
+}
+
+.tour-plan-editor__axis--x {
+    left: 10%;
+    right: 10%;
+    top: 50%;
+    height: 1px;
+}
+
+.tour-plan-editor__axis--y {
+    top: 12%;
+    bottom: 12%;
+    left: 50%;
+    width: 1px;
+}
+
+.tour-plan-editor__zone {
+    position: absolute;
+    display: grid;
+    align-content: end;
+    gap: 5px;
+    min-width: 46px;
+    min-height: 36px;
+    padding: 10px;
+    border: 1px solid rgba(214, 154, 102, 0.42);
+    border-radius: 12px;
+    background: rgba(214, 154, 102, 0.12);
+    color: #f8fafc;
+    cursor: grab;
+    text-align: left;
+    transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.tour-plan-editor__zone:hover,
+.tour-plan-editor__zone.is-dragging {
+    border-color: rgba(214, 154, 102, 0.85);
+    background: rgba(214, 154, 102, 0.2);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+}
+
+.tour-plan-editor__zone.is-dragging {
+    cursor: grabbing;
+}
+
+.tour-plan-editor__zone span {
+    display: grid;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    border-radius: 999px;
+    background: #d69a66;
+    color: #050505;
+    font-weight: 700;
+    pointer-events: none;
+}
+
+.tour-plan-editor__zone em {
+    overflow: hidden;
+    max-width: 100%;
+    color: rgba(248, 250, 252, 0.78);
+    font-size: 11px;
+    font-style: normal;
+    line-height: 1.25;
+    pointer-events: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tour-plan-editor__empty {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    color: rgba(226, 232, 240, 0.62);
+    text-align: center;
+}
+
 @media (max-width: 760px) {
     .admin-image-gallery {
         padding: 12px;

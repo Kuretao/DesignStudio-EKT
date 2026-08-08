@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useCmsText } from "@/src/cms";
 import { GlassPanel } from "@/src/ui";
+import { optimizeImageUrl } from "@/src/utils/images";
 
 type StyleOption = {
   id: string;
@@ -37,6 +38,20 @@ function listFromText(value: string, fallback: string[]) {
     .filter(Boolean);
 
   return items.length ? items : fallback;
+}
+
+function normalizeStyleLabImage(value: string, fallback: string) {
+  const image = value.trim() || fallback;
+
+  if (/^(https?:)?\/\//i.test(image) || image.startsWith("data:") || image.startsWith("/")) {
+    return optimizeImageUrl(image, 1600, 76);
+  }
+
+  if (image.startsWith("images/")) {
+    return optimizeImageUrl(`/${image}`, 1600, 76);
+  }
+
+  return optimizeImageUrl(`/storage/${image.replace(/^\/+/, "")}`, 1600, 76);
 }
 
 const styles: StyleOption[] = [
@@ -118,7 +133,7 @@ export default function StyleLab() {
     label: text(`styleLab.styles.${item.id}.label`, item.label),
     headline: text(`styleLab.styles.${item.id}.headline`, item.headline),
     mood: text(`styleLab.styles.${item.id}.mood`, item.mood),
-    image: text(`styleLab.styles.${item.id}.image`, item.image),
+    image: normalizeStyleLabImage(text(`styleLab.styles.${item.id}.image`, item.image), item.image),
     colors: listFromText(
       text(`styleLab.styles.${item.id}.colors`, item.colors.join("\n")),
       item.colors,
@@ -129,14 +144,14 @@ export default function StyleLab() {
     label: text(`styleLab.materials.${item.id}.label`, item.label),
     texture: text(`styleLab.materials.${item.id}.texture`, item.texture),
     accent: text(`styleLab.materials.${item.id}.accent`, item.accent),
-    image: text(`styleLab.materials.${item.id}.image`, item.image),
+    image: normalizeStyleLabImage(text(`styleLab.materials.${item.id}.image`, item.image), item.image),
   }));
   const localizedLights = lights.map((item) => ({
     ...item,
     label: text(`styleLab.lights.${item.id}.label`, item.label),
     note: text(`styleLab.lights.${item.id}.note`, item.note),
     overlay: text(`styleLab.lights.${item.id}.overlay`, item.overlay),
-    image: text(`styleLab.lights.${item.id}.image`, item.image),
+    image: normalizeStyleLabImage(text(`styleLab.lights.${item.id}.image`, item.image), item.image),
   }));
 
   const activeStyle = useMemo(() => localizedStyles.find((item) => item.id === styleId) ?? localizedStyles[0], [localizedStyles, styleId]);
@@ -188,7 +203,7 @@ export default function StyleLab() {
         <div className="flex flex-col justify-between">
           <div>
             <p className="mb-5 text-xs uppercase tracking-[0.45em] text-[#D69A66]">{text("styleLab.eyebrow", "Подбор стиля")}</p>
-            <h2 className="max-w-3xl text-5xl font-light leading-tight text-[#F5F2EC] md:text-7xl">
+            <h2 className="max-w-3xl text-[clamp(2.6rem,5vw,4.8rem)] font-light leading-tight text-[#F5F2EC]">
               {text("styleLab.title", "Соберите настроение будущего интерьера")}
             </h2>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-[#D6D1CA]">

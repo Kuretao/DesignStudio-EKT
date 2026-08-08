@@ -2,6 +2,7 @@
 
 import { useCms } from "@/src/cms";
 import HeroBackdropSlider from "@/src/components/common/HeroBackdropSlider";
+import { imageFrames, projectImageAt } from "@/src/utils/images";
 
 const sections = [
   {
@@ -191,9 +192,9 @@ export default function PrivacyPage() {
       <section className="relative overflow-hidden px-5 pb-10 pt-20 md:px-10 lg:px-16">
         <HeroBackdropSlider
           slides={[
-            { image: projects[0].image, alt: "3D Smart Design Studio" },
-            { image: projects[3].image, alt: "Коммерческий интерьер" },
-            { image: projects[5].image, alt: "Архитектурный проект" },
+            { image: projectImageAt(projects, 0), alt: "3D Smart Design Studio" },
+            { image: projectImageAt(projects, 3), alt: "Коммерческий интерьер" },
+            { image: projectImageAt(projects, 5), alt: "Архитектурный проект" },
           ]}
           className="bottom-auto h-[580px]"
           controlsClassName="bottom-auto top-[500px]"

@@ -2,6 +2,7 @@
 
 import { useCms } from "@/src/cms";
 import HeroBackdropSlider from "@/src/components/common/HeroBackdropSlider";
+import { imageFrames, projectImageAt } from "@/src/utils/images";
 
 export default function AgreementPage() {
   const { projects } = useCms();
@@ -10,9 +11,9 @@ export default function AgreementPage() {
       <section className="relative overflow-hidden px-5 pb-10 pt-20 md:px-10 lg:px-16">
         <HeroBackdropSlider
           slides={[
-            { image: projects[1].image, alt: "3D Smart Design Studio" },
-            { image: projects[0].image, alt: "Интерьерный проект" },
-            { image: projects[4].image, alt: "Архитектурная визуализация" },
+            { image: projectImageAt(projects, 1), alt: "3D Smart Design Studio" },
+            { image: projectImageAt(projects, 0), alt: "Интерьерный проект" },
+            { image: projectImageAt(projects, 4), alt: "Архитектурная визуализация" },
           ]}
           className="bottom-auto h-[580px]"
           controlsClassName="bottom-auto top-[500px]"

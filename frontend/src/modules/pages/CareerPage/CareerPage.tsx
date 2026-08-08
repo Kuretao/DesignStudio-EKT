@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useCms, useCmsText } from "@/src/cms";
+import { submitLead, useCms, useCmsText } from "@/src/cms";
 import CinematicImage from "@/src/components/common/CinematicImage";
 import HeroBackdropSlider from "@/src/components/common/HeroBackdropSlider";
 import { GlassPanel } from "@/src/ui";
@@ -22,79 +22,6 @@ type Vacancy = {
   image: string;
 };
 
-const vacancies: Vacancy[] = [
-  {
-    id: "interior-designer",
-    title: "Дизайнер интерьера",
-    department: "Интерьеры",
-    format: "Гибрид / удаленно",
-    location: "Самара или другой город",
-    experience: "от 2 лет",
-    salary: "от 90 000 ₽ + проектный бонус",
-    lead: "Для жилых проектов: планировки, концепции, 3D-постановка задач и уверенная коммуникация с клиентом.",
-    tasks: ["вести проект от брифа до рабочей документации", "собирать мудборды и концептуальные решения", "готовить ТЗ для визуализаторов и смежников"],
-    requirements: ["портфолио реализованных или детально проработанных интерьеров", "понимание эргономики, материалов и узлов", "спокойная, точная коммуникация с клиентами"],
-    perks: ["сильная команда визуализации", "понятные этапы и чек-листы", "проекты квартир и домов разного масштаба"],
-    image: "/images/cms/warm-interior-before.webp",
-  },
-  {
-    id: "3d-visualizer",
-    title: "3D-визуализатор интерьеров",
-    department: "3D production",
-    format: "Удаленно",
-    location: "Любой город",
-    experience: "от 1,5 лет",
-    salary: "сдельно, от 3 500 ₽ за ракурс",
-    lead: "Нужен человек с аккуратным светом, материалами и вниманием к атмосфере, а не только к геометрии.",
-    tasks: ["создавать фотореалистичные интерьерные ракурсы", "работать по ТЗ дизайнера и референсам", "готовить быстрые превью и финальные рендеры"],
-    requirements: ["3ds Max + Corona/V-Ray или сопоставимый стек", "чистые сцены и понятная организация файлов", "вкус к натуральным материалам, свету и композиции"],
-    perks: ["регулярный поток задач", "удаленная работа без лишних созвонов", "референсы и ТЗ без хаоса"],
-    image: "/images/cms/warm-interior-after.webp",
-  },
-  {
-    id: "architect",
-    title: "Архитектор-проектировщик",
-    department: "Архитектура",
-    format: "Проектная занятость",
-    location: "Самара / удаленно",
-    experience: "от 3 лет",
-    salary: "обсуждается по проекту",
-    lead: "Для коттеджей и малых коммерческих объектов: фасады, планировочная логика, рабочие решения.",
-    tasks: ["разрабатывать планировочные и фасадные концепции", "готовить комплект чертежей для согласования", "координироваться с визуализаторами и дизайнерами"],
-    requirements: ["уверенная работа с Archicad/Revit или AutoCAD", "понимание конструктивной и инженерной логики", "портфолио частных домов или коммерческих объектов"],
-    perks: ["проектная загрузка без офисной рутины", "задачи на стыке архитектуры и визуализации", "адекватные сроки на проработку"],
-    image: "/images/cms/villa-exterior.webp",
-  },
-  {
-    id: "project-manager",
-    title: "Менеджер дизайн-проектов",
-    department: "Производство",
-    format: "Гибрид",
-    location: "Самара",
-    experience: "от 2 лет",
-    salary: "от 80 000 ₽",
-    lead: "Человек, который держит сроки, документы и коммуникацию так, чтобы дизайнеры могли спокойно проектировать.",
-    tasks: ["вести календарь проекта и контроль этапов", "собирать вводные от клиента и команды", "готовить статусы, счета и простую проектную документацию"],
-    requirements: ["опыт в дизайне, ремонте, архитектуре или смежной сфере", "структурность и бережная настойчивость", "умение переводить хаос в понятный список действий"],
-    perks: ["влияние на качество процесса", "команда без микроменеджмента", "рост в операционное управление студией"],
-    image: "/images/cms/office-space.webp",
-  },
-  {
-    id: "procurement-specialist",
-    title: "Специалист по комплектации",
-    department: "Комплектация",
-    format: "Гибрид / частичная занятость",
-    location: "Самара",
-    experience: "от 1 года",
-    salary: "фикс + бонус",
-    lead: "Для подбора материалов, мебели, света и поставщиков без случайных решений и сорванных сроков.",
-    tasks: ["подбирать позиции под концепцию и бюджет", "вести таблицы, аналоги и статусы заказов", "коммуницировать с салонами, поставщиками и подрядчиками"],
-    requirements: ["знание рынка отделочных материалов и мебели", "внимание к артикулам, срокам и ценам", "умение предлагать аналоги без потери визуальной идеи"],
-    perks: ["живые проекты, а не абстрактные подборки", "контакт с дизайнерами и поставщиками", "гибкий формат занятости"],
-    image: "/images/cms/country-house-interior.webp",
-  },
-];
-
 const inputCls =
   "w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-[#F5F2EC] outline-none transition placeholder:text-white/25 focus:border-[#D69A66]/60 focus:bg-white/[0.07]";
 
@@ -107,6 +34,7 @@ function ApplyModal({ vacancy, onClose }: { vacancy: Vacancy | null; onClose: ()
   const [message, setMessage] = useState("");
   const [agreed, setAgreed] = useState(true);
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -123,12 +51,13 @@ function ApplyModal({ vacancy, onClose }: { vacancy: Vacancy | null; onClose: ()
   useEffect(() => {
     if (!vacancy) return;
     setSent(false);
+    setSending(false);
     setError("");
   }, [vacancy]);
 
   if (!vacancy) return null;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!name.trim() || !contact.trim()) {
       setError(text("career.modal.requiredError", "Заполните имя и контакт, чтобы мы могли ответить."));
       return;
@@ -139,20 +68,35 @@ function ApplyModal({ vacancy, onClose }: { vacancy: Vacancy | null; onClose: ()
       return;
     }
 
-    const payload = {
-      source: "career-page",
-      vacancyId: vacancy.id,
-      vacancyTitle: vacancy.title,
-      name: name.trim(),
-      contact: contact.trim(),
-      portfolio: portfolio.trim(),
-      message: message.trim(),
-      createdAt: new Date().toISOString(),
-    };
-
-    localStorage.setItem("careerApplication", JSON.stringify(payload));
-    setSent(true);
     setError("");
+
+    setSending(true);
+
+    try {
+      await submitLead({
+        source: "career-page",
+        channel: "vacancy-application",
+        name: name.trim(),
+        contact: contact.trim(),
+        service: vacancy.title,
+        message: message.trim(),
+        payload: {
+          vacancyId: vacancy.id,
+          vacancyTitle: vacancy.title,
+          vacancyDepartment: vacancy.department,
+          vacancyFormat: vacancy.format,
+          vacancyLocation: vacancy.location,
+          portfolio: portfolio.trim(),
+          createdAt: new Date().toISOString(),
+        },
+      });
+
+      setSent(true);
+    } catch {
+      setError(text("career.modal.submitError", "Не удалось отправить отклик. Попробуйте еще раз или напишите нам напрямую на почту."));
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -214,7 +158,12 @@ function ApplyModal({ vacancy, onClose }: { vacancy: Vacancy | null; onClose: ()
           <button
             type="button"
             onClick={handleSubmit}
-            className="h-14 rounded-full bg-[#D69A66] px-7 text-sm font-medium uppercase tracking-[0.24em] text-[#050505] transition hover:bg-[#F5F2EC]"
+            disabled={sending || sent}
+            className={`h-14 rounded-full px-7 text-sm font-medium uppercase tracking-[0.24em] transition ${
+              sending || sent
+                ? "cursor-not-allowed bg-white/10 text-white/35"
+                : "bg-[#D69A66] text-[#050505] hover:bg-[#F5F2EC]"
+            }`}
           >
             {text("career.modal.submitButton", "Отправить отклик")}
           </button>
@@ -257,17 +206,19 @@ function VacancyCard({
         </div>
 
         <div className="p-6 md:p-8">
-          <div className="mb-5 flex flex-wrap gap-2 text-xs text-white/45">
-            <span className="rounded-full border border-white/10 px-3 py-1">{vacancy.format}</span>
-            <span className="rounded-full border border-white/10 px-3 py-1">{vacancy.location}</span>
-            <span className="rounded-full border border-white/10 px-3 py-1">{vacancy.experience}</span>
-          </div>
+          {[vacancy.format, vacancy.location, vacancy.experience].some(Boolean) && (
+            <div className="mb-5 flex flex-wrap gap-2 text-xs text-white/45">
+              {[vacancy.format, vacancy.location, vacancy.experience].filter(Boolean).map((value) => (
+                <span key={value} className="rounded-full border border-white/10 px-3 py-1">{value}</span>
+              ))}
+            </div>
+          )}
           <h2 className="text-4xl font-light leading-tight tracking-[-0.045em] text-[#F5F2EC]">{vacancy.title}</h2>
-          <p className="mt-3 text-lg text-[#D69A66]">{vacancy.salary}</p>
-          <p className="mt-5 max-w-2xl leading-relaxed text-[#D6D1CA]">{vacancy.lead}</p>
+          {vacancy.salary && <p className="mt-3 text-lg text-[#D69A66]">{vacancy.salary}</p>}
+          {vacancy.lead && <p className="mt-5 max-w-2xl leading-relaxed text-[#D6D1CA]">{vacancy.lead}</p>}
 
-          <div className="mt-7 grid gap-6 md:grid-cols-2">
-            <div>
+          {(vacancy.tasks.length > 0 || vacancy.requirements.length > 0) && <div className="mt-7 grid gap-6 md:grid-cols-2">
+            {vacancy.tasks.length > 0 && <div>
               <p className="mb-3 text-[10px] uppercase tracking-[0.3em] text-white/35">{text("career.card.tasksLabel", "Задачи")}</p>
               <ul className="space-y-2">
                 {vacancy.tasks.map((item) => (
@@ -277,8 +228,8 @@ function VacancyCard({
                   </li>
                 ))}
               </ul>
-            </div>
-            <div>
+            </div>}
+            {vacancy.requirements.length > 0 && <div>
               <p className="mb-3 text-[10px] uppercase tracking-[0.3em] text-white/35">{text("career.card.requirementsLabel", "Важно")}</p>
               <ul className="space-y-2">
                 {vacancy.requirements.map((item) => (
@@ -288,16 +239,16 @@ function VacancyCard({
                   </li>
                 ))}
               </ul>
-            </div>
-          </div>
+            </div>}
+          </div>}
 
-          <div className="mt-7 flex flex-wrap gap-2">
+          {vacancy.perks.length > 0 && <div className="mt-7 flex flex-wrap gap-2">
             {vacancy.perks.map((perk) => (
               <span key={perk} className="rounded-full bg-white/[0.05] px-3 py-1.5 text-xs text-white/45">
                 {perk}
               </span>
             ))}
-          </div>
+          </div>}
 
           <button
             type="button"
@@ -326,7 +277,7 @@ function normalizeCmsVacancy(item: any, index: number): Vacancy {
     tasks: Array.isArray(item?.tasks) ? item.tasks : Array.isArray(item?.responsibilities) ? item.responsibilities : [],
     requirements: Array.isArray(item?.requirements) ? item.requirements : [],
     perks: Array.isArray(item?.perks) ? item.perks : [],
-    image: String(item?.image ?? vacancies[index % vacancies.length]?.image ?? "/images/cms/office-space.webp"),
+    image: String(item?.image ?? "/images/cms/office-space.webp"),
   };
 }
 
@@ -334,23 +285,12 @@ export default function CareerPage() {
   const { careerVacancies } = useCms();
   const text = useCmsText();
   const pageVacancies = useMemo(() => {
-    const cmsItems = careerVacancies.map(normalizeCmsVacancy).filter((item) => item.title);
-    return cmsItems.length ? cmsItems : vacancies;
+    return careerVacancies.map(normalizeCmsVacancy).filter((item) => item.title);
   }, [careerVacancies]);
   const [activeVacancy, setActiveVacancy] = useState<Vacancy | null>(null);
   const departments = useMemo(
-    () =>
-      Array.from(
-        new Set([
-          ...pageVacancies.map((vacancy) => vacancy.department).filter(Boolean),
-          text("career.departmentFallback1", "Интерьеры"),
-          text("career.departmentFallback2", "3D-визуализация"),
-          text("career.departmentFallback3", "Комплектация"),
-          text("career.departmentFallback4", "Архитектура"),
-          text("career.departmentFallback5", "Ландшафт"),
-        ]),
-      ).slice(0, 7),
-    [pageVacancies, text],
+    () => Array.from(new Set(pageVacancies.map((vacancy) => vacancy.department).filter(Boolean))),
+    [pageVacancies],
   );
 
   return (
@@ -373,13 +313,13 @@ export default function CareerPage() {
           <div className="relative z-10 mx-auto grid min-h-[calc(100vh-7rem)] max-w-7xl gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-end">
             <div className="pb-8">
               <p className="text-xs uppercase tracking-[0.38em] text-[#D69A66]">{text("career.hero.label", "Карьера / 3D Smart Design Studio")}</p>
-              <h1 className="mt-5 max-w-5xl text-[clamp(3rem,6.4vw,6.2rem)] font-light leading-[0.94] tracking-[-0.045em] text-white">
+              <h1 className="mt-5 max-w-5xl text-[clamp(2.8rem,5vw,5.2rem)] font-light leading-[0.94] tracking-normal md:tracking-[-0.035em] text-white">
                 {text("career.hero.title", "Карьера в студии")}
               </h1>
               <p className="mt-7 max-w-2xl text-lg leading-relaxed text-[#E8E0D8]/85 md:text-xl">
                 {text("career.hero.text", "Ищем людей, которые умеют делать пространство понятным: в концепции, визуализации, документации, комплектации и коммуникации.")}
               </p>
-              <div className="mt-9 flex flex-wrap gap-3">
+              {pageVacancies.length > 0 && <div className="mt-9 flex flex-wrap gap-3">
                 <a
                   href="#vacancies"
                   className="rounded-full border border-[#D69A66] bg-[#D69A66] px-6 py-4 text-xs uppercase tracking-[0.24em] text-[#050505] transition duration-300 hover:-translate-y-0.5 hover:bg-[#E3AD7B]"
@@ -393,7 +333,7 @@ export default function CareerPage() {
                 >
                   {text("career.hero.secondaryButton", "Отправить резюме")}
                 </button>
-              </div>
+              </div>}
             </div>
 
             <div className="mb-8 grid gap-4">
@@ -402,34 +342,34 @@ export default function CareerPage() {
                   [text("career.hero.stat1.value", "5"), text("career.hero.stat1.label", "открытых направлений")],
                   [text("career.hero.stat2.value", "гибрид"), text("career.hero.stat2.label", "и удаленная работа")],
                   [text("career.hero.stat3.value", "проектно"), text("career.hero.stat3.label", "можно начать без full-time")],
-                ].map(([value, label]) => (
+                ].map(([value, label], index) => (
                   <GlassPanel key={value} className="p-5">
-                    <strong className="block text-3xl font-light tracking-[-0.04em] text-[#D69A66]">{value}</strong>
+                    <strong className="block text-3xl font-light tracking-[-0.04em] text-[#D69A66]">{index === 0 ? departments.length : value}</strong>
                     <span className="mt-3 block text-xs uppercase leading-relaxed tracking-[0.18em] text-[#D6D1CA]">{label}</span>
                   </GlassPanel>
                 ))}
               </div>
 
-              <GlassPanel className="rounded-[2rem] p-6">
+              {departments.length > 0 && <GlassPanel className="rounded-[2rem] p-6">
                 <p className="text-xs uppercase tracking-[0.28em] text-[#D69A66]">{text("career.departments.label", "Кого ждем")}</p>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {departments.map((department) => (
+                  {departments.slice(0, 7).map((department) => (
                     <span key={department} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm text-white/60">
                       {department}
                     </span>
                   ))}
                 </div>
-              </GlassPanel>
+              </GlassPanel>}
             </div>
           </div>
         </section>
 
-        <section id="vacancies" className="px-5 py-24 md:px-10 lg:px-16">
+        {pageVacancies.length > 0 && <section id="vacancies" className="px-5 py-24 md:px-10 lg:px-16">
           <div className="mx-auto max-w-7xl">
             <div className="mb-14 grid gap-8 md:grid-cols-[1fr_0.7fr] md:items-end">
               <div>
                 <p className="mb-5 text-xs uppercase tracking-[0.45em] text-[#D69A66]">{text("career.vacancies.label", "Открытые позиции")}</p>
-                <h2 className="max-w-4xl text-5xl font-light leading-[0.95] tracking-[-0.055em] md:text-7xl">
+                <h2 className="max-w-4xl text-[clamp(2.6rem,5vw,4.8rem)] font-light leading-[0.98] tracking-normal md:tracking-[-0.035em]">
                   {text("career.vacancies.title", "Вакансии для тех, кто любит точность и красивый результат")}
                 </h2>
               </div>
@@ -444,7 +384,7 @@ export default function CareerPage() {
               ))}
             </div>
           </div>
-        </section>
+        </section>}
 
         <section className="border-t border-white/10 px-5 py-24 md:px-10 lg:px-16">
           <div className="mx-auto max-w-7xl">
@@ -452,7 +392,7 @@ export default function CareerPage() {
               <div className="grid gap-8 md:grid-cols-[1fr_0.8fr] md:items-end">
                 <div>
                   <p className="mb-5 text-xs uppercase tracking-[0.45em] text-[#D69A66]">{text("career.cta.label", "Не нашли роль?")}</p>
-                  <h2 className="max-w-3xl text-5xl font-light leading-tight tracking-[-0.055em] md:text-7xl">
+                  <h2 className="max-w-3xl text-[clamp(2.5rem,4.7vw,4.6rem)] font-light leading-tight tracking-normal md:tracking-[-0.035em]">
                     {text("career.cta.title", "Напишите нам, если чувствуете совпадение")}
                   </h2>
                 </div>
@@ -460,14 +400,14 @@ export default function CareerPage() {
                   <p className="text-lg leading-relaxed text-[#D6D1CA]">
                     {text("career.cta.text", "Иногда нужный специалист появляется раньше вакансии. Расскажите, чем можете усилить студию, и приложите портфолио.")}
                   </p>
-                  <button
+                  {pageVacancies.length > 0 && <button
                     type="button"
                     onClick={() => setActiveVacancy(pageVacancies[0] ?? null)}
                     className="mt-8 inline-flex items-center gap-3 rounded-full bg-[#D69A66] px-8 py-4 text-sm uppercase tracking-[0.24em] text-[#050505] transition hover:bg-[#F5F2EC]"
                   >
                     {text("career.cta.button", "Отправить отклик")}
                     <span>→</span>
-                  </button>
+                  </button>}
                 </div>
               </div>
             </GlassPanel>

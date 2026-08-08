@@ -1,17 +1,16 @@
 FROM php:8.4-cli-alpine
 RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.yandex.ru/mirrors/alpine|g' /etc/apk/repositories \
     && apk update \
-    && apk add --no-cache bash curl icu-dev libzip-dev oniguruma-dev zip \
-    && docker-php-ext-install intl zip mbstring pdo pdo_mysql
-RUN apk add --no-cache bash curl icu-dev libzip-dev oniguruma-dev zip \
-    && docker-php-ext-install intl mbstring pdo_mysql zip
+    && apk add --no-cache bash curl freetype-dev icu-dev libjpeg-turbo-dev libpng-dev libwebp-dev libzip-dev oniguruma-dev zip \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install gd intl zip mbstring pdo pdo_mysql
 	
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 RUN { \
         echo 'upload_max_filesize=128M'; \
         echo 'post_max_size=128M'; \
-        echo 'memory_limit=256M'; \
+        echo 'memory_limit=512M'; \
     } > /usr/local/etc/php/conf.d/uploads.ini
 
 WORKDIR /var/www/html

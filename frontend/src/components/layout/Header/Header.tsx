@@ -10,10 +10,10 @@ import ContactModal from "@/src/modals/ContactModal";
 
 function LogoMark() {
   return (
-    <span className="flex min-w-[128px] flex-col items-center gap-1 text-center">
+    <span className="flex min-w-[88px] flex-col items-center justify-center gap-1 text-center md:min-w-[128px]">
       <svg
         viewBox="-1.12 -1.12 2.24 2.24"
-        className="mx-auto block h-7 w-7 shrink-0"
+        className="mx-auto block h-6 w-6 shrink-0 md:h-7 md:w-7"
         fill="none"
         aria-hidden="true"
       >
@@ -64,7 +64,7 @@ function LogoMark() {
           strokeWidth="0.032"
         />
       </svg>
-      <span className="text-center text-[9px] font-medium leading-none tracking-[0.24em] text-white">
+      <span className="text-center text-[8px] font-medium leading-none tracking-[0.22em] text-white md:text-[9px]">
         3D Smart
         <span className="mt-1 block tracking-[0.2em]">Design Studio</span>
       </span>
@@ -145,7 +145,9 @@ export default function Header() {
     ...item,
     label: localize(item, "label", item.label),
   }));
-  const localizedServiceNavigationGroups = serviceNavigationGroups.map((group) => ({
+  const localizedServiceNavigationGroups = serviceNavigationGroups
+    .filter((group) => group.items.length > 0)
+    .map((group) => ({
     ...group,
     title: localize(group, "title", group.title),
     description: localize(group, "description", group.description),
@@ -171,6 +173,7 @@ export default function Header() {
     menuByHref.get("/o-nas") ?? { href: "/o-nas", label: text("menu.about", "О нас") },
     menuByHref.get("/portfolio") ?? { href: "/portfolio", label: text("menu.portfolio", "Портфолио") },
     { href: "/services", label: text("header.servicesRoot", "Услуги") },
+    menuByHref.get("/akcii-i-skidki") ?? { href: "/akcii-i-skidki", label: text("menu.promos", "Акции") },
     menuByHref.get("/blog") ?? { href: "/blog", label: text("menu.blog", "Блог") },
     menuByHref.get("/kontakty") ?? { href: "/kontakty", label: text("menu.contacts", "Контакты") },
   ];
@@ -208,13 +211,13 @@ export default function Header() {
   return (
     <>
       <header className="fixed left-0 right-0 top-0 z-50 border-b border-white/16 bg-[#050505]/10 px-5 text-white backdrop-blur-[8px] md:px-10 lg:px-12">
-        <div className="mx-auto grid h-[72px] max-w-[1680px] grid-cols-[1fr_auto_1fr] items-center md:h-[76px]">
+        <div className="mx-auto grid h-[78px] max-w-[1680px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center md:h-[84px]">
           <button
             type="button"
             onClick={openMenu}
             aria-expanded={menuOpen}
             aria-controls="rolls-menu"
-            className="flex w-[142px] cursor-pointer items-center gap-[18px] justify-self-start text-[10px] font-semibold uppercase tracking-[0.24em] transition duration-300 hover:text-white/68"
+            className="flex min-w-0 cursor-pointer items-center gap-2.5 justify-self-start whitespace-nowrap text-[9px] font-semibold uppercase tracking-[0.18em] transition duration-300 hover:text-white/68 md:w-[142px] md:gap-[18px] md:text-[10px] md:tracking-[0.24em]"
           >
             <MenuIcon />
             <span>{text("header.menu", "Меню")}</span>
@@ -224,21 +227,14 @@ export default function Header() {
             href="/"
             aria-label={siteSettings.siteName}
             onClick={closeMenu}
-            className="flex min-w-[128px] flex-col items-center gap-0.5 justify-self-center text-center transition duration-300 hover:opacity-75"
+            className="flex h-full min-w-[88px] items-center justify-center justify-self-center text-center transition duration-300 hover:opacity-75 md:min-w-[128px]"
           >
             {siteSettings.logoSmall || siteSettings.logo ? (
-              <>
-                <img
-                  src={siteSettings.logoSmall ?? siteSettings.logo ?? ""}
-                  alt=""
-                  aria-hidden="true"
-                  className="block h-auto max-h-12 w-auto max-w-[164px] object-contain"
-                />
-                <span className="text-[9px] font-medium leading-none tracking-[0.24em] text-white">
-                  3D Smart
-                  <span className="mt-1 block tracking-[0.2em]">Design Studio</span>
-                </span>
-              </>
+              <img
+                src={siteSettings.logoSmall ?? siteSettings.logo ?? ""}
+                alt={siteSettings.siteName}
+                className="block h-auto max-h-11 w-auto max-w-[96px] object-contain md:max-h-14 md:max-w-[164px]"
+              />
             ) : (
               <LogoMark />
             )}
@@ -247,7 +243,7 @@ export default function Header() {
           <button
             type="button"
             onClick={openContact}
-            className="w-[142px] justify-self-end text-right text-[10px] font-semibold uppercase tracking-[0.24em] transition duration-300 hover:text-white/68"
+            className="min-w-0 max-w-full justify-self-end whitespace-nowrap text-right text-[9px] font-semibold uppercase tracking-[0.14em] transition duration-300 hover:text-white/68 md:w-[142px] md:text-[10px] md:tracking-[0.24em]"
           >
             {text("header.contact", "Написать нам")}
           </button>
@@ -348,7 +344,7 @@ export default function Header() {
                   )}
                 </p>
               </div>
-              <div className="grid gap-2.5">
+              <div className={`grid gap-2.5 ${localizedServiceNavigationGroups.length > 15 ? "direction-scroll max-h-[58vh] overflow-y-auto pr-2" : ""}`}>
                 {localizedServiceNavigationGroups.map((group) => {
                   const active =
                     group.href === currentPath ||
@@ -369,12 +365,12 @@ export default function Header() {
                       }`}
                     >
                       <span className="flex items-center justify-end gap-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-white/76 md:text-sm">
-                        {group.title}
+                        <span className="line-clamp-2 min-w-0 [overflow-wrap:anywhere]">{group.title}</span>
                         <span className="shrink-0 text-[#D69A66] transition group-hover:translate-x-1">
                           →
                         </span>
                       </span>
-                      <span className="mt-1.5 block text-sm leading-relaxed text-white/34">
+                      <span className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-white/34">
                         {group.description}
                       </span>
                     </button>
@@ -417,7 +413,7 @@ export default function Header() {
                     </p>
                   </div>
 
-                  <div className="grid gap-2">
+                  <div className={`grid gap-2 ${activeServiceGroup.items.length > 15 ? "direction-scroll max-h-[52vh] overflow-y-auto pr-2" : ""}`}>
                     {activeServiceGroup.items.map((child, index) => (
                       <Link
                         key={child.href}

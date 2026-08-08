@@ -25,7 +25,7 @@ export default function AwardsPage() {
         <div className="relative z-10 mx-auto flex min-h-[calc(72vh-8rem)] max-w-7xl items-end">
           <div>
             <SectionLabel>{text("awardsPage.hero.label", "Награды и дипломы")}</SectionLabel>
-            <h1 className="mt-5 max-w-5xl text-[clamp(3rem,6.4vw,6.4rem)] font-light leading-[0.94] tracking-[-0.045em]">
+            <h1 className="mt-5 max-w-5xl text-[clamp(2.8rem,5vw,5.2rem)] font-light leading-[0.94] tracking-normal md:tracking-[-0.035em]">
               {text("awardsPage.hero.title", "Документы, которые подтверждают доверие")}
             </h1>
             <p className="mt-7 max-w-3xl text-lg leading-relaxed text-[#D6D1CA] md:text-xl">

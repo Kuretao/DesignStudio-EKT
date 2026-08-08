@@ -42,7 +42,7 @@ export function ContentPagesOverview() {
     <section className="border-t border-white/10 px-5 py-28 md:px-10 lg:px-16">
       <div className="mx-auto max-w-7xl">
         <SectionLabel>Разделы сайта</SectionLabel>
-        <h2 className="mb-12 max-w-4xl text-5xl font-light tracking-normal md:text-7xl">
+        <h2 className="mb-12 max-w-4xl text-[clamp(2.6rem,5vw,4.8rem)] font-light leading-tight tracking-normal">
           Материалы, отзывы и полезные страницы
         </h2>
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
@@ -120,7 +120,7 @@ function ContentPage({ page }: { page: ContentPageItem }) {
 
   return (
     <div className="page-in">
-      <section className="relative overflow-hidden px-5 py-28 md:px-10 lg:px-16">
+      <section className="relative overflow-hidden px-5 pb-28 pt-40 md:px-10 md:pb-28 md:pt-44 lg:px-16">
         <HeroBackdropSlider
           slides={sliderImages.map((image) => ({ image, alt: heroTitle }))}
         />
@@ -161,7 +161,27 @@ function ContentPage({ page }: { page: ContentPageItem }) {
           ) : null}
 
           {contentBlocks.length ? (
-            <CmsBlocks blocks={contentBlocks} pageTitle={currentPage.title} />
+            <CmsBlocks
+              blocks={contentBlocks}
+              pageTitle={currentPage.title}
+              partnerForm={
+                isPartners
+                  ? {
+                      inputCls,
+                      partnerName,
+                      partnerCompany,
+                      partnerContact,
+                      partnerMessage,
+                      sent,
+                      onNameChange: setPartnerName,
+                      onCompanyChange: setPartnerCompany,
+                      onContactChange: setPartnerContact,
+                      onMessageChange: setPartnerMessage,
+                      onSubmit: handlePartnerSubmit,
+                    }
+                  : undefined
+              }
+            />
           ) : hasBody ? null : isCareer ? (
             <CareerContent careerVacancies={careerVacancies} />
           ) : isPartners ? (
@@ -192,14 +212,24 @@ function ContentPage({ page }: { page: ContentPageItem }) {
 function CmsBlocks({
   blocks,
   pageTitle,
+  partnerForm,
 }: {
   blocks: ContentBlock[];
   pageTitle: string;
+  partnerForm?: PartnerFormProps;
 }) {
   return (
     <div className="space-y-8">
       {blocks.map((block, index) => {
         const key = `${block.type ?? "block"}-${index}-${block.title ?? ""}`;
+
+        if (block.type === "list") {
+          return <ListBlock key={key} block={block} />;
+        }
+
+        if (block.type === "form" && partnerForm) {
+          return <PartnerFormBlock key={key} block={block} form={partnerForm} />;
+        }
 
         if (block.type === "gallery") {
           return <GalleryBlock key={key} block={block} pageTitle={pageTitle} />;
@@ -223,6 +253,50 @@ function CmsBlocks({
         );
       })}
     </div>
+  );
+}
+
+function ListBlock({ block }: { block: ContentBlock }) {
+  const items = String(block.text ?? "")
+    .split(/\r?\n/u)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  if (!items.length && !block.title && !block.subtitle) return null;
+
+  return (
+    <GlassPanel className="rounded-[2rem] p-7 md:p-9">
+      {block.eyebrow ? (
+        <SectionLabel className="mb-5">{block.eyebrow}</SectionLabel>
+      ) : null}
+      {block.title ? (
+        <h2 className="text-4xl font-light leading-tight tracking-normal [overflow-wrap:anywhere] md:text-5xl">
+          {block.title}
+        </h2>
+      ) : null}
+      {block.subtitle ? (
+        <p className="mt-5 max-w-3xl text-lg leading-relaxed text-[#D6D1CA] [overflow-wrap:anywhere]">
+          {block.subtitle}
+        </p>
+      ) : null}
+      {items.length ? (
+        <div className="mt-8 grid gap-4 md:grid-cols-2">
+          {items.map((item, index) => (
+            <div
+              key={`${item}-${index}`}
+              className="flex min-w-0 gap-4 rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-5"
+            >
+              <span className="text-sm text-[#D69A66]">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <p className="leading-relaxed text-[#D6D1CA] [overflow-wrap:anywhere]">
+                {item}
+              </p>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </GlassPanel>
   );
 }
 
@@ -530,6 +604,90 @@ function CareerContent({ careerVacancies }: { careerVacancies: any[] }) {
   );
 }
 
+type PartnerFormProps = {
+  inputCls: string;
+  partnerName: string;
+  partnerCompany: string;
+  partnerContact: string;
+  partnerMessage: string;
+  sent: boolean;
+  onNameChange: (value: string) => void;
+  onCompanyChange: (value: string) => void;
+  onContactChange: (value: string) => void;
+  onMessageChange: (value: string) => void;
+  onSubmit: () => void;
+};
+
+function PartnerFormBlock({
+  block,
+  form,
+}: {
+  block?: ContentBlock;
+  form: PartnerFormProps;
+}) {
+  const settings = block?.settings ?? {};
+  const setting = (key: string, fallback: string) => {
+    const value = settings[key];
+
+    return typeof value === "string" && value.trim() ? value : fallback;
+  };
+
+  return (
+    <GlassPanel className="rounded-[2rem] p-7 md:p-9">
+      <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
+        <div>
+          <SectionLabel className="mb-5">
+            {block?.eyebrow || "Обратная связь"}
+          </SectionLabel>
+          <h2 className="text-4xl font-light leading-tight tracking-normal [overflow-wrap:anywhere] md:text-5xl">
+            {block?.title || "Предложить сотрудничество"}
+          </h2>
+          {block?.subtitle || block?.text ? (
+            <p className="mt-5 whitespace-pre-line leading-relaxed text-[#D6D1CA] [overflow-wrap:anywhere]">
+              {block.subtitle || block.text}
+            </p>
+          ) : null}
+        </div>
+        <div className="grid gap-3">
+          <input
+            className={form.inputCls}
+            placeholder={setting("namePlaceholder", "Ваше имя")}
+            value={form.partnerName}
+            onChange={(event) => form.onNameChange(event.target.value)}
+          />
+          <input
+            className={form.inputCls}
+            placeholder={setting("companyPlaceholder", "Компания или направление")}
+            value={form.partnerCompany}
+            onChange={(event) => form.onCompanyChange(event.target.value)}
+          />
+          <input
+            className={form.inputCls}
+            placeholder={setting("contactPlaceholder", "Телефон, e-mail или Telegram")}
+            value={form.partnerContact}
+            onChange={(event) => form.onContactChange(event.target.value)}
+          />
+          <textarea
+            className={`${form.inputCls} min-h-[140px] resize-none`}
+            placeholder={setting("messagePlaceholder", "Коротко о предложении")}
+            value={form.partnerMessage}
+            onChange={(event) => form.onMessageChange(event.target.value)}
+          />
+          <button
+            type="button"
+            onClick={form.onSubmit}
+            className="h-14 rounded-full bg-[#D69A66] text-sm font-medium uppercase tracking-[0.22em] text-[#050505] transition hover:bg-[#F5F2EC]"
+          >
+            {form.sent
+              ? setting("sentLabel", "Заявка подготовлена")
+              : block?.linkLabel || "Отправить"}
+          </button>
+        </div>
+      </div>
+    </GlassPanel>
+  );
+}
+
 function PartnersContent({
   inputCls,
   partnerName,
@@ -542,19 +700,7 @@ function PartnersContent({
   onContactChange,
   onMessageChange,
   onSubmit,
-}: {
-  inputCls: string;
-  partnerName: string;
-  partnerCompany: string;
-  partnerContact: string;
-  partnerMessage: string;
-  sent: boolean;
-  onNameChange: (value: string) => void;
-  onCompanyChange: (value: string) => void;
-  onContactChange: (value: string) => void;
-  onMessageChange: (value: string) => void;
-  onSubmit: () => void;
-}) {
+}: PartnerFormProps) {
   return (
     <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
       <GlassPanel className="rounded-[2rem] p-7 md:p-9">
@@ -578,45 +724,21 @@ function PartnersContent({
           ))}
         </div>
       </GlassPanel>
-      <GlassPanel className="rounded-[2rem] p-7 md:p-9">
-        <SectionLabel className="mb-5">Обратная связь</SectionLabel>
-        <h2 className="text-3xl font-light tracking-normal">
-          Предложить сотрудничество
-        </h2>
-        <div className="mt-8 grid gap-3">
-          <input
-            className={inputCls}
-            placeholder="Ваше имя"
-            value={partnerName}
-            onChange={(event) => onNameChange(event.target.value)}
-          />
-          <input
-            className={inputCls}
-            placeholder="Компания или направление"
-            value={partnerCompany}
-            onChange={(event) => onCompanyChange(event.target.value)}
-          />
-          <input
-            className={inputCls}
-            placeholder="Телефон, e-mail или Telegram"
-            value={partnerContact}
-            onChange={(event) => onContactChange(event.target.value)}
-          />
-          <textarea
-            className={`${inputCls} min-h-[140px] resize-none`}
-            placeholder="Коротко о предложении"
-            value={partnerMessage}
-            onChange={(event) => onMessageChange(event.target.value)}
-          />
-          <button
-            type="button"
-            onClick={onSubmit}
-            className="h-14 rounded-full bg-[#D69A66] text-sm font-medium uppercase tracking-[0.22em] text-[#050505] transition hover:bg-[#F5F2EC]"
-          >
-            {sent ? "Заявка подготовлена" : "Отправить"}
-          </button>
-        </div>
-      </GlassPanel>
+      <PartnerFormBlock
+        form={{
+          inputCls,
+          partnerName,
+          partnerCompany,
+          partnerContact,
+          partnerMessage,
+          sent,
+          onNameChange,
+          onCompanyChange,
+          onContactChange,
+          onMessageChange,
+          onSubmit,
+        }}
+      />
     </div>
   );
 }
