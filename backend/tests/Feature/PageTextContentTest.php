@@ -113,4 +113,20 @@ class PageTextContentTest extends TestCase
             ->assertJsonPath('blocks.0.linkLabelRu', 'Связаться')
             ->assertJsonPath('blocks.0.linkLabelEn', 'Contact us');
     }
+
+    public function test_legal_pages_are_backfilled_with_editable_content(): void
+    {
+        foreach (['politika-konfidencialnosti', 'user/agreement'] as $slug) {
+            $page = Page::query()->where('slug', $slug)->firstOrFail();
+
+            $this->assertSame('legal', $page->template);
+            $this->assertNotEmpty($page->fieldRu('body'));
+
+            $this->getJson('/api/v1/pages/'.$slug)
+                ->assertOk()
+                ->assertJsonPath('slug', $slug)
+                ->assertJsonPath('template', 'legal')
+                ->assertJsonPath('bodyRu', $page->fieldRu('body'));
+        }
+    }
 }

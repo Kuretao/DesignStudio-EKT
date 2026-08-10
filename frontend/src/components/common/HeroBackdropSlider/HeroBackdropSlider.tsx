@@ -81,39 +81,51 @@ export default function HeroBackdropSlider({
   if (!cleanSlides.length) return null;
 
   const moveSlide = (direction: number) => {
-    setActiveSlide((current) => (current + direction + cleanSlides.length) % cleanSlides.length);
+    setActiveSlide(
+      (current) =>
+        (current + direction + cleanSlides.length) % cleanSlides.length,
+    );
   };
 
   return (
     <>
-      <div className={`absolute inset-0 ${className}`}>
+      <div className={`absolute inset-0 overflow-hidden ${className}`}>
         {cleanSlides.map((slide, index) => (
           <div
             key={slide.image}
-            className={`media-frame absolute inset-0 transition duration-[1100ms] ease-out ${
+            className={`media-frame absolute inset-0 overflow-hidden transition duration-[1100ms] ease-out ${
               loadedSlides[slide.image] ? "media-frame-loaded" : ""
-            } ${
-              activeSlide === index ? "opacity-100" : "opacity-0"
-          }`}
+            } ${activeSlide === index ? "opacity-100" : "opacity-0"}`}
             aria-hidden={activeSlide !== index}
           >
-            <div className="media-frame-loader pointer-events-none absolute inset-0 z-[1] flex items-center justify-center bg-[#17130f]" aria-hidden="true">
+            <div
+              className="media-frame-loader pointer-events-none absolute inset-0 z-[1] flex items-center justify-center bg-[#17130f]"
+              aria-hidden="true"
+            >
               <span className="media-frame-loader__ring" />
             </div>
             <img
               src={slide.image}
               alt={activeSlide === index ? slide.alt : ""}
-              className={`media-frame-image h-full w-full object-cover transition duration-[1400ms] ease-out ${
-                activeSlide === index ? "scale-100 brightness-[0.82] saturate-[1.08]" : "scale-[1.06] brightness-[0.62] saturate-[0.9]"
+              className={`media-frame-image block h-full w-full object-cover transition duration-[1400ms] ease-out ${
+                activeSlide === index
+                  ? "scale-100 brightness-[0.82] saturate-[1.08]"
+                  : "scale-[1.06] brightness-[0.62] saturate-[0.9]"
               }`}
               loading={index === 0 ? "eager" : "lazy"}
               decoding="async"
               fetchPriority={index === 0 ? "high" : "auto"}
               onLoad={() =>
-                setLoadedSlides((current) => ({ ...current, [slide.image]: true }))
+                setLoadedSlides((current) => ({
+                  ...current,
+                  [slide.image]: true,
+                }))
               }
               onError={() =>
-                setLoadedSlides((current) => ({ ...current, [slide.image]: true }))
+                setLoadedSlides((current) => ({
+                  ...current,
+                  [slide.image]: true,
+                }))
               }
             />
           </div>
@@ -128,16 +140,23 @@ export default function HeroBackdropSlider({
       </div>
 
       {cleanSlides.length > 1 && (
-        <div className={`absolute bottom-8 left-5 right-5 z-20 mx-auto flex max-w-7xl items-center justify-between gap-4 md:left-10 md:right-10 lg:left-16 lg:right-16 ${controlsClassName}`}>
+        <div
+          className={`absolute bottom-8 left-5 right-5 z-20 mx-auto flex max-w-7xl items-center justify-between gap-4 md:left-10 md:right-10 lg:left-16 lg:right-16 ${controlsClassName}`}
+        >
           <div className="flex items-center gap-2">
             {cleanSlides.map((slide, index) => (
               <button
                 key={`${slide.image}-dot`}
                 type="button"
-                aria-label={text("slider.dotAria", "Слайд {number}").replace("{number}", String(index + 1))}
+                aria-label={text("slider.dotAria", "Слайд {number}").replace(
+                  "{number}",
+                  String(index + 1),
+                )}
                 onClick={() => setActiveSlide(index)}
                 className={`h-1.5 rounded-full transition-all duration-500 ${
-                  activeSlide === index ? "w-12 bg-[#D69A66]" : "w-5 bg-white/30 hover:bg-white/60"
+                  activeSlide === index
+                    ? "w-12 bg-[#D69A66]"
+                    : "w-5 bg-white/30 hover:bg-white/60"
                 }`}
               />
             ))}

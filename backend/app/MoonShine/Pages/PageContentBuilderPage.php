@@ -178,9 +178,14 @@ class PageContentBuilderPage extends Page
         $title = e($page->fieldRu('title') ?: $page->title ?: 'Без названия');
         $path = $page->slug === 'home' ? 'Главная страница' : '/' . e(ltrim((string) $page->slug, '/'));
         $pageEditUrl = e($this->moonshineResourcePageUrl(PageResource::class, PageFormPage::class, $page->getKey()));
-        $blocks = $page->blocks->isNotEmpty()
-            ? $page->blocks->map(fn (PageBlock $block): string => $this->blockCard($block))->implode('')
-            : $this->noBlocksHtml();
+        $isLegal = $page->template === 'legal'
+            || in_array($page->slug, ['politika-konfidencialnosti', 'user/agreement'], true);
+        $blocks = $isLegal
+            ? $this->legalPageEditorHtml($page, $pageEditUrl)
+            : ($page->blocks->isNotEmpty()
+                ? $page->blocks->map(fn (PageBlock $block): string => $this->blockCard($block))->implode('')
+                : $this->noBlocksHtml());
+        $actionLabel = $isLegal ? 'Редактировать текст документа' : 'Настройки страницы';
 
         return <<<HTML
         <div class="page-builder-selected">
@@ -191,7 +196,7 @@ class PageContentBuilderPage extends Page
                     <p><code>{$path}</code></p>
                 </div>
                 <div class="page-builder-selected__actions">
-                    <a href="{$pageEditUrl}">Настройки страницы</a>
+                    <a class="page-builder-selected__primary" href="{$pageEditUrl}">{$actionLabel}</a>
                 </div>
             </div>
 
@@ -199,6 +204,22 @@ class PageContentBuilderPage extends Page
                 {$blocks}
             </div>
 
+        </div>
+        HTML;
+    }
+
+    private function legalPageEditorHtml(ContentPage $page, string $editUrl): string
+    {
+        $preview = e(str((string) ($page->fieldRu('body') ?? ''))->stripTags()->squish()->limit(240)->toString());
+        $preview = $preview !== ''
+            ? $preview
+            : 'Текст документа пока не заполнен. Откройте редактор и добавьте содержание страницы.';
+
+        return <<<HTML
+        <div class="page-builder-empty">
+            <strong>Юридический документ редактируется целиком</strong>
+            <span>{$preview}</span>
+            <a href="{$editUrl}">Открыть редактор текста</a>
         </div>
         HTML;
     }

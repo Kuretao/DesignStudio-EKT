@@ -46,17 +46,27 @@ class PageFormPage extends FormPage
     protected function fields(): iterable
     {
         $mainFields = CmsFieldSets::pageSection('main');
+        $item = $this->getResource()->getItem();
+        $isLegal = $item?->template === 'legal'
+            || in_array($item?->slug, ['politika-konfidencialnosti', 'user/agreement'], true);
+        $intro = $isLegal
+            ? 'Здесь редактируется весь юридический документ: заголовок и текст на русском и английском. После сохранения изменения появятся на сайте.'
+            : 'Для обычной страницы оставьте тип "Обычная текстовая страница", заполните редактор и включите пункт меню на вкладке "Публикация и меню", если он нужен.';
+        $noteTitle = $isLegal ? 'Редактор документа' : 'Редактор для обычного текста';
+        $noteText = $isLegal
+            ? 'Используйте заголовки, абзацы, списки и ссылки. Весь текст ниже напрямую показывается на юридической странице.'
+            : 'Заголовок и текст достаточно заполнить в этой форме. Блоки страниц нужны только для сложных макетов.';
 
         return [
             FlexibleRender::make($this->overviewHtml()),
             Alert::make('information-circle', 'info')
-                ->content('Для обычной страницы оставьте тип "Обычная текстовая страница", заполните редактор и включите пункт меню на вкладке "Публикация и меню", если он нужен.'),
+                ->content($intro),
             Tabs::make([
                 Tab::make('Текст страницы', [
                     Box::make('Содержание страницы', [
                         $this->sectionNote(
-                            'Редактор для обычного текста',
-                            'Заголовок и текст достаточно заполнить в этой форме. Блоки страниц нужны только для сложных макетов.'
+                            $noteTitle,
+                            $noteText
                         ),
                         Grid::make([
                             Column::make([
@@ -115,7 +125,7 @@ class PageFormPage extends FormPage
                 Rule::unique('pages', 'slug')->ignore($item->getKey()),
             ],
             'template' => ['required', Rule::in(['text', 'content', 'legal', 'about', 'blog'])],
-            'body_ru' => ['nullable', 'string', 'required_if:template,text'],
+            'body_ru' => ['nullable', 'string', 'required_if:template,text,legal'],
             'body_en' => ['nullable', 'string'],
             'seo_title_ru' => ['nullable', 'string', 'max:120'],
             'seo_title_en' => ['nullable', 'string', 'max:120'],

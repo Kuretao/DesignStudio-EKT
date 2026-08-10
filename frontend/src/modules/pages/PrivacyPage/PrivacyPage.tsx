@@ -1,8 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useCms } from "@/src/cms";
-import HeroBackdropSlider from "@/src/components/common/HeroBackdropSlider";
-import { imageFrames, projectImageAt } from "@/src/utils/images";
+import LegalDocumentPage from "@/src/modules/pages/LegalDocumentPage";
 
 const sections = [
   {
@@ -172,7 +170,7 @@ function renderBody(text: string) {
               </span>
             ) : (
               part
-            )
+            ),
           )}
         </p>
       );
@@ -186,76 +184,79 @@ function renderBody(text: string) {
 }
 
 export default function PrivacyPage() {
-  const { projects } = useCms();
   return (
-    <div className="page-in">
-      <section className="relative overflow-hidden px-5 pb-10 pt-20 md:px-10 lg:px-16">
-        <HeroBackdropSlider
-          slides={[
-            { image: projectImageAt(projects, 0), alt: "3D Smart Design Studio" },
-            { image: projectImageAt(projects, 3), alt: "Коммерческий интерьер" },
-            { image: projectImageAt(projects, 5), alt: "Архитектурный проект" },
-          ]}
-          className="bottom-auto h-[580px]"
-          controlsClassName="bottom-auto top-[500px]"
-        />
-        <div className="pointer-events-none absolute left-0 right-0 top-0 h-[580px] bg-[linear-gradient(90deg,rgba(5,5,5,.96)_0%,rgba(5,5,5,.78)_52%,rgba(5,5,5,.34)_100%)]" />
-        <div className="pointer-events-none absolute left-0 right-0 top-0 h-[580px] bg-[linear-gradient(0deg,#050505_0%,rgba(5,5,5,.48)_32%,transparent_74%)]" />
-        <div className="relative z-10 mx-auto max-w-4xl">
-          <p className="mb-5 text-xs uppercase tracking-[0.45em] text-[#D69A66]">Документ</p>
-          <h1 className="mb-4 text-[clamp(2.7rem,5.2vw,5.3rem)] font-light leading-[0.98] tracking-[-0.04em]">
-            Политика конфиденциальности
-          </h1>
-          <div className="mb-12 flex flex-wrap items-center gap-4 text-sm text-white/40">
-            <span>Федеральный закон № 152-ФЗ</span>
-            <span className="h-1 w-1 rounded-full bg-white/20" />
-            <span>ИП Шакинене Екатерина Игоревна</span>
-            <span className="h-1 w-1 rounded-full bg-white/20" />
-            <span>3dsmartdesign.ru</span>
-          </div>
-
-          <div className="space-y-5">
-            {sections.map((section) => (
-              <div
-                key={section.num}
-                className="group rounded-[2rem] border border-white/10 bg-white/[0.025] p-8 transition hover:border-white/20 md:p-10"
-              >
-                <div className="mb-5 flex items-center gap-4">
-                  <span className="text-xs font-light tracking-[0.3em] text-[#D69A66]/60">
-                    {section.num}
-                  </span>
-                  <h2 className="text-xl font-light tracking-[-0.02em] text-white md:text-2xl">
-                    {section.title}
-                  </h2>
-                </div>
-                <div className="space-y-4 text-sm">{renderBody(section.body)}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-10 rounded-[2rem] border border-white/10 bg-white/[0.025] p-8">
-            <h2 className="mb-4 text-xl font-light tracking-[-0.03em] text-white">Контактные данные оператора</h2>
-            <div className="space-y-2 text-sm text-white/60">
-              <p>
-                <span className="text-white/80">ИП Шакинене Екатерина Игоревна</span>
-              </p>
-              <p>Студия концептуального дизайна <span className="text-white/80">3D Smart Design Studio</span></p>
-              <p>
-                Телефон:{" "}
-                <a href="tel:+79879421242" className="text-[#D69A66] transition hover:text-white">
-                  +7 (987) 942-12-42
-                </a>
-              </p>
-              <p>
-                Почта:{" "}
-                <a href="mailto:3dsmartdesign@bk.ru" className="text-[#D69A66] transition hover:text-white">
-                  3dsmartdesign@bk.ru
-                </a>
-              </p>
-            </div>
-          </div>
+    <LegalDocumentPage
+      slug="politika-konfidencialnosti"
+      fallbackTitle="Политика конфиденциальности"
+      projectIndexes={[0, 3, 5]}
+      slideAlts={[
+        "3D Smart Design Studio",
+        "Коммерческий интерьер",
+        "Архитектурный проект",
+      ]}
+      meta={
+        <div className="flex flex-wrap items-center gap-4 text-sm text-white/40">
+          <span>Федеральный закон № 152-ФЗ</span>
+          <span className="hidden h-1 w-1 rounded-full bg-white/20 sm:block" />
+          <span>ИП Шакинене Екатерина Игоревна</span>
+          <span className="hidden h-1 w-1 rounded-full bg-white/20 sm:block" />
+          <span>3dsmartdesign.ru</span>
         </div>
-      </section>
-    </div>
+      }
+    >
+      <div className="space-y-5">
+        {sections.map((section) => (
+          <div
+            key={section.num}
+            className="group rounded-[2rem] border border-white/10 bg-white/[0.025] p-8 transition hover:border-white/20 md:p-10"
+          >
+            <div className="mb-5 flex items-center gap-4">
+              <span className="text-xs font-light tracking-[0.3em] text-[#D69A66]/60">
+                {section.num}
+              </span>
+              <h2 className="text-xl font-light tracking-[-0.02em] text-white md:text-2xl">
+                {section.title}
+              </h2>
+            </div>
+            <div className="space-y-4 text-sm">{renderBody(section.body)}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-10 rounded-[2rem] border border-white/10 bg-white/[0.025] p-8">
+        <h2 className="mb-4 text-xl font-light tracking-[-0.03em] text-white">
+          Контактные данные оператора
+        </h2>
+        <div className="space-y-2 text-sm text-white/60">
+          <p>
+            <span className="text-white/80">
+              ИП Шакинене Екатерина Игоревна
+            </span>
+          </p>
+          <p>
+            Студия концептуального дизайна{" "}
+            <span className="text-white/80">3D Smart Design Studio</span>
+          </p>
+          <p>
+            Телефон:{" "}
+            <a
+              href="tel:+79879421242"
+              className="text-[#D69A66] transition hover:text-white"
+            >
+              +7 (987) 942-12-42
+            </a>
+          </p>
+          <p>
+            Почта:{" "}
+            <a
+              href="mailto:3dsmartdesign@bk.ru"
+              className="text-[#D69A66] transition hover:text-white"
+            >
+              3dsmartdesign@bk.ru
+            </a>
+          </p>
+        </div>
+      </div>
+    </LegalDocumentPage>
   );
 }

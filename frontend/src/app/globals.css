@@ -164,6 +164,31 @@
   font-size: 1.5rem;
 }
 
+.legal-rich-text {
+  font-size: 0.95rem;
+  line-height: 1.75;
+}
+
+.legal-rich-text h2 {
+  margin-top: 2em;
+  padding-top: 1.25em;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.legal-rich-text h2:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.legal-rich-text li::marker {
+  color: #d69a66;
+}
+
+.legal-rich-text a {
+  color: #d69a66;
+}
+
 .media-frame {
   background:
     linear-gradient(110deg, rgba(255, 255, 255, 0.02), rgba(214, 154, 102, 0.08), rgba(255, 255, 255, 0.02)),

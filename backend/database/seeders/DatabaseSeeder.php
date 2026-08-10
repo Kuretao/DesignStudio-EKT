@@ -19,6 +19,7 @@ use App\Models\Vacancy;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use App\Support\DefaultLegalPages;
 use App\Support\DefaultUiTexts;
 use MoonShine\Laravel\Models\MoonshineUser;
 use MoonShine\Laravel\Models\MoonshineUserRole;
@@ -279,13 +280,22 @@ class DatabaseSeeder extends Seeder
             ['o-nas', 'О нас', 'About Us', 'about'],
             ['partneram', 'Партнерам', 'For Partners', 'content'],
             ['blog', 'Блог', 'Blog', 'blog'],
-            ['user/agreement', 'Пользовательское соглашение', 'User Agreement', 'legal'],
+            ['user/agreement', 'Согласие на обработку персональных данных', 'Consent to Personal Data Processing', 'legal'],
             ['politika-konfidencialnosti', 'Политика конфиденциальности', 'Privacy Policy', 'legal'],
         ])->each(function (array $data): void {
             $page = Page::query()->updateOrCreate(
                 ['slug' => $data[0]],
                 ['title' => $data[1], 'title_en' => $data[2], 'template' => $data[3], 'is_published' => true],
             );
+
+            $legalContent = DefaultLegalPages::pages()[$data[0]] ?? null;
+
+            if ($legalContent && blank($page->body) && blank($page->getRawOriginal('body_ru'))) {
+                $page->forceFill([
+                    'body' => $legalContent['body_ru'],
+                    'body_ru' => $legalContent['body_ru'],
+                ])->save();
+            }
 
             PageBlock::query()->updateOrCreate(
                 ['page_id' => $page->id, 'position' => 1],
