@@ -20,6 +20,8 @@ dist-ssr
 .claude
 .playwright-cli/
 .tmp-pre-container*/
+.tmp-cms-php-check-*.tar.gz
+.tmp-deploy-*.tar.gz
 .DS_Store
 *.suo
 *.ntvs*

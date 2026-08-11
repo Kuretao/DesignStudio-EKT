@@ -771,6 +771,11 @@ function normalizeServiceNavigationGroups(
           typeof group?.imageAltRu === "string" ? group.imageAltRu : null,
         imageAltEn:
           typeof group?.imageAltEn === "string" ? group.imageAltEn : null,
+        showInServicesHero: Boolean(group?.showInServicesHero),
+        servicesHeroPosition:
+          typeof group?.servicesHeroPosition === "number"
+            ? group.servicesHeroPosition
+            : null,
         items,
       };
     })

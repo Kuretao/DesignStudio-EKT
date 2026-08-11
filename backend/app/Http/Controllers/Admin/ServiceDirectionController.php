@@ -9,10 +9,58 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class ServiceDirectionController extends Controller
 {
+    public function updateHero(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'direction_ids' => ['nullable', 'array', 'max:3'],
+            'direction_ids.*' => [
+                'nullable',
+                'integer',
+                'distinct',
+                Rule::exists('menu_items', 'id')->where(
+                    static fn ($query) => $query
+                        ->where('menu_area', MenuItem::AREA_SERVICES)
+                        ->whereNull('parent_id')
+                ),
+            ],
+        ], [
+            'direction_ids.max' => 'В первом экране можно показать не больше трех направлений.',
+            'direction_ids.*.distinct' => 'В каждом слоте нужно выбрать отдельное направление.',
+            'direction_ids.*.exists' => 'Одно из выбранных направлений больше не существует.',
+        ]);
+
+        $directionIds = collect($data['direction_ids'] ?? [])
+            ->filter(static fn (mixed $id): bool => filled($id))
+            ->map(static fn (mixed $id): int => (int) $id)
+            ->values();
+
+        DB::transaction(function () use ($directionIds): void {
+            MenuItem::query()
+                ->where('menu_area', MenuItem::AREA_SERVICES)
+                ->whereNull('parent_id')
+                ->update([
+                    'show_in_services_hero' => false,
+                    'services_hero_position' => null,
+                ]);
+
+            $directionIds->each(function (int $directionId, int $index): void {
+                MenuItem::query()
+                    ->whereKey($directionId)
+                    ->update([
+                        'show_in_services_hero' => true,
+                        'services_hero_position' => $index + 1,
+                    ]);
+            });
+        });
+
+        return back()->with('success', 'Карточки первого экрана сохранены.');
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validated($request);

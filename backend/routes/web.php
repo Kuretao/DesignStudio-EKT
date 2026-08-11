@@ -18,6 +18,7 @@ Route::middleware(config('moonshine.auth.middleware', []))
         Route::get('/style-lab-editor', [StyleLabEditorController::class, 'show'])->name('admin.style-lab-editor');
         Route::post('/style-lab-editor', [StyleLabEditorController::class, 'update'])->name('admin.style-lab-editor.update');
         Route::post('/service-directions', [ServiceDirectionController::class, 'store'])->name('admin.service-directions.store');
+        Route::put('/service-directions-hero', [ServiceDirectionController::class, 'updateHero'])->name('admin.service-directions.hero');
         Route::put('/service-directions/{direction}', [ServiceDirectionController::class, 'update'])->name('admin.service-directions.update');
         Route::delete('/service-directions/{direction}', [ServiceDirectionController::class, 'destroy'])->name('admin.service-directions.destroy');
     });

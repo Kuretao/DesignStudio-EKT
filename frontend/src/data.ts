@@ -784,6 +784,8 @@ export type ServiceNavigationGroup = {
   description: string;
   image?: string | null;
   imageAlt?: string | null;
+  showInServicesHero?: boolean;
+  servicesHeroPosition?: number | null;
   items: ServiceNavigationChild[];
 };
 

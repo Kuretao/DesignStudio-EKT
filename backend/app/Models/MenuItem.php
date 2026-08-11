@@ -76,6 +76,8 @@ class MenuItem extends Model
     {
         return [
             'is_active' => 'boolean',
+            'show_in_services_hero' => 'boolean',
+            'services_hero_position' => 'integer',
         ];
     }
 

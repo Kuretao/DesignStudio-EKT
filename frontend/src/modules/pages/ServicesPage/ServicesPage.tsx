@@ -8,15 +8,41 @@ import { GlassPanel } from "@/src/ui";
 import SectionLabel from "@/src/components/common/SectionLabel";
 import { imageFrames, projectImageAt } from "@/src/utils/images";
 
-const serviceHeroStats = [
-  ["10 лет", "опыта в интерьерах, архитектуре и 3D"],
-  ["25+", "специалистов под масштаб проекта"],
-  ["6", "направлений в единой системе"],
-];
-
 function ServicesHero() {
-  const { projects, servicePageItems } = useCms();
-  const heroCards = servicePageItems.slice(0, 3);
+  const { projects, serviceNavigationGroups } = useCms();
+  const text = useCmsText();
+  const localize = useLocalizedField();
+  const selectedHeroCards = serviceNavigationGroups
+    .filter((group) => group.showInServicesHero && group.items.length > 0)
+    .sort(
+      (left, right) =>
+        (left.servicesHeroPosition ?? 99) - (right.servicesHeroPosition ?? 99),
+    );
+  const heroCards = (selectedHeroCards.length
+    ? selectedHeroCards
+    : serviceNavigationGroups.filter((group) => group.items.length > 0)
+  )
+    .slice(0, 3)
+    .map((group) => ({
+      ...group,
+      title: localize(group, "title", group.title),
+      description: localize(group, "description", group.description),
+      imageAlt: localize(group, "imageAlt", group.imageAlt ?? group.title),
+    }));
+  const serviceHeroStats = [
+    [
+      text("servicesPage.hero.stat1.value", "10 лет"),
+      text("servicesPage.hero.stat1.label", "опыта в интерьерах, архитектуре и 3D"),
+    ],
+    [
+      text("servicesPage.hero.stat2.value", "25+"),
+      text("servicesPage.hero.stat2.label", "специалистов под масштаб проекта"),
+    ],
+    [
+      text("servicesPage.hero.stat3.value", "6"),
+      text("servicesPage.hero.stat3.label", "направлений в единой системе"),
+    ],
+  ];
 
   return (
     <section className="relative min-h-screen overflow-hidden px-5 pb-16 pt-28 md:px-10 lg:px-16">
@@ -33,28 +59,29 @@ function ServicesHero() {
       <div className="relative z-10 mx-auto grid min-h-[calc(100vh-7rem)] max-w-7xl gap-10 lg:grid-cols-[0.94fr_1.06fr] lg:items-end">
         <div className="pb-6">
           <p className="max-w-full text-[11px] uppercase leading-relaxed tracking-[0.22em] text-[#D69A66] [overflow-wrap:anywhere] sm:text-xs sm:tracking-[0.38em]">
-            Услуги / 3D Smart Design Studio
+            {text("servicesPage.hero.eyebrow", "Услуги / 3D Smart Design Studio")}
           </p>
           <h1 className="mt-5 max-w-5xl text-[clamp(2.8rem,5vw,5.2rem)] font-light leading-[0.94] tracking-normal md:tracking-[-0.035em] text-white">
-            Услуги студии
+            {text("servicesPage.hero.title", "Услуги студии")}
           </h1>
           <p className="mt-7 max-w-2xl text-lg leading-relaxed text-[#E8E0D8]/85 md:text-xl">
-            Проектируем интерьеры, архитектуру, ландшафт и визуализации так,
-            чтобы заказчик видел не набор услуг, а продуманную систему будущего
-            пространства.
+            {text(
+              "servicesPage.hero.text",
+              "Проектируем интерьеры, архитектуру, ландшафт и визуализации так, чтобы заказчик видел не набор услуг, а продуманную систему будущего пространства.",
+            )}
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
             <Link
               href="/kontakty"
               className="rounded-full border border-[#D69A66] bg-[#D69A66] px-6 py-4 text-xs uppercase tracking-[0.24em] text-[#050505] transition duration-300 hover:-translate-y-0.5 hover:bg-[#E3AD7B]"
             >
-              Обсудить проект
+              {text("servicesPage.hero.primaryButton", "Обсудить проект")}
             </Link>
             <Link
               href="/portfolio"
               className="rounded-full border border-white/15 bg-black/25 px-6 py-4 text-xs uppercase tracking-[0.24em] text-white/75 backdrop-blur transition duration-300 hover:border-[#D69A66]/70 hover:text-white"
             >
-              Смотреть работы
+              {text("servicesPage.hero.secondaryButton", "Смотреть работы")}
             </Link>
           </div>
         </div>
@@ -77,19 +104,19 @@ function ServicesHero() {
             {heroCards.map((item) => (
               <Link
                 key={item.id}
-                href={`/${item.id}`}
+                href={item.href}
                 className="group relative min-h-56 overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] transition duration-300 will-change-transform hover:-translate-y-2 hover:border-[#D69A66]/60"
               >
                 <CinematicImage
                   frames={imageFrames([item.image, projectImageAt(projects, 0), projectImageAt(projects, 2)])}
-                  alt={item.title}
+                  alt={item.imageAlt || item.title}
                   fill
                   hint="motion"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/68 via-[#050505]/16 to-transparent" />
                 <div className="absolute inset-x-5 bottom-5">
                   <p className="mb-2 text-xs uppercase tracking-[0.22em] text-[#D69A66] [overflow-wrap:anywhere]">
-                    {item.eyebrow}
+                    {item.description}
                   </p>
                   <h2 className="text-xl font-light leading-tight tracking-normal [overflow-wrap:anywhere]">
                     {item.title}

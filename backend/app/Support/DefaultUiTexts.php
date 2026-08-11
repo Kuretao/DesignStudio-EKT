@@ -81,6 +81,18 @@ final class DefaultUiTexts
             self::row('brandStrip.title', 'partners-home', 'Партнеры: заголовок', 'Девелоперы и застройщики', 'Developers and construction companies'),
             self::row('brandStrip.text', 'partners-home', 'Партнеры: текст', 'Проекты студии выбирают частные клиенты, девелоперы и строительные компании, которым важны понятная визуализация и аккуратная реализация.', 'The studio is chosen by private clients, developers, and construction companies that need clear visualization and careful implementation.'),
 
+            self::row('servicesPage.hero.eyebrow', 'services-page', 'Услуги hero: надзаголовок', 'Услуги / 3D Smart Design Studio', 'Services / 3D Smart Design Studio'),
+            self::row('servicesPage.hero.title', 'services-page', 'Услуги hero: заголовок', 'Услуги студии', 'Studio services'),
+            self::row('servicesPage.hero.text', 'services-page', 'Услуги hero: описание', 'Проектируем интерьеры, архитектуру, ландшафт и визуализации так, чтобы заказчик видел не набор услуг, а продуманную систему будущего пространства.', 'We design interiors, architecture, landscapes, and visualizations as one coherent system for the future space.'),
+            self::row('servicesPage.hero.primaryButton', 'services-page', 'Услуги hero: основная кнопка', 'Обсудить проект', 'Discuss a project'),
+            self::row('servicesPage.hero.secondaryButton', 'services-page', 'Услуги hero: вторая кнопка', 'Смотреть работы', 'View projects'),
+            self::row('servicesPage.hero.stat1.value', 'services-page', 'Услуги hero: показатель 1', '10 лет', '10 years'),
+            self::row('servicesPage.hero.stat1.label', 'services-page', 'Услуги hero: подпись показателя 1', 'опыта в интерьерах, архитектуре и 3D', 'of experience in interiors, architecture, and 3D'),
+            self::row('servicesPage.hero.stat2.value', 'services-page', 'Услуги hero: показатель 2', '25+', '25+'),
+            self::row('servicesPage.hero.stat2.label', 'services-page', 'Услуги hero: подпись показателя 2', 'специалистов под масштаб проекта', 'specialists for every project scale'),
+            self::row('servicesPage.hero.stat3.value', 'services-page', 'Услуги hero: показатель 3', '6', '6'),
+            self::row('servicesPage.hero.stat3.label', 'services-page', 'Услуги hero: подпись показателя 3', 'направлений в единой системе', 'directions in one system'),
+
             self::row('servicesSummary.label', 'services-home', 'Услуги: метка', 'Услуги и цены', 'Services and pricing'),
             self::row('servicesSummary.title', 'services-home', 'Услуги: заголовок', 'Услуги и цены', 'Services and pricing'),
             self::row('servicesSummary.text', 'services-home', 'Услуги: текст', 'Стоимость фиксируется после брифа и состава работ. Ниже - понятная стартовая структура по основным направлениям студии.', 'The final price is fixed after the brief and scope are clear. Below is a simple starting structure for the studio’s core directions.'),

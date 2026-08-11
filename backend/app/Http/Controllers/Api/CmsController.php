@@ -301,6 +301,8 @@ class CmsController extends Controller
                     'imageAlt' => $group->image_alt_ru,
                     'imageAltRu' => $group->image_alt_ru,
                     'imageAltEn' => $group->image_alt_en,
+                    'showInServicesHero' => (bool) $group->show_in_services_hero,
+                    'servicesHeroPosition' => $group->services_hero_position,
                     'items' => $items,
                 ];
             })

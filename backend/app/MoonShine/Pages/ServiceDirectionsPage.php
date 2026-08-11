@@ -81,6 +81,7 @@ class ServiceDirectionsPage extends Page
             ->count();
 
         $flash = $this->flashHtml();
+        $heroPicker = $this->heroPicker($directions, $assignableServices);
         $cards = $directions->isNotEmpty()
             ? $directions->map(fn (NavigationItem $direction): string => $this->directionCard($direction, $assignableServices))->implode('')
             : $this->emptyState();
@@ -105,12 +106,108 @@ class ServiceDirectionsPage extends Page
                 </div>
             </div>
 
+            {$heroPicker}
+
             {$this->createForm($assignableServices)}
 
             <div class="service-directions__grid">
                 {$cards}
             </div>
         </section>
+        HTML;
+    }
+
+    /**
+     * @param \Illuminate\Support\Collection<int, NavigationItem> $directions
+     * @param \Illuminate\Support\Collection<int, Service> $services
+     */
+    private function heroPicker($directions, $services): string
+    {
+        if ($directions->isEmpty()) {
+            return '';
+        }
+
+        $selectedIds = $directions
+            ->where('show_in_services_hero', true)
+            ->sortBy('services_hero_position')
+            ->pluck('id')
+            ->map(static fn ($id): int => (int) $id)
+            ->values();
+
+        if ($selectedIds->isEmpty()) {
+            $eligibleIds = $services
+                ->where('is_published', true)
+                ->pluck('service_direction_id')
+                ->filter()
+                ->unique();
+            $selectedIds = $directions
+                ->where('is_active', true)
+                ->whereIn('id', $eligibleIds)
+                ->take(3)
+                ->pluck('id')
+                ->map(static fn ($id): int => (int) $id)
+                ->values();
+        }
+
+        $options = $directions->map(function (NavigationItem $direction) use ($services): array {
+            $publishedCount = $services
+                ->where('is_published', true)
+                ->where('service_direction_id', $direction->id)
+                ->count();
+            $notes = [];
+
+            if (! $direction->is_active) {
+                $notes[] = 'скрыто';
+            }
+
+            if ($publishedCount === 0) {
+                $notes[] = 'нет опубликованных услуг';
+            }
+
+            return [
+                'id' => (int) $direction->id,
+                'label' => $direction->labelRu() . ($notes === [] ? '' : ' (' . implode(', ', $notes) . ')'),
+            ];
+        });
+
+        $selects = collect(range(0, 2))->map(function (int $index) use ($options, $selectedIds): string {
+            $selectedId = (int) ($selectedIds->get($index) ?? 0);
+            $optionHtml = '<option value="">Не показывать карточку</option>' . $options
+                ->map(static function (array $option) use ($selectedId): string {
+                    $selected = $option['id'] === $selectedId ? ' selected' : '';
+
+                    return '<option value="' . $option['id'] . '"' . $selected . '>' . e($option['label']) . '</option>';
+                })
+                ->implode('');
+            $slot = $index + 1;
+
+            return <<<HTML
+            <label>
+                <span>Карточка {$slot}</span>
+                <select name="direction_ids[]" data-hero-direction-select>{$optionHtml}</select>
+            </label>
+            HTML;
+        })->implode('');
+
+        $action = e(route('admin.service-directions.hero'));
+        $csrf = csrf_field();
+        $put = method_field('PUT');
+
+        return <<<HTML
+        <form class="service-directions__hero-picker" method="post" action="{$action}" data-hero-direction-picker>
+            {$csrf}
+            {$put}
+            <div class="service-directions__hero-picker-head">
+                <div>
+                    <p class="service-directions__eyebrow">Первый экран страницы услуг</p>
+                    <h2>Три карточки направлений справа</h2>
+                    <span>Выберите состав и порядок карточек. Название, картинка и описание берутся из настроек самого направления ниже.</span>
+                </div>
+                <button type="submit">Сохранить карточки</button>
+            </div>
+            <div class="service-directions__hero-picker-grid">{$selects}</div>
+            <small>Скрытые направления и направления без опубликованных услуг на сайте не показываются.</small>
+        </form>
         HTML;
     }
 
@@ -162,6 +259,9 @@ class ServiceDirectionsPage extends Page
         $active = $direction->is_active
             ? '<span class="service-directions__badge service-directions__badge--ok">Показывается</span>'
             : '<span class="service-directions__badge">Скрыто</span>';
+        $heroBadge = $direction->show_in_services_hero
+            ? '<span class="service-directions__badge service-directions__badge--hero">Первый экран #' . (int) $direction->services_hero_position . '</span>'
+            : '';
 
         return <<<HTML
         <article class="service-directions__card">
@@ -169,7 +269,7 @@ class ServiceDirectionsPage extends Page
                 <div class="service-directions__media">{$imageHtml}</div>
                 <div class="service-directions__body">
                     <div class="service-directions__card-top">
-                        {$active}
+                        <span class="service-directions__badge-row">{$active}{$heroBadge}</span>
                         <span class="service-directions__position">#{$direction->position}</span>
                     </div>
                     <h2>{$title}</h2>
@@ -389,6 +489,21 @@ class ServiceDirectionsPage extends Page
 
             refreshPicker(picker);
           });
+
+          document.querySelectorAll('[data-hero-direction-picker]').forEach((picker) => {
+            const selects = Array.from(picker.querySelectorAll('[data-hero-direction-select]'));
+            const refreshOptions = () => {
+              const selected = selects.map((select) => select.value).filter(Boolean);
+              selects.forEach((select) => {
+                Array.from(select.options).forEach((option) => {
+                  option.disabled = option.value !== '' && option.value !== select.value && selected.includes(option.value);
+                });
+              });
+            };
+
+            picker.addEventListener('change', refreshOptions);
+            refreshOptions();
+          });
         })();
         JS;
     }
@@ -399,6 +514,7 @@ class ServiceDirectionsPage extends Page
         .service-directions { display: grid; gap: 24px; }
         .service-directions__hero,
         .service-directions__form,
+        .service-directions__hero-picker,
         .service-directions__card,
         .service-directions__empty,
         .service-directions__flash { border: 1px solid rgba(148, 163, 184, .24); border-radius: 16px; background: rgba(15, 23, 42, .62); }
@@ -413,6 +529,13 @@ class ServiceDirectionsPage extends Page
         .service-directions__stat strong { display: block; font-size: 30px; color: #fff; }
         .service-directions__stat span { color: #cbd5e1; font-size: 13px; }
         .service-directions__form { display: grid; gap: 18px; padding: 20px; }
+        .service-directions__hero-picker { display: grid; gap: 18px; padding: 20px; border-color: rgba(214, 154, 102, .42); background: rgba(88, 51, 28, .18); }
+        .service-directions__hero-picker-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+        .service-directions__hero-picker-head span, .service-directions__hero-picker > small { color: #cbd5e1; }
+        .service-directions__hero-picker-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+        .service-directions__hero-picker-grid label { display: grid; gap: 7px; color: #f8fafc; font-size: 13px; font-weight: 800; }
+        .service-directions__hero-picker-grid select { width: 100%; min-width: 0; border: 1px solid rgba(214, 154, 102, .36); border-radius: 10px; background: rgba(2, 6, 23, .72); color: #fff; padding: 12px; font: inherit; }
+        .service-directions__hero-picker-grid option { background: #111827; color: #fff; }
         .service-directions__form--create { border-color: rgba(16, 185, 129, .36); background: rgba(6, 78, 59, .22); }
         .service-directions__form-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
         .service-directions__form-head span,
@@ -455,6 +578,8 @@ class ServiceDirectionsPage extends Page
         .service-directions__card-top, .service-directions__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; justify-content: space-between; }
         .service-directions__badge, .service-directions__position, .service-directions__meta span { padding: 6px 10px; border-radius: 999px; background: rgba(148, 163, 184, .13); color: #cbd5e1; font-size: 12px; font-weight: 700; }
         .service-directions__badge--ok { background: rgba(16, 185, 129, .18); color: #a7f3d0; }
+        .service-directions__badge--hero { background: rgba(214, 154, 102, .18); color: #fed7aa; }
+        .service-directions__badge-row { display: flex; flex-wrap: wrap; gap: 8px; }
         .service-directions__details { border-top: 1px solid rgba(148, 163, 184, .18); }
         .service-directions__details summary { cursor: pointer; padding: 16px 18px; color: #c4b5fd; font-weight: 900; }
         .service-directions__details .service-directions__form { border: 0; border-radius: 0; background: rgba(2, 6, 23, .18); }
@@ -473,8 +598,10 @@ class ServiceDirectionsPage extends Page
         @media (max-width: 900px) {
           .service-directions__hero,
           .service-directions__summary,
-          .service-directions__fields { grid-template-columns: 1fr; }
-          .service-directions__form-head { display: grid; }
+          .service-directions__fields,
+          .service-directions__hero-picker-grid { grid-template-columns: 1fr; }
+          .service-directions__form-head,
+          .service-directions__hero-picker-head { display: grid; }
           .service-picker__top,
           .service-picker__item { grid-template-columns: 1fr; }
           .service-picker__badges { justify-content: flex-start; }
