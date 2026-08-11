@@ -9,6 +9,7 @@ function FAQItem({ q, a, index }: { q: string; a: string; index: number }) {
 
   return (
     <div
+      data-reveal-card
       className={`rounded-[1.5rem] border bg-white/[0.03] transition-all duration-300 ${
         open
           ? "border-[#D69A66]/45 bg-white/[0.045] shadow-[0_8px_40px_rgba(214,154,102,0.06)]"

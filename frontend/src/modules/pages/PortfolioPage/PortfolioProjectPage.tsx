@@ -461,8 +461,8 @@ function ProjectGallery({
             <>
               <div className="flex items-center justify-between gap-4">
                 <p className="text-xs uppercase tracking-[0.24em] text-[#D69A66]">{text("portfolioCase.gallery.moreLabel", "Дополнительные ракурсы")}</p>
-                {lowerGallery.length > 3 ? (
-                  <div className="flex gap-2">
+                {lowerGallery.length > 1 ? (
+                  <div className={`gap-2 ${lowerGallery.length <= 3 ? "flex md:hidden" : "flex"}`}>
                     <button
                       type="button"
                       aria-label={text("portfolioCase.gallery.prevCardsAria", "Предыдущие ракурсы")}
@@ -484,12 +484,13 @@ function ProjectGallery({
               </div>
 
               <div ref={galleryStripRef} className="grid gap-5 md:grid-cols-3">
-                {visibleLowerGallery.map(({ image, index }) => (
+                {visibleLowerGallery.map(({ image, index }, displayIndex) => (
                   <button
                     type="button"
                     key={`${image}-${index}`}
                     onClick={() => setLightboxIndex(index)}
-                    className="case-gallery-card group relative min-h-[210px] overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] text-left transition duration-300 hover:-translate-y-1 hover:border-[#D69A66]/60"
+                    data-reveal-card
+                    className={`case-gallery-card group relative min-h-[210px] overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] text-left transition duration-300 hover:-translate-y-1 hover:border-[#D69A66]/60 ${displayIndex > 0 ? "hidden md:block" : ""}`}
                   >
                     <CinematicImage
                       frames={[image, gallery[(index + 1) % gallery.length], related[index % Math.max(related.length, 1)]?.image]}

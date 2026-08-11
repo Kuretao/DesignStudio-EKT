@@ -58,7 +58,7 @@ function FeatureProject({
       <div className="absolute inset-0 bg-gradient-to-r from-[#080705]/72 via-[#324238]/12 to-[#E8DDCE]/18" />
 
       <div className={`relative z-10 grid w-full gap-8 md:grid-cols-2 ${reverse ? "md:[&>*:first-child]:col-start-2" : ""}`}>
-        <GlassPanel className="section-in magnetic-card rounded-[2rem] p-7 md:p-10">
+        <GlassPanel data-reveal-card className="section-in magnetic-card rounded-[2rem] p-7 md:p-10">
           <p className="mb-6 text-xs uppercase tracking-[0.42em] text-[#D69A66]">{label}</p>
           <h2 className="text-[clamp(2.7rem,5vw,4.8rem)] font-light leading-tight tracking-normal [overflow-wrap:anywhere]">{title}</h2>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-[#D6D1CA] md:text-lg">{description}</p>
@@ -163,7 +163,7 @@ function HomePage({ activeProject, setActiveProject }: HomePageProps) {
           <FeatureProject project={primaryFeatured} fallbackLabel={text("home.featureProject01", "Избранный проект 01")} labels={projectLabels} />
         ) : null}
 
-        <section className="snap-section story-section relative z-[1] flex min-h-[100svh] items-start px-5 pb-20 pt-28 md:px-10 md:pt-32 lg:min-h-screen lg:items-center lg:px-16 lg:py-28">
+        <section className="snap-section story-section relative z-[1] flex min-h-[100svh] items-start overflow-hidden px-5 pb-20 pt-28 md:px-10 md:pt-32 lg:min-h-screen lg:items-center lg:px-16 lg:py-28">
           <div className="story-backdrop absolute inset-0" aria-hidden="true" />
           
           <div className="relative z-10 mx-auto max-w-6xl">

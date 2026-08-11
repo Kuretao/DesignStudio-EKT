@@ -590,7 +590,7 @@ export function ProjectShowcase({ project }: { project: Project }) {
 
               <div className="mt-10 grid gap-4">
                 {selectedCards.slice(0, 3).map((card, index) => (
-                  <GlassPanel key={`${card.title || "card"}-${index}`} className="rounded-[1.25rem] p-5">
+                  <GlassPanel data-reveal-card key={`${card.title || "card"}-${index}`} className="rounded-[1.25rem] p-5">
                     <span className="text-xs uppercase tracking-[0.28em] text-[#D69A66]">{card.title}</span>
                     <p className="mt-3 text-sm leading-relaxed text-[#D6D1CA]">{card.text}</p>
                   </GlassPanel>
@@ -602,8 +602,8 @@ export function ProjectShowcase({ project }: { project: Project }) {
 
         <div className="mt-8 flex items-center justify-between gap-4">
           <p className="text-xs uppercase tracking-[0.24em] text-[#D69A66]">{text("portfolio.galleryStrip", "Ракурсы проекта")}</p>
-          {gallery.length > 3 ? (
-            <div className="flex gap-2">
+          {gallery.length > 1 ? (
+            <div className={`gap-2 ${gallery.length <= 3 ? "flex md:hidden" : "flex"}`}>
               <button
                 type="button"
                 aria-label={text("portfolio.prevImagesAria", "Предыдущие изображения")}
@@ -625,12 +625,13 @@ export function ProjectShowcase({ project }: { project: Project }) {
         </div>
 
         <div ref={galleryStripRef} className="mt-4 grid gap-5 md:grid-cols-3">
-          {visibleGallery.map(({ image, index }) => (
+          {visibleGallery.map(({ image, index }, displayIndex) => (
             <button
               type="button"
               key={`${project.id}-${image}-${index}`}
               onClick={() => setLightboxIndex(index)}
-              className="showcase-gallery-card group relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] transition duration-300 will-change-transform hover:-translate-y-2 hover:border-[#D69A66]/60 hover:shadow-[0_24px_80px_rgba(0,0,0,0.42)]"
+              data-reveal-card
+              className={`showcase-gallery-card group relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] transition duration-300 will-change-transform hover:-translate-y-2 hover:border-[#D69A66]/60 hover:shadow-[0_24px_80px_rgba(0,0,0,0.42)] ${displayIndex > 0 ? "hidden md:block" : ""}`}
             >
               <CinematicImage
                 frames={[image, gallery[(index + 1) % gallery.length], gallery[(index + 2) % gallery.length]]}

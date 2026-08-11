@@ -389,10 +389,12 @@ export const GlobalStyle = createGlobalStyle`
     }
 
     .hero-video,
-    .project-bg {
-      transform: none !important;
+    .project-bg,
+    .story-backdrop {
       filter: brightness(0.82) contrast(1.02) saturate(0.92);
-      will-change: auto;
+      will-change: transform;
+      backface-visibility: hidden;
+      transform-origin: center center;
     }
 
     .motion-progress,

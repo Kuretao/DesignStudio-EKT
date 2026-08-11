@@ -49,12 +49,12 @@ export default function AwardsSection({
   const [offset, setOffset] = useState(0);
   const awardsGridRef = useRef<HTMLDivElement | null>(null);
   const animatingRef = useRef(false);
-  const sliderEnabled = !compact && awards.length > 3;
+  const sliderEnabled = !compact && awards.length > 1;
   const visibleAwards = useMemo(
     () =>
       sliderEnabled
         ? Array.from(
-            { length: 3 },
+            { length: Math.min(3, awards.length) },
             (_, index) => awards[(offset + index) % awards.length],
           )
         : awards,
@@ -128,7 +128,7 @@ export default function AwardsSection({
             </p>
             <div className="mt-6 flex flex-wrap gap-3 xl:justify-end">
               {sliderEnabled ? (
-                <div className="flex gap-2">
+                <div className={`gap-2 ${awards.length <= 3 ? "flex md:hidden" : "flex"}`}>
                   <button
                     type="button"
                     onClick={() => move(-1)}
@@ -159,12 +159,13 @@ export default function AwardsSection({
           </div>
         </div>
 
-        <div ref={awardsGridRef} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div ref={awardsGridRef} className="grid gap-4 md:grid-cols-3">
           {visibleAwards.map((award, index) => (
             <article
               key={`${award.title}-${award.year}-${index}`}
               data-award-card
-              className="group overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] transition duration-500 hover:-translate-y-1 hover:border-[#D69A66]/55"
+              data-reveal-card
+              className={`group overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] transition duration-500 hover:-translate-y-1 hover:border-[#D69A66]/55 ${sliderEnabled && index > 0 ? "hidden md:block" : ""}`}
             >
               <div className="relative aspect-[4/5] overflow-hidden bg-[#171511]">
                 <AwardDocument title={award.title} image={award.image} />

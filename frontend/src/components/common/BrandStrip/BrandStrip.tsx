@@ -35,6 +35,7 @@ export default function BrandStrip() {
             return (
               <div
                 key={brand.name}
+                data-reveal-card
                 className="group flex min-h-32 flex-col items-center justify-center bg-[#11100d]/88 px-4 py-6 text-center transition hover:bg-white/[0.055] md:px-5"
               >
                 <img

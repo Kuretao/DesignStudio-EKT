@@ -39,7 +39,7 @@ function AboutPage() {
 
           <div className="mt-10 grid gap-3 sm:grid-cols-3">
             {studioFacts.map((fact) => (
-              <GlassPanel key={fact.value} className="rounded-[1.25rem] p-5">
+              <GlassPanel data-reveal-card key={fact.value} className="rounded-[1.25rem] p-5">
                 <strong className="block text-3xl font-light text-[#D69A66]">{fact.value}</strong>
                 <span className="mt-3 block text-sm leading-snug text-[#D6D1CA]">{fact.label}</span>
               </GlassPanel>
@@ -65,14 +65,14 @@ function AboutPage() {
         <div className="grid gap-5 md:grid-cols-[0.86fr_1.14fr]">
           <div className="grid gap-5">
             {studioPrinciples.map((item, index) => (
-              <GlassPanel key={item} className="rounded-[1.5rem] p-6 transition duration-500 hover:-translate-y-1 hover:border-[#D69A66]/50">
+              <GlassPanel data-reveal-card key={item} className="rounded-[1.5rem] p-6 transition duration-500 hover:-translate-y-1 hover:border-[#D69A66]/50">
                 <span className="text-sm text-[#D69A66]">0{index + 1}</span>
                 <p className="mt-8 text-lg leading-relaxed text-[#F5F2EC]">{item}</p>
               </GlassPanel>
             ))}
           </div>
 
-          <div className="group relative min-h-[620px] overflow-hidden rounded-[2.5rem] border border-white/10">
+          <div data-reveal-card className="group relative min-h-[620px] overflow-hidden rounded-[2.5rem] border border-white/10">
             <CinematicImage
               frames={[projectImageAt(projects, 0), projectImageAt(projects, 1), projectImageAt(projects, 4)]}
               alt={text("about.imageAlt", "Интерьерный проект 3D Smart Design Studio")}

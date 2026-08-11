@@ -73,7 +73,8 @@ export default function ClientShell({ children }: { children: React.ReactNode })
     const ctx = gsap.context(() => {
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const desktopViewport = window.matchMedia("(min-width: 900px)").matches;
-      const stableParallaxViewport = window.matchMedia("(min-width: 1200px) and (pointer: fine)").matches;
+      const mobileViewport = window.matchMedia("(max-width: 767px)").matches;
+      const tabletViewport = window.matchMedia("(min-width: 768px) and (max-width: 1199px)").matches;
 
       ScrollTrigger.refresh();
 
@@ -111,74 +112,79 @@ export default function ClientShell({ children }: { children: React.ReactNode })
         );
       }
 
-      if (animationControls.pageReveal && desktopViewport) {
+      if (animationControls.pageReveal) {
         const revealTargets = gsap.utils.toArray<HTMLElement>(
-          ".section-in, .review-card",
+          ".section-in, .review-card, section:not(.snap-section):not(.style-lab-section) > .mx-auto",
         );
 
         if (revealTargets.length) {
-          gsap.set(revealTargets, { autoAlpha: 0, y: 24 });
+          gsap.set(revealTargets, { autoAlpha: 0, y: mobileViewport ? 14 : 24 });
           ScrollTrigger.batch(revealTargets, {
-          start: "top 88%",
-          once: true,
-          interval: 0.04,
-          batchMax: 10,
-          onEnter: (batch) => {
-            gsap.to(batch, {
-              autoAlpha: 1,
-              y: 0,
-              duration: 0.46,
-              stagger: 0.035,
-              ease: "power2.out",
-              clearProps: "opacity,visibility,transform",
-            });
-          },
+            start: mobileViewport ? "top 96%" : "top 88%",
+            once: true,
+            interval: 0.035,
+            batchMax: 10,
+            onEnter: (batch) => {
+              gsap.to(batch, {
+                autoAlpha: 1,
+                y: 0,
+                duration: mobileViewport ? 0.34 : 0.46,
+                stagger: mobileViewport ? 0.02 : 0.035,
+                ease: "power2.out",
+                overwrite: "auto",
+                clearProps: "opacity,visibility,transform",
+              });
+            },
           });
         }
 
         if (pathname === "/") {
           const homeFlow = gsap.utils.toArray<HTMLElement>(".home-flow-reveal");
           if (homeFlow.length) {
-            gsap.set(homeFlow, { y: 22 });
+            gsap.set(homeFlow, { autoAlpha: 0, y: mobileViewport ? 18 : 26 });
             ScrollTrigger.batch(homeFlow, {
-            start: "top 92%",
-            once: true,
-            interval: 0.04,
-            batchMax: 4,
-            onEnter: (batch) => {
-              gsap.to(batch, {
-                y: 0,
-                duration: 0.5,
-                stagger: 0.045,
-                ease: "power2.out",
-                clearProps: "transform",
-              });
-            },
+              start: mobileViewport ? "top 97%" : "top 92%",
+              once: true,
+              interval: 0.04,
+              batchMax: 4,
+              onEnter: (batch) => {
+                gsap.to(batch, {
+                  autoAlpha: 1,
+                  y: 0,
+                  duration: mobileViewport ? 0.38 : 0.5,
+                  stagger: mobileViewport ? 0.025 : 0.045,
+                  ease: "power2.out",
+                  overwrite: "auto",
+                  clearProps: "opacity,visibility,transform",
+                });
+              },
             });
           }
 
-          const homeCards = gsap.utils.toArray<HTMLElement>("[data-reveal-card]");
+        }
 
-          if (homeCards.length) {
-            gsap.set(homeCards, { autoAlpha: 0, y: 16, scale: 0.995 });
-            ScrollTrigger.batch(homeCards, {
-            start: "top 91%",
+        const revealCards = gsap.utils.toArray<HTMLElement>("[data-reveal-card]");
+
+        if (revealCards.length) {
+          gsap.set(revealCards, { autoAlpha: 0, y: mobileViewport ? 12 : 18, scale: 0.992 });
+          ScrollTrigger.batch(revealCards, {
+            start: mobileViewport ? "top 96%" : "top 91%",
             once: true,
-            interval: 0.035,
-            batchMax: 12,
+            interval: 0.03,
+            batchMax: mobileViewport ? 4 : 12,
             onEnter: (batch) => {
               gsap.to(batch, {
                 autoAlpha: 1,
                 y: 0,
                 scale: 1,
-                duration: 0.38,
-                stagger: 0.03,
+                duration: mobileViewport ? 0.32 : 0.4,
+                stagger: mobileViewport ? 0.025 : 0.03,
                 ease: "power2.out",
+                overwrite: "auto",
                 clearProps: "opacity,visibility,transform",
               });
             },
-            });
-          }
+          });
         }
       }
 
@@ -222,54 +228,55 @@ export default function ClientShell({ children }: { children: React.ReactNode })
             0.82,
           );
 
-        if (desktopViewport) {
-          const storyWords = gsap.utils.toArray<HTMLElement>(".story-word");
-          if (storyWords.length) {
-            gsap.set(storyWords, { opacity: 0.24, y: 14, color: "rgba(245,242,236,0.38)" });
-            gsap.to(storyWords, {
+        const storyWords = gsap.utils.toArray<HTMLElement>(".story-word");
+        if (storyWords.length) {
+          gsap.set(storyWords, { opacity: mobileViewport ? 0.42 : 0.24, y: mobileViewport ? 7 : 14, color: "rgba(245,242,236,0.38)" });
+          gsap.to(storyWords, {
             opacity: 1,
             y: 0,
             color: "#F5F2EC",
-            stagger: 0.035,
+            stagger: mobileViewport ? 0.018 : 0.035,
             ease: "none",
             scrollTrigger: {
               trigger: ".story-section",
-              start: "top center",
-              end: "bottom center",
-              scrub: 0.45,
+              start: mobileViewport ? "top 82%" : "top center",
+              end: mobileViewport ? "center 38%" : "bottom center",
+              scrub: mobileViewport ? 0.16 : 0.45,
             },
-            });
-          }
-        }
-
-        if (stableParallaxViewport) {
-          const stackSections = gsap.utils.toArray<HTMLElement>(".slides-wrap .snap-section");
-
-          stackSections.forEach((section) => {
-            const media = section.querySelector<HTMLElement>(
-              ".hero-video, .project-bg, .story-backdrop",
-            );
-
-            if (!media) return;
-
-            gsap.fromTo(
-              media,
-              { yPercent: -3, scale: 1.035 },
-              {
-                yPercent: 3,
-                scale: 1.035,
-                ease: "none",
-                scrollTrigger: {
-                  trigger: section,
-                  start: "top bottom",
-                  end: "bottom top",
-                  scrub: 0.45,
-                  fastScrollEnd: true,
-                },
-              },
-            );
           });
         }
+
+        const stackSections = gsap.utils
+          .toArray<HTMLElement>(".slides-wrap .snap-section")
+          .slice(0, 3);
+        const parallaxShift = mobileViewport ? 1.25 : tabletViewport ? 1.8 : 3;
+        const parallaxScale = mobileViewport ? 1.09 : tabletViewport ? 1.07 : 1.045;
+
+        stackSections.forEach((section) => {
+          const media = section.querySelector<HTMLElement>(
+            ".hero-video, .project-bg, .story-backdrop",
+          );
+
+          if (!media) return;
+
+          gsap.fromTo(
+            media,
+            { yPercent: -parallaxShift, scale: parallaxScale, force3D: true },
+            {
+              yPercent: parallaxShift,
+              scale: parallaxScale,
+              force3D: true,
+              ease: "none",
+              scrollTrigger: {
+                trigger: section,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: mobileViewport || tabletViewport ? true : 0.35,
+                invalidateOnRefresh: true,
+              },
+            },
+          );
+        });
 
       }
 
@@ -290,7 +297,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
       <Noise />
       {children}
       {!isStandaloneExperience && (
-        <div className="absolute bottom-[calc(env(safe-area-inset-bottom)+14px)] right-4 z-[70] flex flex-row gap-2 md:fixed md:bottom-8 md:right-8 md:flex-col">
+        <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+16px)] right-4 z-[70] flex flex-col gap-2 md:bottom-8 md:right-8">
           {floatingMessengers.map((messenger) => {
             const href = messenger.icon === "telegram" ? messengerLinks.telegram : messenger.icon === "vk" ? messengerLinks.vk : messengerLinks.max;
 
@@ -301,7 +308,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
                 target="_blank"
                 rel="noreferrer"
                 aria-label={text(`fixed.${messenger.icon}`, messenger.label)}
-                className="grid h-10 w-10 place-items-center rounded-full border border-white/18 bg-[#050505]/45 text-white shadow-[0_12px_34px_rgba(0,0,0,0.28)] backdrop-blur-md transition duration-300 hover:-translate-y-0.5 hover:border-white/34 hover:bg-white/18 md:h-12 md:w-12"
+                className="grid h-12 w-12 place-items-center rounded-full border border-white/18 bg-[#050505]/45 text-white shadow-[0_12px_34px_rgba(0,0,0,0.28)] backdrop-blur-md transition duration-300 hover:-translate-y-0.5 hover:border-white/34 hover:bg-white/18"
               >
                 <MessengerIcon icon={messenger.icon} />
               </a>

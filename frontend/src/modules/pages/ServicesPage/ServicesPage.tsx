@@ -177,7 +177,7 @@ export function ServicesSummary() {
 
         <div className="grid gap-4 xl:grid-cols-2">
           {mainServices.map((service) => (
-            <GlassPanel key={service.title} className="rounded-[2rem] p-7">
+            <GlassPanel data-reveal-card key={service.title} className="rounded-[2rem] p-7">
               <div className="mb-8 flex min-w-0 flex-col items-start justify-between gap-4 sm:flex-row">
                 <h3 className="line-clamp-3 min-w-0 text-[clamp(1.75rem,2.4vw,2.25rem)] font-light leading-tight tracking-normal [overflow-wrap:anywhere]">
                   {service.title}
@@ -253,6 +253,7 @@ export function ServicePages() {
             return (
               <GlassPanel
                 key={group.id}
+                data-reveal-card
                 className="overflow-hidden rounded-[2rem]"
               >
                 <Link href={group.href} className="group block">
@@ -332,6 +333,7 @@ export function Workflow() {
           {steps.map((step, index) => (
             <GlassPanel
               key={step}
+              data-reveal-card
               className="p-7 lg:px-6 xl:p-7"
               style={{
                 background: "rgba(255, 255, 255, 0.03)",
