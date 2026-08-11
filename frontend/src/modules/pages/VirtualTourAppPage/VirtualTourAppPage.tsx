@@ -12,7 +12,7 @@ type TourScene = {
   panorama: string;
   yaw: number;
   pitch: number;
-  plan: { x: number; y: number };
+  plan: { x: number; y: number; width: number; height: number };
   next: {
     id: string;
     text: string;
@@ -91,7 +91,7 @@ const demoScenes: TourScene[] = [
     panorama: "/panoramas/demo-house-living.jpg",
     yaw: 95,
     pitch: -2,
-    plan: { x: 32, y: 58 },
+    plan: { x: 34, y: 58, width: 36, height: 42 },
     next: [
       { id: "hall", text: "Холл", yaw: 144, pitch: -4, targetYaw: 12 },
       { id: "bedroom", text: "Спальня", yaw: 62, pitch: -3, targetYaw: -92 },
@@ -104,7 +104,7 @@ const demoScenes: TourScene[] = [
     panorama: "/panoramas/demo-house-hall.jpg",
     yaw: 8,
     pitch: -2,
-    plan: { x: 55, y: 42 },
+    plan: { x: 56, y: 42, width: 34, height: 42 },
     next: [
       { id: "living", text: "Гостиная", yaw: -72, pitch: -3, targetYaw: 116 },
       { id: "bedroom", text: "Спальня", yaw: 88, pitch: -2, targetYaw: -18 },
@@ -117,7 +117,7 @@ const demoScenes: TourScene[] = [
     panorama: "/panoramas/demo-house-bedroom.jpg",
     yaw: -52,
     pitch: -4,
-    plan: { x: 73, y: 64 },
+    plan: { x: 72, y: 64, width: 38, height: 28 },
     next: [
       { id: "hall", text: "Холл", yaw: -132, pitch: -5, targetYaw: 22 },
       { id: "living", text: "Гостиная", yaw: 154, pitch: -2, targetYaw: 95 },
@@ -138,6 +138,8 @@ function getProjectTourScenes(project?: Project): TourScene[] {
     plan: {
       x: Math.max(0, Math.min(100, Number(scene.plan?.x ?? 28 + ((index * 23) % 54)))),
       y: Math.max(0, Math.min(100, Number(scene.plan?.y ?? 30 + ((index * 19) % 46)))),
+      width: Math.max(16, Math.min(82, Number(scene.plan?.width ?? 34))),
+      height: Math.max(14, Math.min(82, Number(scene.plan?.height ?? 30))),
     },
     next: Array.isArray(scene.next)
       ? scene.next.map((link) => ({
@@ -379,9 +381,29 @@ export default function VirtualTourAppPage() {
             <div className="absolute inset-5 rounded-[1rem] border border-white/16" />
             <div className="absolute left-[12%] top-[46%] h-px w-[76%] bg-white/12" />
             <div className="absolute left-[49%] top-[14%] h-[72%] w-px bg-white/12" />
-            <div className="absolute left-[22%] top-[22%] h-[42%] w-[36%] rounded-[0.8rem] border border-[#D69A66]/28 bg-[#D69A66]/8" />
-            <div className="absolute right-[13%] top-[18%] h-[42%] w-[33%] rounded-[0.8rem] border border-white/16 bg-white/[0.035]" />
-            <div className="absolute bottom-[15%] right-[17%] h-[28%] w-[38%] rounded-[0.8rem] border border-white/16 bg-white/[0.035]" />
+
+            {scenes.map((scene) => {
+              const active = scene.id === activeSceneId;
+              const width = scene.plan.width;
+              const height = scene.plan.height;
+              const left = Math.max(0, Math.min(100 - width, scene.plan.x - width / 2));
+              const top = Math.max(0, Math.min(100 - height, scene.plan.y - height / 2));
+
+              return (
+                <button
+                  key={`${scene.id}-zone`}
+                  type="button"
+                  onClick={() => loadScene(scene.id)}
+                  className={`absolute rounded-[0.8rem] border transition ${
+                    active
+                      ? "border-[#D69A66]/50 bg-[#D69A66]/12 shadow-[0_0_28px_rgba(214,154,102,0.16)]"
+                      : "border-white/16 bg-white/[0.035] hover:border-[#D69A66]/38 hover:bg-[#D69A66]/8"
+                  }`}
+                  style={{ left: `${left}%`, top: `${top}%`, width: `${width}%`, height: `${height}%` }}
+                  aria-label={`Открыть зону ${scene.title}`}
+                />
+              );
+            })}
 
             {scenes.map((scene, index) => {
               const active = scene.id === activeSceneId;
