@@ -22,6 +22,21 @@ export function optimizeImageUrl(src?: string | null, width = 1400, quality = 76
   }
 }
 
+export function normalizeMediaPath(src?: string | null) {
+  const value = src?.trim();
+  if (!value) return "";
+
+  if (
+    /^(https?:)?\/\//i.test(value) ||
+    value.startsWith("data:") ||
+    value.startsWith("/")
+  ) {
+    return value;
+  }
+
+  return `/storage/${value.replace(/^\/+/, "")}`;
+}
+
 export function optimizeImageList<T extends string | null | undefined>(
   images: T[],
   width = 1400,
@@ -75,4 +90,16 @@ export function imageFrames(
   const frames = images.filter((image): image is string => Boolean(image));
 
   return frames.length ? frames : [fallbackImage(fallbackIndex)];
+}
+
+export function cmsImageFrames(
+  value: string,
+  fallbackFrames: Array<string | null | undefined>,
+) {
+  const configuredFrames = value
+    .split(/\r?\n/u)
+    .map((frame) => normalizeMediaPath(frame))
+    .filter(Boolean);
+
+  return imageFrames(configuredFrames.length ? configuredFrames : fallbackFrames);
 }

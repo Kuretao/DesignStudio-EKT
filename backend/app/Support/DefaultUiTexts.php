@@ -217,6 +217,8 @@ final class DefaultUiTexts
             self::row('aboutFull.hero.text', 'about-full', 'О нас: описание в банере', '3D Smart Design Studio соединяет эстетику, инженерную логику и понятный процесс. Заказчик видит не просто красивую картинку, а уверенный маршрут от идеи до реализации.', '3D Smart Design Studio combines aesthetics, engineering logic, and a clear process. The client sees not just a beautiful image, but a confident route from idea to implementation.'),
             self::row('aboutFull.hero.cta1', 'about-full', 'О нас: основная кнопка', 'Обсудить проект', 'Discuss a project'),
             self::row('aboutFull.hero.cta2', 'about-full', 'О нас: вторая кнопка', 'Смотреть работы', 'View projects'),
+            self::row('aboutFull.hero.backgroundImages', 'about-full', 'О нас: фон первого экрана', '', null, 'Загрузите изображение или выберите несколько кадров из галереи, по одному в строке.'),
+            self::row('aboutFull.hero.cardImages', 'about-full', 'О нас: изображение карточки «Что внутри подхода»', '', null, 'Картинка слева от списка направлений. Можно добавить несколько кадров построчно.'),
             self::row('aboutFull.hero.imageLabel', 'about-full', 'О нас: подпись на изображении', 'Премиальная подача начинается с точной системы', 'Premium presentation starts with a precise system'),
             self::row('aboutFull.hero.approachLabel', 'about-full', 'О нас: подпись «Что внутри подхода»', 'Что внутри подхода', 'Inside the approach'),
 
@@ -226,6 +228,9 @@ final class DefaultUiTexts
             self::row('aboutFull.principles.text', 'about-full', 'Принципы: текст', 'Хороший проект ощущается легко, потому что за ним стоит точная работа: планировочная логика, материалы, свет, документация, бюджет и коммуникация.', 'A good project feels effortless because precise work stands behind it: planning logic, materials, light, documentation, budget, and communication.'),
 
             // Команда
+            self::row('aboutFull.work.images1', 'about-full', 'Команда: большое изображение', '', null, 'Большая вертикальная карточка в блоке команды. Можно добавить несколько кадров построчно.'),
+            self::row('aboutFull.work.images2', 'about-full', 'Команда: изображение архитектуры', '', null, 'Верхняя малая карточка в блоке команды. Можно добавить несколько кадров построчно.'),
+            self::row('aboutFull.work.images3', 'about-full', 'Команда: изображение ландшафта', '', null, 'Нижняя малая карточка в блоке команды. Можно добавить несколько кадров построчно.'),
             self::row('aboutFull.work.imageLabel1', 'about-full', 'Команда: подпись большого изображения', 'Интерьер как рабочий сценарий жизни', 'Interior as a working life scenario'),
             self::row('aboutFull.work.imageLabel2', 'about-full', 'Команда: подпись изображения архитектуры', 'Архитектура и визуализация', 'Architecture and visualization'),
             self::row('aboutFull.work.imageLabel3', 'about-full', 'Команда: подпись изображения ландшафта', 'Ландшафт как продолжение дома', 'Landscape as an extension of the house'),

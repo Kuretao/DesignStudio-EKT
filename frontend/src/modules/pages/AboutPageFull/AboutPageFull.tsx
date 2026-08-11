@@ -6,11 +6,45 @@ import { GlassPanel } from "@/src/ui";
 import CinematicImage from "@/src/components/common/CinematicImage";
 import HeroBackdropSlider from "@/src/components/common/HeroBackdropSlider";
 import SectionLabel from "@/src/components/common/SectionLabel";
-import { imageFrames, projectImageAt } from "@/src/utils/images";
+import { cmsImageFrames, projectImageAt } from "@/src/utils/images";
 
 export default function AboutPageFull() {
   const { projects } = useCms();
   const text = useCmsText();
+
+  const heroBackgroundFrames = cmsImageFrames(
+    text("aboutFull.hero.backgroundImages", ""),
+    [
+      projectImageAt(projects, 0),
+      projectImageAt(projects, 1),
+      projectImageAt(projects, 4),
+    ],
+  );
+  const heroCardFrames = cmsImageFrames(
+    text("aboutFull.hero.cardImages", ""),
+    [
+      projectImageAt(projects, 4),
+      projectImageAt(projects, 5),
+      projectImageAt(projects, 0),
+    ],
+  );
+  const workImageFrames = [
+    cmsImageFrames(text("aboutFull.work.images1", ""), [
+      projectImageAt(projects, 1),
+      projectImageAt(projects, 0),
+      projectImageAt(projects, 3),
+    ]),
+    cmsImageFrames(text("aboutFull.work.images2", ""), [
+      projectImageAt(projects, 5),
+      projectImageAt(projects, 4),
+      projectImageAt(projects, 1),
+    ]),
+    cmsImageFrames(text("aboutFull.work.images3", ""), [
+      projectImageAt(projects, 2),
+      projectImageAt(projects, 3),
+      projectImageAt(projects, 0),
+    ]),
+  ];
 
   const stats = [
     { value: text("aboutFull.stats.1.value", "10 лет"), label: text("aboutFull.stats.1.label", "проектируем интерьеры, архитектуру и визуализации") },
@@ -67,11 +101,10 @@ export default function AboutPageFull() {
     <div className="page-in">
       <section className="relative min-h-screen overflow-hidden px-5 pb-16 pt-28 md:px-10 lg:px-16">
         <HeroBackdropSlider
-          slides={[
-            { image: projectImageAt(projects, 0), alt: "3D Smart Design Studio" },
-            { image: projectImageAt(projects, 1), alt: "Интерьерный проект студии" },
-            { image: projectImageAt(projects, 4), alt: "Архитектурная визуализация студии" },
-          ]}
+          slides={heroBackgroundFrames.map((image) => ({
+            image,
+            alt: "3D Smart Design Studio",
+          }))}
         />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,5,.97)_0%,rgba(5,5,5,.72)_48%,rgba(5,5,5,.2)_100%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(0deg,#050505_0%,rgba(5,5,5,.36)_32%,transparent_76%)]" />
@@ -111,7 +144,7 @@ export default function AboutPageFull() {
             <GlassPanel className="overflow-hidden rounded-[2rem] p-0">
               <div className="grid md:grid-cols-[0.95fr_1.05fr]">
                 <div className="relative min-h-72 overflow-hidden">
-                  <CinematicImage frames={[projectImageAt(projects, 4), projectImageAt(projects, 5), projectImageAt(projects, 0)]} alt="Архитектурная визуализация студии" fill hint="system" />
+                  <CinematicImage frames={heroCardFrames} alt="Архитектурная визуализация студии" fill hint="system" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/84 via-transparent to-transparent" />
                   <p className="absolute bottom-5 left-5 right-5 text-2xl font-light tracking-[-0.04em]">{text("aboutFull.hero.imageLabel", "Премиальная подача начинается с точной системы")}</p>
                 </div>
@@ -171,18 +204,18 @@ export default function AboutPageFull() {
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div className="grid gap-5 md:grid-cols-2">
             <div className="group relative min-h-[540px] overflow-hidden rounded-[2rem] border border-white/10">
-              <CinematicImage frames={[projectImageAt(projects, 1), projectImageAt(projects, 0), projectImageAt(projects, 3)]} alt="Интерьерный проект" fill hint="motion" />
+              <CinematicImage frames={workImageFrames[0]} alt="Интерьерный проект" fill hint="motion" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/85 via-transparent to-transparent" />
               <p className="absolute bottom-6 left-6 right-6 text-2xl font-light">{text("aboutFull.work.imageLabel1", "Интерьер как рабочий сценарий жизни")}</p>
             </div>
             <div className="grid gap-5">
               <div className="group relative min-h-[260px] overflow-hidden rounded-[2rem] border border-white/10">
-                <CinematicImage frames={[projectImageAt(projects, 5), projectImageAt(projects, 4), projectImageAt(projects, 1)]} alt="Архитектурный проект" fill hint="motion" />
+                <CinematicImage frames={workImageFrames[1]} alt="Архитектурный проект" fill hint="motion" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/80 via-transparent to-transparent" />
                 <p className="absolute bottom-5 left-5 right-5 text-xl font-light">{text("aboutFull.work.imageLabel2", "Архитектура и визуализация")}</p>
               </div>
               <div className="group relative min-h-[260px] overflow-hidden rounded-[2rem] border border-white/10">
-                <CinematicImage frames={[projectImageAt(projects, 2), projectImageAt(projects, 3), projectImageAt(projects, 0)]} alt="Ландшафтный дизайн" fill hint="motion" />
+                <CinematicImage frames={workImageFrames[2]} alt="Ландшафтный дизайн" fill hint="motion" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/80 via-transparent to-transparent" />
                 <p className="absolute bottom-5 left-5 right-5 text-xl font-light">{text("aboutFull.work.imageLabel3", "Ландшафт как продолжение дома")}</p>
               </div>
