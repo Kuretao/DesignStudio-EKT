@@ -167,6 +167,7 @@ class PageContentBuilderPage extends Page
         $promosUrl = $this->moonshineResourcePageUrl(PromoResource::class, PromoIndexPage::class);
         $awardsUrl = $this->moonshineResourcePageUrl(AwardResource::class, AwardIndexPage::class);
         $partnersUrl = $this->moonshineResourcePageUrl(PartnerResource::class, PartnerIndexPage::class);
+        $reviewsUrl = $this->moonshineResourcePageUrl(ReviewResource::class, ReviewIndexPage::class);
         $faqUrl = $this->moonshineResourcePageUrl(FaqResource::class, FaqIndexPage::class);
         $vacanciesUrl = $this->moonshineResourcePageUrl(VacancyResource::class, VacancyIndexPage::class);
         $leadsUrl = $this->moonshineResourcePageUrl(LeadResource::class, LeadIndexPage::class);
@@ -265,6 +266,24 @@ class PageContentBuilderPage extends Page
                 ],
             ],
             [
+                'slug' => 'nagrady-i-diplomy',
+                'title' => 'Награды и дипломы',
+                'path' => '/nagrady-i-diplomy',
+                'description' => 'Отдельная витрина дипломов, сертификатов и благодарностей.',
+                'sections' => [
+                    ['id' => 'awards', 'title' => 'Награды и дипломы', 'kind' => 'Hero и слайдер', 'group' => 'awards-home', 'description' => 'Заголовки страницы и все карточки наград.', 'links' => [['label' => 'Карточки наград и изображения', 'url' => $awardsUrl]]],
+                ],
+            ],
+            [
+                'slug' => 'otzyvy-o-nas',
+                'title' => 'Отзывы',
+                'path' => '/otzyvy-o-nas',
+                'description' => 'Hero, отзывы клиентов, ответы студии и форма нового отзыва.',
+                'sections' => [
+                    ['id' => 'reviews', 'title' => 'Страница отзывов', 'kind' => 'Hero, список и форма', 'group' => 'reviews-page', 'description' => 'Все подписи, кнопки, сообщения формы и тексты страницы.', 'links' => [['label' => 'Карточки отзывов', 'url' => $reviewsUrl]]],
+                ],
+            ],
+            [
                 'slug' => 'partneram',
                 'title' => 'Партнерам',
                 'path' => '/partneram',
@@ -272,6 +291,26 @@ class PageContentBuilderPage extends Page
                 'sections' => [
                     ['id' => 'partners', 'title' => 'Партнеры и доверие', 'kind' => 'Карточки партнеров', 'group' => 'partners-home', 'description' => 'Заголовки общего блока и карточки партнеров.', 'links' => [['label' => 'Партнеры и логотипы', 'url' => $partnersUrl]]],
                     ['id' => 'leads', 'title' => 'Заявки партнеров', 'kind' => 'Форма', 'description' => 'Все отправленные заявки со страницы партнеров.', 'links' => [['label' => 'Открыть заявки', 'url' => $leadsUrl]]],
+                ],
+            ],
+            [
+                'slug' => 'politika-konfidencialnosti',
+                'title' => 'Политика конфиденциальности',
+                'path' => '/politika-konfidencialnosti',
+                'legal' => true,
+                'description' => 'Юридическая страница редактируется единым структурированным текстом.',
+                'sections' => [
+                    ['id' => 'document', 'title' => 'Текст документа', 'kind' => 'Юридическая страница', 'description' => 'Заголовок, полный текст, SEO и дата обновления редактируются в настройках страницы.'],
+                ],
+            ],
+            [
+                'slug' => 'user/agreement',
+                'title' => 'Пользовательское соглашение',
+                'path' => '/user/agreement',
+                'legal' => true,
+                'description' => 'Юридическая страница редактируется единым структурированным текстом.',
+                'sections' => [
+                    ['id' => 'document', 'title' => 'Текст документа', 'kind' => 'Юридическая страница', 'description' => 'Заголовок, полный текст, SEO и дата обновления редактируются в настройках страницы.'],
                 ],
             ],
         ];
@@ -305,8 +344,9 @@ class PageContentBuilderPage extends Page
         $title = e((string) $definition['title']);
         $path = e((string) $definition['path']);
         $description = e((string) ($definition['description'] ?? 'Все реальные секции страницы собраны ниже.'));
+        $settingsLabel = ($definition['legal'] ?? false) ? 'Редактировать текст документа' : 'SEO и адрес страницы';
         $settingsButton = $contentPage
-            ? '<a href="' . e($this->moonshineResourcePageUrl(PageResource::class, PageFormPage::class, $contentPage->getKey())) . '">SEO и адрес страницы</a>'
+            ? '<a href="' . e($this->moonshineResourcePageUrl(PageResource::class, PageFormPage::class, $contentPage->getKey())) . '">' . e($settingsLabel) . '</a>'
             : '';
         $sections = collect($definition['sections'] ?? [])
             ->map(fn (array $section): string => $this->sitePageSectionCard($definition, $section))
